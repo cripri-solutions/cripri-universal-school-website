@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="description" content="A welcoming school website with information for families, learners and the wider community.">
+  <meta name="description" content="Discover our school, learning programmes, admissions and community.">
   <meta name="theme-color" content="#123b5d">
   <title>Welcome to Your School</title>
   <link rel="stylesheet" href="style.css">
@@ -14,16 +14,12 @@
   <header class="site-header">
     <div class="container header-inner">
       <a class="brand" href="#home" aria-label="School homepage">
-        <span class="brand-mark" aria-hidden="true">S</span>
+        <span class="brand-mark" data-school-initial aria-hidden="true">S</span>
         <span data-school-name>Your School</span>
       </a>
       <button class="menu-toggle" type="button" aria-expanded="false" aria-controls="site-nav">Menu</button>
       <nav id="site-nav" class="site-nav" aria-label="Main navigation">
-        <a href="#about">About</a>
-        <a href="#learning">Learning</a>
-        <a href="#admissions">Admissions</a>
-        <a href="#community">Community</a>
-        <a class="nav-contact" href="#contact">Contact</a>
+        <a href="#about">About</a><a href="#learning">Learning</a><a href="#admissions">Admissions</a><a href="#community">News</a><a class="nav-contact" href="#contact">Contact</a>
       </nav>
     </div>
   </header>
@@ -31,8 +27,8 @@
   <main id="main">
     <section class="hero" id="home">
       <div class="container hero-content">
-        <p class="eyebrow">Learning • Growth • Opportunity</p>
-        <h1>A place to learn, grow and shape the future.</h1>
+        <p class="eyebrow" data-school-motto>Learning • Growth • Opportunity</p>
+        <h1 data-school-headline>A place to learn, grow and shape the future.</h1>
         <p class="hero-copy" data-school-tagline>Welcome to a school community where every learner matters.</p>
         <div class="hero-actions">
           <a class="button button-primary" href="#admissions">Explore admissions</a>
@@ -43,18 +39,14 @@
 
     <section class="welcome section">
       <div class="container welcome-grid">
-        <div>
-          <p class="eyebrow">Welcome</p>
-          <h2>Education with purpose and possibility</h2>
-        </div>
-        <p>We believe education is more than lessons and examinations. It is about helping learners build knowledge, confidence, character and the skills to contribute positively to their communities.</p>
+        <div><p class="eyebrow">Welcome</p><h2 data-welcome-title>Education with purpose and possibility</h2></div>
+        <p data-welcome-message>We believe education is more than lessons and examinations. It is about helping learners build knowledge, confidence, character and the skills to contribute positively to their communities.</p>
       </div>
     </section>
 
     <section class="section highlights" aria-labelledby="highlights-title">
       <div class="container">
-        <p class="eyebrow">Our school</p>
-        <h2 id="highlights-title">A community built around learners</h2>
+        <p class="eyebrow">Our school</p><h2 id="highlights-title">A community built around learners</h2>
         <div class="feature-grid">
           <article class="feature-card"><span class="feature-number">01</span><h3>Strong learning</h3><p>Supportive teaching and a commitment to meaningful learning at every stage.</p></article>
           <article class="feature-card"><span class="feature-number">02</span><h3>Personal growth</h3><p>Opportunities to develop confidence, responsibility, creativity and leadership.</p></article>
@@ -65,42 +57,36 @@
 
     <section class="section section-tint" id="about">
       <div class="container split-layout">
-        <div>
-          <p class="eyebrow">About us</p>
-          <h2>More than a school. A community.</h2>
-          <p>Every school has its own story, values and ambitions. Use this section to introduce your institution, its history, leadership and the principles that guide its work.</p>
+        <div><p class="eyebrow">About us</p><h2 data-about-title>More than a school. A community.</h2>
+          <p data-about-message>We are committed to creating a welcoming environment where learners are encouraged to ask questions, discover their strengths and prepare for a changing world.</p>
           <a class="text-link" href="#contact">Get in touch <span aria-hidden="true">→</span></a>
         </div>
-        <div class="info-panel"><span class="panel-icon" aria-hidden="true">✦</span><h3>Our commitment</h3><p>To provide a safe, respectful and encouraging environment where learners can discover their strengths and prepare for the future.</p></div>
+        <div class="info-panel"><span class="panel-icon" aria-hidden="true">✦</span><h3>Our mission</h3><p data-school-mission>To nurture knowledgeable, confident and responsible learners through quality education and a supportive school community.</p></div>
       </div>
     </section>
 
     <section class="section" id="learning">
-      <div class="container">
-        <p class="eyebrow">Learning experience</p>
-        <h2>Learning for life</h2>
-        <p class="section-intro">Present the programmes, curriculum, co-curricular activities and learner support offered by your school.</p>
+      <div class="container"><p class="eyebrow">Learning experience</p><h2>Learning for life</h2>
+        <p class="section-intro">We aim to provide a balanced learning experience that develops knowledge, practical skills, creativity and good character.</p>
         <div class="simple-grid">
-          <div><h3>Academic programmes</h3><p>Describe the curriculum, subjects and learning pathways available.</p></div>
-          <div><h3>Talent and activities</h3><p>Showcase sports, clubs, arts, innovation and other opportunities.</p></div>
-          <div><h3>Learner support</h3><p>Explain guidance, wellbeing, inclusion and academic support services.</p></div>
+          <div><h3>Academic programmes</h3><p>Engaging teaching and learning that helps every learner build a strong foundation.</p></div>
+          <div><h3>Talent and activities</h3><p>Opportunities to explore interests through sports, clubs, arts and innovation.</p></div>
+          <div><h3>Learner support</h3><p>Guidance and encouragement that recognises each learner's individual needs.</p></div>
         </div>
       </div>
     </section>
 
     <section class="section admissions" id="admissions">
       <div class="container admissions-inner">
-        <div><p class="eyebrow">Join our community</p><h2>Take the next step</h2><p>Share your admissions process, requirements, important dates and how families can make an enquiry.</p></div>
+        <div><p class="eyebrow">Join our community</p><h2>Take the next step</h2><p>We welcome enquiries from families who would like to learn more about our school, admissions process and available programmes.</p></div>
         <a class="button button-light" href="#contact">Enquire about admission</a>
       </div>
     </section>
 
     <section class="section section-tint" id="community">
-      <div class="container">
-        <p class="eyebrow">News and updates</p>
-        <h2>Stay connected</h2>
-        <p class="section-intro">Use this area for school announcements, events, achievements and important notices. Replace this sample content with verified updates from your school.</p>
-        <div class="notice-card"><span class="notice-label">School updates</span><h3>News and announcements</h3><p>Check back here for the latest information from the school office.</p></div>
+      <div class="container"><p class="eyebrow">News and updates</p><h2>Stay connected</h2>
+        <p class="section-intro">Find school announcements, upcoming events, learner achievements and important notices here.</p>
+        <div class="notice-card"><span class="notice-label">School updates</span><h3>Latest from the school</h3><p>School news and announcements will be shared here. Please contact the school office if you need further information.</p></div>
       </div>
     </section>
 
@@ -116,12 +102,9 @@
       </div>
     </section>
   </main>
-
-  <footer class="site-footer">
-    <div class="container footer-inner">
-      <p>© <span id="current-year"></span> <span data-school-name>Your School</span>. All rights reserved.</p>
-      <p>Website platform by <a href="https://github.com/cripri-solutions">CRIPRI Technologies</a></p>
-    </div>
-  </footer>
+  <footer class="site-footer"><div class="container footer-inner">
+    <p>© <span id="current-year"></span> <span data-school-name>Your School</span>. All rights reserved.</p>
+    <p>Website platform by <a href="https://github.com/cripri-solutions">CRIPRI Technologies</a></p>
+  </div></footer>
 </body>
 </html>
