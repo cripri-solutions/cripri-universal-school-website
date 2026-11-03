@@ -49,3 +49,13 @@ This starter is a public information website only. It does not yet include admis
 ## Platform
 
 Built as a reusable website foundation by CRIPRI Technologies.
+
+## Illustrative photography
+
+The starter currently uses illustrative photographs hosted by Unsplash for the school-life gallery and a classroom image for the hero banner. They are examples only, not photographs of a real CRIPRI client school. Before launching a school's site, replace them with photographs supplied by that school with appropriate permission and consent, especially where learners are identifiable. The gallery photo source pages are:
+
+- Quilia: https://unsplash.com/photos/students-in-classroom-with-teacher-presenting-zFSo6bnZJTw
+- Yogendra Singh: https://unsplash.com/photos/girls-in-classroom-M92wusZZ_qg
+- jason hu: https://unsplash.com/photos/students-studying-at-tables-in-a-library-EP8lBWLFLkg
+
+Images are loaded from Unsplash's image CDN, so an internet connection is required to display them. For a production deployment, prefer school-approved images stored in a school-controlled location.
