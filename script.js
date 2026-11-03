@@ -5,6 +5,10 @@
 const SCHOOL_SETTINGS = {
   name: "Your School",
   initial: "S",
+  logoUrl: "", // Optional public image URL for this school
+  primaryColor: "#123b5d",
+  accentColor: "#f2b84b",
+  heroImageUrl: "", // Optional public hero photograph URL
   motto: "Learning • Growth • Opportunity",
   headline: "A place to learn, grow and shape the future.",
   tagline: "Welcome to a school community where every learner matters.",
@@ -40,7 +44,22 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   });
 
+  document.documentElement.style.setProperty("--navy", SCHOOL_SETTINGS.primaryColor || "#123b5d");
+  document.documentElement.style.setProperty("--gold", SCHOOL_SETTINGS.accentColor || "#f2b84b");
+
+  const logo = document.querySelector("[data-school-logo]");
   const initial = document.querySelector("[data-school-initial]");
+  if (logo && SCHOOL_SETTINGS.logoUrl) {
+    logo.src = SCHOOL_SETTINGS.logoUrl;
+    logo.hidden = false;
+    if (initial) initial.hidden = true;
+  }
+  const hero = document.querySelector(".hero");
+  if (hero && SCHOOL_SETTINGS.heroImageUrl) {
+    hero.style.backgroundImage = 'linear-gradient(115deg, rgba(10,39,63,.88), rgba(18,59,93,.68)), url("' + SCHOOL_SETTINGS.heroImageUrl + '")';
+    hero.style.backgroundPosition = "center";
+    hero.style.backgroundSize = "cover";
+  }
   if (initial) initial.textContent = (SCHOOL_SETTINGS.initial || SCHOOL_SETTINGS.name.charAt(0) || "S").charAt(0).toUpperCase();
 
   document.querySelectorAll("[data-school-email-link]").forEach((element) => {
