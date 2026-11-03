@@ -1,0 +1,74 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex,nofollow">
+  <title>CRIPRI Registration Review | Internal Preview</title>
+  <link rel="stylesheet" href="style.css">
+  <style>
+    body{background:#f3f6f9}.review-wrap{max-width:1120px;margin:38px auto;padding:0 20px}
+    .review-head{display:flex;justify-content:space-between;align-items:center;gap:16px;margin-bottom:24px}
+    .review-head h1{margin:0;color:#123b5d;font-size:clamp(1.7rem,4vw,2.3rem)}
+    .review-label{display:inline-block;padding:6px 10px;border-radius:20px;background:#fff0cf;color:#76520d;font-size:.75rem;font-weight:800}
+    .review-warning{padding:14px 16px;margin-bottom:20px;border-left:4px solid #d8a33a;background:#fff7e6;color:#70551f;border-radius:8px;font-size:.9rem}
+    .review-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:20px}
+    .review-stat,.review-panel{padding:20px;border:1px solid #e0e7ed;border-radius:13px;background:#fff}
+    .review-stat small{display:block;color:#6c7b88}.review-stat strong{display:block;margin-top:7px;color:#123b5d;font-size:1.6rem}
+    .review-panel{overflow:hidden}.review-panel h2{margin:0 0 14px;color:#123b5d;font-size:1.15rem}
+    .review-table{width:100%;border-collapse:collapse;text-align:left;font-size:.88rem}
+    .review-table th,.review-table td{padding:13px 10px;border-bottom:1px solid #e9eef2;vertical-align:top}
+    .review-table th{color:#687887;font-size:.76rem;text-transform:uppercase;letter-spacing:.05em}
+    .status{display:inline-block;padding:5px 9px;border-radius:20px;background:#fff0cf;color:#79520a;font-size:.73rem;font-weight:800}
+    .review-flow{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;counter-reset:step}
+    .review-step{padding:15px;border:1px solid #e3e9ee;border-radius:10px;background:#fbfcfd}
+    .review-step:before{counter-increment:step;content:counter(step);display:grid;place-items:center;width:27px;height:27px;margin-bottom:10px;border-radius:50%;background:#123b5d;color:white;font-weight:800;font-size:.8rem}
+    .review-step strong{display:block;color:#123b5d;font-size:.9rem}.review-step p{margin:6px 0 0;color:#687887;font-size:.8rem;line-height:1.5}
+    .review-foot{margin:20px 0;color:#71808c;font-size:.8rem}
+    @media(max-width:800px){.review-flow{grid-template-columns:repeat(2,1fr)}.review-table{min-width:650px}.table-scroll{overflow-x:auto}.review-stats{grid-template-columns:1fr}}
+    @media(max-width:480px){.review-head{align-items:flex-start;flex-direction:column}.review-flow{grid-template-columns:1fr}}
+  </style>
+</head>
+<body>
+  <main class="review-wrap">
+    <div class="review-head">
+      <div><p class="eyebrow">CRIPRI platform operations</p><h1>School registration review</h1></div>
+      <span class="review-label">INTERNAL DESIGN PREVIEW</span>
+    </div>
+    <p class="review-warning"><strong>Prototype only:</strong> This page contains fictional sample entries. It is not an authenticated CRIPRI staff console. No applications can be approved, rejected or changed here.</p>
+
+    <section class="review-stats" aria-label="Illustrative registration counts">
+      <article class="review-stat"><small>Pending review</small><strong>04</strong></article>
+      <article class="review-stat"><small>Approved this month</small><strong>08</strong></article>
+      <article class="review-stat"><small>Awaiting verification</small><strong>02</strong></article>
+    </section>
+
+    <section class="review-panel">
+      <h2>Illustrative applications queue</h2>
+      <div class="table-scroll">
+        <table class="review-table">
+          <thead><tr><th>Application</th><th>School</th><th>Country / region</th><th>Submitted</th><th>Status</th></tr></thead>
+          <tbody>
+            <tr><td>APP-DEMO-001</td><td>Green Valley School</td><td>Kenya · Sample County</td><td>03 Nov 2026</td><td><span class="status">Pending review</span></td></tr>
+            <tr><td>APP-DEMO-002</td><td>Sunrise Academy</td><td>Kenya · Sample County</td><td>02 Nov 2026</td><td><span class="status">Verification needed</span></td></tr>
+            <tr><td>APP-DEMO-003</td><td>Hillside Learning Centre</td><td>Uganda · Sample Region</td><td>01 Nov 2026</td><td><span class="status">Pending review</span></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="review-panel" style="margin-top:18px">
+      <h2 style="margin-bottom:18px">Required approval workflow</h2>
+      <div class="review-flow">
+        <article class="review-step"><strong>Receive application</strong><p>Store a unique application reference and mark it pending.</p></article>
+        <article class="review-step"><strong>Check school details</strong><p>Review official name, location, contacts and school category.</p></article>
+        <article class="review-step"><strong>Verify representative</strong><p>Confirm the applicant is authorised to act for the school.</p></article>
+        <article class="review-step"><strong>Record decision</strong><p>An authorised CRIPRI reviewer approves or rejects with a recorded reason.</p></article>
+        <article class="review-step"><strong>Activate school</strong><p>Only after approval, assign School ID and initiate administrator setup.</p></article>
+      </div>
+    </section>
+    <p class="review-foot">CRIPRI Technologies · Internal workflow concept · All entries on this page are fictional.</p>
+    <p><a href="school-registration-preview.html">View school registration preview</a> · <a href="index.html">Public website</a></p>
+  </main>
+</body>
+</html>
