@@ -1,0 +1,88 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function signedIn() {
+      return request.auth != null;
+    }
+
+    function isPlatformReviewer() {
+      return signedIn() && request.auth.token.platformAdmin == true;
+    }
+
+    function schoolIsActive(schoolId) {
+      return exists(/databases/$(database)/documents/schools/$(schoolId))
+        && get(/databases/$(database)/documents/schools/$(schoolId)).data.status == 'ACTIVE';
+    }
+
+    function belongsToActiveSchool(schoolId) {
+      return signedIn()
+        && request.auth.token.schoolId == schoolId
+        && schoolIsActive(schoolId);
+    }
+
+    function hasSchoolRole(schoolId, allowedRoles) {
+      return belongsToActiveSchool(schoolId)
+        && request.auth.token.role in allowedRoles;
+    }
+
+    // School applications are private. Applicants may submit only their own
+    // pending application. Only trusted CRIPRI reviewers can read or decide it.
+    match /schoolApplications/{applicationId} {
+      allow create: if signedIn()
+        && request.resource.data.applicantUid == request.auth.uid
+        && request.resource.data.status == 'PENDING_REVIEW'
+        && request.resource.data.keys().hasOnly([
+          'applicantUid', 'schoolName', 'schoolCategory', 'country',
+          'region', 'officialEmail', 'officialPhone', 'address',
+          'contactName', 'contactRole', 'status', 'submittedAt'
+        ]);
+      allow read, update, delete: if isPlatformReviewer();
+    }
+
+    // School records are created and activated only by trusted CRIPRI
+    // administrative processes, never by a school user from the client.
+    match /schools/{schoolId} {
+      allow read: if isPlatformReviewer()
+        || (resource.data.status == 'ACTIVE'
+            && (resource.data.publicProfileEnabled == true
+                || belongsToActiveSchool(schoolId)));
+      allow create, update, delete: if isPlatformReviewer();
+
+      // Public website content contains only approved public information.
+      match /siteContent/{contentId} {
+        allow read: if schoolIsActive(schoolId);
+        allow create, update, delete: if hasSchoolRole(
+          schoolId, ['SCHOOL_ADMIN', 'WEBSITE_EDITOR']
+        );
+      }
+
+      // Private school data remains closed until its dedicated roles and
+      // data validation are deliberately implemented and reviewed.
+      match /privateData/{document=**} {
+        allow read, write: if false;
+      }
+
+      // School membership records cannot be created or elevated by clients.
+      match /members/{uid} {
+        allow read: if isPlatformReviewer()
+          || (signedIn() && request.auth.uid == uid
+              && belongsToActiveSchool(schoolId));
+        allow create, update, delete: if isPlatformReviewer();
+      }
+    }
+
+    // Users can read only their own basic account record. Account roles and
+    // school assignments are provisioned by trusted server-side processes.
+    match /users/{uid} {
+      allow read: if isPlatformReviewer()
+        || (signedIn() && request.auth.uid == uid);
+      allow create, update, delete: if isPlatformReviewer();
+    }
+
+    // No other collection is accessible unless explicitly added above.
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}
