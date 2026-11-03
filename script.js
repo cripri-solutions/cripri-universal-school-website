@@ -1,39 +1,53 @@
 /* CRIPRI Universal School Website
-   CUSTOMISE THIS OBJECT for each school's public website.
-   Keep private credentials and student information out of this file. */
+   CUSTOMISE this object for each school's public website.
+   Only enter approved public information. Never add passwords,
+   private keys, student records or confidential data here. */
 const SCHOOL_SETTINGS = {
   name: "Your School",
+  initial: "S",
+  motto: "Learning • Growth • Opportunity",
+  headline: "A place to learn, grow and shape the future.",
   tagline: "Welcome to a school community where every learner matters.",
+  welcomeTitle: "Education with purpose and possibility",
+  welcomeMessage: "We believe education is more than lessons and examinations. It is about helping learners build knowledge, confidence, character and the skills to contribute positively to their communities.",
+  aboutTitle: "More than a school. A community.",
+  aboutMessage: "We are committed to creating a welcoming environment where learners are encouraged to ask questions, discover their strengths and prepare for a changing world.",
+  mission: "To nurture knowledgeable, confident and responsible learners through quality education and a supportive school community.",
   email: "info@example.com",
   phone: "+000 000 000 000",
   location: "School location"
 };
 
 document.addEventListener("DOMContentLoaded", () => {
-  document.querySelectorAll("[data-school-name]").forEach((element) => {
-    element.textContent = SCHOOL_SETTINGS.name;
+  const textSettings = {
+    "[data-school-name]": SCHOOL_SETTINGS.name,
+    "[data-school-motto]": SCHOOL_SETTINGS.motto,
+    "[data-school-headline]": SCHOOL_SETTINGS.headline,
+    "[data-school-tagline]": SCHOOL_SETTINGS.tagline,
+    "[data-welcome-title]": SCHOOL_SETTINGS.welcomeTitle,
+    "[data-welcome-message]": SCHOOL_SETTINGS.welcomeMessage,
+    "[data-about-title]": SCHOOL_SETTINGS.aboutTitle,
+    "[data-about-message]": SCHOOL_SETTINGS.aboutMessage,
+    "[data-school-mission]": SCHOOL_SETTINGS.mission,
+    "[data-school-email]": SCHOOL_SETTINGS.email,
+    "[data-school-phone]": SCHOOL_SETTINGS.phone,
+    "[data-school-location]": SCHOOL_SETTINGS.location
+  };
+
+  Object.entries(textSettings).forEach(([selector, value]) => {
+    document.querySelectorAll(selector).forEach((element) => {
+      element.textContent = value;
+    });
   });
 
-  document.querySelectorAll("[data-school-tagline]").forEach((element) => {
-    element.textContent = SCHOOL_SETTINGS.tagline;
-  });
+  const initial = document.querySelector("[data-school-initial]");
+  if (initial) initial.textContent = (SCHOOL_SETTINGS.initial || SCHOOL_SETTINGS.name.charAt(0) || "S").charAt(0).toUpperCase();
 
-  document.querySelectorAll("[data-school-email]").forEach((element) => {
-    element.textContent = SCHOOL_SETTINGS.email;
-  });
   document.querySelectorAll("[data-school-email-link]").forEach((element) => {
     element.href = "mailto:" + SCHOOL_SETTINGS.email;
   });
-
-  document.querySelectorAll("[data-school-phone]").forEach((element) => {
-    element.textContent = SCHOOL_SETTINGS.phone;
-  });
   document.querySelectorAll("[data-school-phone-link]").forEach((element) => {
     element.href = "tel:" + SCHOOL_SETTINGS.phone.replace(/[^+\d]/g, "");
-  });
-
-  document.querySelectorAll("[data-school-location]").forEach((element) => {
-    element.textContent = SCHOOL_SETTINGS.location;
   });
 
   document.title = SCHOOL_SETTINGS.name + " | Welcome";
