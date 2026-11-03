@@ -8,7 +8,7 @@ const SCHOOL_SETTINGS = {
   logoUrl: "", // Optional public image URL for this school
   primaryColor: "#123b5d",
   accentColor: "#f2b84b",
-  heroImageUrl: "", // Optional public hero photograph URL
+  heroImageUrl: "https://images.unsplash.com/photo-1509062522246-3755977927d7?auto=format&fit=crop&w=2000&q=85", // Replace with school-approved hero photo URL
   motto: "Learning • Growth • Opportunity",
   headline: "A place to learn, grow and shape the future.",
   tagline: "Welcome to a school community where every learner matters.",
