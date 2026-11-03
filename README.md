@@ -32,9 +32,9 @@ const SCHOOL_SETTINGS = {
 };
 ```
 
-Replace the sample values with the school's approved public information. Do not put passwords, private keys, student records or other confidential information in this file or in a public repository.
+Replace the sample values with the school's approved public information. You can also set `initial`, `primaryColor`, and `accentColor`. Add a public `logoUrl` to display the school logo and an optional `heroImageUrl` for a banner photograph. Use images that the school owns or has permission to publish. Do not put passwords, private keys, student records or other confidential information in this file or in a public repository.
 
-To change colours, edit the CSS variables at the top of `style.css`. To change page content, edit the relevant sections in `index.html`.
+To change page content, edit the relevant sections in `index.html`. The school colours can be set in `SCHOOL_SETTINGS`; the CSS variables in `style.css` provide the default theme.
 
 ## Deploying a separate school website
 
