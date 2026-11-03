@@ -25,6 +25,8 @@ a:focus-visible, button:focus-visible { outline: 3px solid var(--gold); outline-
 .header-inner { min-height: 76px; justify-content: space-between; gap: 24px; }
 .brand { gap: 12px; color: var(--navy); font-size: 1.05rem; font-weight: 800; text-decoration: none; }
 .brand-mark { display: grid; place-items: center; width: 42px; height: 42px; border-radius: 12px; color: var(--navy); background: var(--gold); }
+.brand-logo { display: block; width: 46px; height: 46px; object-fit: contain; }
+.brand-logo[hidden], .brand-mark[hidden] { display: none; }
 .site-nav { gap: 26px; }
 .site-nav a { color: var(--ink); font-size: .94rem; font-weight: 700; text-decoration: none; }
 .site-nav a:hover, .text-link:hover { color: var(--blue); }
