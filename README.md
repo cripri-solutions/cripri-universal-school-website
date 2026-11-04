@@ -1,61 +1,57 @@
 # CRIPRI Universal School Website
 
-A lightweight, reusable public website starter for schools, maintained by CRIPRI Technologies.
+The public landing page for the CRIPRI Universal School Website platform, maintained by CRIPRI Technologies.
 
-This starter uses plain HTML, CSS and JavaScript. It has no build step, framework, paid hosting dependency or external JavaScript package.
-
-## Included
-
-- Responsive school homepage
-- About, learning, admissions, community updates and contact sections
-- Mobile navigation
-- School-specific settings in one place
-- GitHub Pages-compatible static hosting
-
-## Preview
+## Live preview
 
 https://cripri-solutions.github.io/cripri-universal-school-website/
 
-GitHub may take a few minutes to publish a new commit.
+## What this repository currently contains
 
-## Customising a school website
+- `index.html` — CRIPRI platform landing page explaining the service and school onboarding approach.
+- `style.css` — responsive visual design shared by the public pages.
+- `school-registration-preview.html` — demonstration of the proposed school application form; it is disabled and does not submit or store data.
+- `portal-preview.html` — sample school administrator workspace; it has no login or database.
+- `registration-review-preview.html` — fictional sample of CRIPRI's manual application review process; it is not a live staff console.
+- `script.js` — reusable settings-driven school homepage script retained as a starter for future individual school sites.
+- `firestore.rules` and `firebase.json` — an initial security-rules draft and Firebase configuration; not deployed.
+- `docs/backend-security-plan.md` — proposed backend structure and security boundaries.
 
-Open `script.js` and edit the `SCHOOL_SETTINGS` object:
+## Current hosting
 
-```js
-const SCHOOL_SETTINGS = {
-  name: "Your School",
-  tagline: "Welcome to a school community where every learner matters.",
-  email: "info@example.com",
-  phone: "+000 000 000 000",
-  location: "School location"
-};
-```
+The public static pages are hosted on GitHub Pages. Firebase is not currently connected. No existing CRIPRI Firebase project is used or modified.
 
-Replace the sample values with the school's approved public information. You can also set `initial`, `primaryColor`, and `accentColor`. Add a public `logoUrl` to display the school logo and an optional `heroImageUrl` for a banner photograph. Use images that the school owns or has permission to publish. Do not put passwords, private keys, student records or other confidential information in this file or in a public repository.
+## Important functionality boundary
 
-To change page content, edit the relevant sections in `index.html`. The school colours can be set in `SCHOOL_SETTINGS`; the CSS variables in `style.css` provide the default theme.
+This is currently a public website and set of interface previews. It does **not** yet:
+- collect or transmit school applications;
+- create school accounts or administrator logins;
+- approve or reject applications;
+- generate school IDs;
+- save or publish school content from a dashboard;
+- provide a private database.
 
-## Deploying a separate school website
+Do not enter real school details, passwords, student information or confidential information into preview pages. The registration form is disabled and the review/dashboard pages use illustrative content only.
 
-This repository is the reusable starter template. For an independent school website, create a separate repository for that school, copy the approved public website files into it, customise the school settings and content, and enable GitHub Pages for that repository.
+## Planned school onboarding
 
-Each school's private portal and records must be implemented separately with a secure backend and strict school-by-school access controls. GitHub Pages is static hosting; it does not provide secure user accounts or a private database.
+1. A school submits an application through a future secure form.
+2. The application is stored as `PENDING_REVIEW`.
+3. CRIPRI verifies the school and its authorised representative.
+4. An authorised CRIPRI reviewer records approval or rejection.
+5. Only after approval does a trusted process create the school identity and provision administrator access.
 
-## Important security boundary
+No school should be automatically activated simply because it submits an application.
 
-This starter is a public information website only. It does not yet include admissions form processing, administrator login, teacher/parent/student accounts, payments, or a school database. Do not collect or publish confidential learner information through this static site.
+## Hosting and cost approach
 
-## Platform
+- Keep public static website hosting on GitHub Pages.
+- Evaluate a separate Firebase project for the platform backend, starting with the no-cost Spark plan where supported.
+- Do not enable billing, upgrade to Blaze, enable Cloud Build or deploy paid services without explicit approval.
+- Secure role assignment and school activation must not be implemented in untrusted browser code. Any backend design must be tested before real applications are accepted.
 
-Built as a reusable website foundation by CRIPRI Technologies.
+## Individual school websites
 
-## Illustrative photography
+The `script.js` and existing school-page styling provide a starting point for future individual school websites. Each school site should use its own approved public content and approved photographs. Do not publish identifiable learner photographs without the school's appropriate permissions and consent.
 
-The starter currently uses illustrative photographs hosted by Unsplash for the school-life gallery and a classroom image for the hero banner. They are examples only, not photographs of a real CRIPRI client school. Before launching a school's site, replace them with photographs supplied by that school with appropriate permission and consent, especially where learners are identifiable. The gallery photo source pages are:
-
-- Quilia: https://unsplash.com/photos/students-in-classroom-with-teacher-presenting-zFSo6bnZJTw
-- Yogendra Singh: https://unsplash.com/photos/girls-in-classroom-M92wusZZ_qg
-- jason hu: https://unsplash.com/photos/students-studying-at-tables-in-a-library-EP8lBWLFLkg
-
-Images are loaded from Unsplash's image CDN, so an internet connection is required to display them. For a production deployment, prefer school-approved images stored in a school-controlled location.
+Built by CRIPRI Technologies.
