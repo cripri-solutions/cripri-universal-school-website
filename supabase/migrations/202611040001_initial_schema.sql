@@ -56,6 +56,11 @@ alter table public.schools enable row level security;
 alter table public.school_memberships enable row level security;
 alter table public.school_content enable row level security;
 
+-- Remove any default table grants before granting only the required actions.
+revoke all on public.schools from anon, authenticated;
+revoke all on public.school_memberships from anon, authenticated;
+revoke all on public.school_content from anon, authenticated;
+
 -- Anonymous visitors may submit an application, but cannot read or approve one.
 revoke all on public.school_applications from anon, authenticated;
 grant insert (school_name, contact_person, contact_email, contact_phone, requested_slug, message)
@@ -103,6 +108,9 @@ create policy "public can view published content of active schools"
     published = true
     and exists (select 1 from public.schools s where s.id = school_id and s.status = 'active')
   );
+create policy "school members can view their own draft content"
+  on public.school_content for select to authenticated
+  using (public.is_school_member(school_id));
 
 grant insert, update, delete on public.school_content to authenticated;
 create policy "school members can add content"
