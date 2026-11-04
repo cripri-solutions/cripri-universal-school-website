@@ -74,10 +74,10 @@ grant execute on function public.list_pending_school_applications() to authentic
 -- Approval requires a previously invited/created Auth user for the first
 -- school administrator. This avoids activating a school with no owner.
 create or replace function public.review_school_application(
-  application_id uuid,
-  decision text,
-  reason text default null,
-  initial_admin_user_id uuid default null
+  p_application_id uuid,
+  p_decision text,
+  p_reason text default null,
+  p_initial_admin_user_id uuid default null
 )
 returns uuid
 language plpgsql
@@ -93,7 +93,7 @@ begin
       using errcode = '42501';
   end if;
 
-  if decision is null or decision not in ('approved', 'rejected') then
+  if p_decision is null or p_decision not in ('approved', 'rejected') then
     raise exception 'Decision must be approved or rejected'
       using errcode = '22023';
   end if;
@@ -101,7 +101,7 @@ begin
   select *
     into app
     from public.school_applications
-   where id = application_id
+   where id = p_application_id
    for update;
 
   if not found then
@@ -113,14 +113,14 @@ begin
       using errcode = '55000';
   end if;
 
-  if decision = 'approved' then
-    if initial_admin_user_id is null then
+  if p_decision = 'approved' then
+    if p_initial_admin_user_id is null then
       raise exception 'An invited school administrator is required'
         using errcode = '22023';
     end if;
 
     if not exists (
-      select 1 from auth.users u where u.id = initial_admin_user_id
+      select 1 from auth.users u where u.id = p_initial_admin_user_id
     ) then
       raise exception 'The supplied administrator Auth user does not exist'
         using errcode = '22023';
@@ -131,25 +131,25 @@ begin
     returning id into new_school_id;
 
     insert into public.school_memberships (school_id, user_id, role)
-    values (new_school_id, initial_admin_user_id, 'school_admin');
+    values (new_school_id, p_initial_admin_user_id, 'school_admin');
 
     insert into public.school_content (school_id, content, published)
     values (new_school_id, '{}'::jsonb, false);
   end if;
 
   update public.school_applications
-     set status = decision,
+     set status = p_decision,
          reviewed_at = now(),
          reviewed_by = (select auth.uid()),
-         review_reason = nullif(trim(reason), '')
-   where id = application_id;
+         review_reason = nullif(trim(p_reason), '')
+   where id = p_application_id;
 
   insert into public.application_review_audit (
     application_id, school_id, reviewer_id, decision, reason
   )
   values (
-    application_id, new_school_id, (select auth.uid()), decision,
-    nullif(trim(reason), '')
+    p_application_id, new_school_id, (select auth.uid()), p_decision,
+    nullif(trim(p_reason), '')
   );
 
   return new_school_id;
