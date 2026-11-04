@@ -1,82 +1,77 @@
-# CRIPRI Universal School Website — backend security plan
+# CRIPRI Universal School Website — Supabase backend plan
 
-## Purpose and boundaries
+## Purpose
 
-This repository is the public website template and the reviewed starting point for a future school portal. The current GitHub Pages site is static. It does not authenticate users, process applications, or store school records.
+This repository is the public landing page and school website demonstration platform maintained by CRIPRI Technologies. The intended backend is the separate Supabase project named **CRIPRI Platform**.
 
-The proposed backend is a **separate Firebase project dedicated to the website platform**. Do not reuse or change Firebase projects used by CRIPRI School Manager, Staff Manager, Student Biometric, or License Manager.
+This backend is for the website platform only. It must remain separate from all CRIPRI Android applications and their Firebase projects. Do not access, modify, migrate or reuse those projects as part of this work.
 
-## Proposed Firestore collections
+## Verified repository/database boundary
 
-### `schoolApplications/{applicationId}`
+- GitHub Pages currently serves the public static preview.
+- A SQL migration is present at `supabase/migrations/202611040001_initial_schema.sql`.
+- A migration file in GitHub is only source code. It does not prove that the SQL has been run in Supabase.
+- No live workflow should be advertised until the database state, authentication, server-side functions, browser permissions and end-to-end tests have been verified.
+- The older `firebase.json` and `firestore.rules` files are legacy drafts. They are not the active backend plan and must not be deployed as part of the Supabase implementation.
 
-A registration request submitted by an authenticated applicant. Suggested fields:
+## Existing initial schema — what it provides
 
-- `applicantUid`: Firebase Authentication UID of the applicant
-- `schoolName`, `schoolCategory`, `country`, `region`
-- `officialEmail`, `officialPhone`, `address`
-- `contactName`, `contactRole`
-- `status`: initially `PENDING_REVIEW`
-- `submittedAt`: server timestamp
+The checked-in initial migration defines:
 
-Only a trusted CRIPRI reviewer may read application records or make an approval decision. Do not expose an application queue on the public website.
+- `school_applications`: public school application submissions with contact details, requested slug, message and review status.
+- `schools`: school name, slug and lifecycle status.
+- `school_memberships`: links authenticated users to a school with a role.
+- `school_content`: one JSONB content document per school, with a published flag.
+- Row Level Security (RLS) on these tables.
+- A public insert path for pending applications.
+- Public reads of active schools and published content.
+- Authenticated users can read their own membership.
+- A helper function to check whether an authenticated user belongs to an active school.
 
-### `schools/{schoolId}`
+The migration does not, by itself, deliver the complete product. It does not create a CRIPRI reviewer console, a secure approval workflow, user invitation/onboarding, a fully working school editor, image storage policies, email notifications, spam controls, or a tested deployment pipeline.
 
-A school record created by a trusted CRIPRI process only. Suggested fields:
+## Security work required before real use
 
-- `schoolId`: immutable unique identifier matching the document ID
-- `officialName`
-- `status`: `PENDING_SETUP`, `ACTIVE`, `SUSPENDED`, or `REJECTED`
-- `publicProfileEnabled`
-- `createdAt`, `approvedAt`, `approvedBy`
+1. **Review application intake.** Validate required fields and slug format; add practical anti-spam/rate-limiting protection and avoid exposing application records to public visitors.
+2. **Trusted approval.** Only a trusted server-side operation may approve/reject applications, create or activate schools, assign the first administrator, or suspend a school. Never place Supabase service-role credentials in browser JavaScript.
+3. **Role-specific editing.** The current schema stores membership roles, but the initial content policy treats school members alike. Define and test the exact permissions for `school_admin` and `content_editor`.
+4. **Editable school identity.** The product requirement is that an authorised school administrator can edit the public school name and profile. Implement this with narrowly scoped permissions; never let school users change their school ID, slug ownership, lifecycle status or membership roles unless a separate trusted workflow explicitly allows it.
+5. **Tenant isolation.** Test that a user from one school cannot read, edit or publish another school's content, including by changing IDs in browser requests.
+6. **Content publishing.** Define draft versus published content and ensure public visitors can read only published content for active schools.
+7. **Image storage.** Define a private upload path and file-type/size controls for school logos and photographs. Public delivery should expose only approved published assets.
+8. **Auditability.** Record who reviewed applications and who changed/published school content, with server-generated timestamps.
+9. **Authentication and recovery.** Define secure reviewer and school-admin sign-in, invitation, password reset and account recovery before launch.
+10. **Testing.** Test RLS and trusted operations against a non-production Supabase project before accepting real school data.
 
-The school ID must never be supplied or changed by a school administrator. Generate it after approval in trusted server-side code and check for uniqueness.
+## Suggested platform roles
 
-### `schools/{schoolId}/siteContent/{contentId}`
+- **CRIPRI reviewer:** verifies applications and controls approval, activation, suspension and initial administrator provisioning.
+- **School admin:** manages the school's public identity and all approved website content for that school.
+- **Content editor:** edits permitted school content but cannot manage memberships, change protected school identity fields, or alter school status.
+- **Public visitor:** reads published content for active schools only.
 
-Approved public website content such as the school's public profile, announcements and events. Only authorised members of that same active school may edit it. Public reads are allowed only for active schools and only for this public-content collection.
+Role assignment must be performed by trusted administrative code. A browser user must never be able to grant themselves a role.
 
-### `schools/{schoolId}/members/{uid}`
+## Public school links
 
-School membership metadata. Membership and role assignment are provisioned by trusted CRIPRI processes, not by users editing their own records.
+For the first release, prefer one GitHub Pages domain with a school-specific path or slug, for example:
 
-### `users/{uid}`
+`https://cripri-solutions.github.io/cripri-universal-school-website/schools/example-school/`
 
-Basic account metadata. School assignment and role claims are issued by trusted server-side processes. A user must never be able to promote themselves to school administrator or platform reviewer.
+This is a proposed URL pattern, not a currently working dynamic route. GitHub Pages serves static files; dynamic school content must be loaded by the front-end from the approved public Supabase data. Custom domains and per-school subdomains can be considered later.
 
-### `schools/{schoolId}/privateData/{document}`
+## Deployment and cost guardrails
 
-Reserved for future confidential records. It is explicitly denied in the initial rules until a separate design, role model, validation plan and tests are approved.
+- Keep the current static preview on GitHub Pages during development.
+- Use Supabase Free only within its current published quotas and limitations.
+- Do not enable paid Supabase features, add billing, upgrade plans, or deploy paid services without explicit approval.
+- Do not activate Firebase billing, Google Cloud Build or other paid Google Cloud services for this project.
+- Confirm current plan limits and operational implications before production use.
 
-## Approval workflow
+## Migration discipline
 
-1. Applicant signs in and submits an application.
-2. Application is stored as `PENDING_REVIEW`.
-3. A CRIPRI reviewer verifies the school and authorised representative outside the public client.
-4. The reviewer records approval or rejection, reviewer UID, timestamp and reason in a controlled workflow.
-5. On approval, trusted server-side code creates the school document, assigns a unique immutable School ID and provisions the initial administrator.
-6. The administrator receives access only after their identity is verified and their account is assigned the correct school ID and role.
-7. Suspension disables school access through the school status check.
+The existing initial migration is a versioned baseline. Do not paste it into the SQL Editor repeatedly or assume it has already run. First inspect the actual Supabase migration/database state. Any schema correction must be added as a new migration, reviewed for safe RLS and grants, tested, and applied only after explicit approval.
 
-## Security model
+## Status
 
-- Default deny: every collection not explicitly allowed is inaccessible.
-- Platform reviewer authority uses a trusted Firebase Authentication custom claim: `platformAdmin: true`.
-- School access uses trusted custom claims: `schoolId` and `role`.
-- Supported initial website-editing roles: `SCHOOL_ADMIN` and `WEBSITE_EDITOR`.
-- Custom claims must be set only by trusted server-side code using the Firebase Admin SDK. Never set them from browser JavaScript.
-- School membership and role documents are not client-writable.
-- School status is checked before school member access.
-- Private student, staff, parent, attendance, payment and biometric data are out of scope and denied by these initial rules.
-- Never put service-account JSON, private keys, passwords, student information or other secrets in this public GitHub repository.
-
-## Important deployment warning
-
-These rules are a conservative starting point, not a complete production backend. They must be tested in the Firebase Emulator Suite or an equivalent isolated test project before deployment. The initial rules deliberately deny private records and client-side approval decisions.
-
-No Firebase project has been connected or changed by adding these files. Do not deploy until the dedicated website Firebase project ID is confirmed and the rules have been tested.
-
-## Cost-conscious deployment approach
-
-Use a dedicated Firebase project and check the current Firebase plan limits for the exact products required. Firestore and Authentication may be usable on the no-cost Spark plan within its quotas; do not enable billing, Cloud Build, paid extensions, or other paid Google Cloud services without an explicit decision. Hosting the static public website on GitHub Pages remains separate.
+This document describes the intended architecture and outstanding work. It is not a declaration that the backend is deployed or production-ready.
