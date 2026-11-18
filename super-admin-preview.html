@@ -431,5 +431,69 @@ function decide(button,status) {
   count.textContent=Math.max(0,Number(count.textContent)-1);
 }
 </script>
+  
+<style>
+body {
+  visibility: hidden;
+}
+</style>
+
+<script type="module">
+import { createClient } from
+'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.57.4/+esm';
+
+const supabase = createClient(
+  'https://dudrolmymjwphwivrlko.supabase.co',
+  'sb_publishable_PLYgkSvgd79KTEHKh21o-g_CKgUTRTY'
+);
+
+async function protectDashboard() {
+  const { data, error } = await supabase.auth.getSession();
+
+  if (error || !data.session) {
+    window.location.replace('super-admin-login.html');
+    return;
+  }
+
+  const { data: reviewer, error: checkError } = await supabase
+    .from('platform_reviewers')
+    .select('user_id')
+    .eq('user_id', data.session.user.id)
+    .eq('active', true)
+    .maybeSingle();
+
+  if (checkError || !reviewer) {
+    await supabase.auth.signOut();
+    window.location.replace('super-admin-login.html');
+    return;
+  }
+
+  const signOut = document.createElement('button');
+  signOut.textContent = 'Sign Out';
+  signOut.style.cssText =
+    'background:#28527f;color:white;margin-left:15px';
+
+  signOut.onclick = async () => {
+    signOut.disabled = true;
+    const { error } = await supabase.auth.signOut();
+
+    if (error) {
+      signOut.disabled = false;
+      alert('Sign out failed. Please try again.');
+      return;
+    }
+
+    window.location.replace('super-admin-login.html');
+  };
+
+  document.querySelector('header').appendChild(signOut);
+  document.body.style.visibility = 'visible';
+}
+
+protectDashboard().catch(() => {
+  window.location.replace('super-admin-login.html');
+});
+</script>
+
 </body>
 </html>
