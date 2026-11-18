@@ -1,0 +1,134 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex,nofollow">
+<title>CRIPRI Super Admin Login</title>
+<style>
+*{box-sizing:border-box}
+body{
+ margin:0;min-height:100vh;display:grid;
+ place-items:center;padding:20px;
+ background:#f3f6fb;color:#26364b;
+ font-family:Arial,sans-serif
+}
+.card{
+ width:min(440px,100%);padding:34px;
+ background:white;border-radius:15px;
+ box-shadow:0 14px 42px #10233f15
+}
+.brand{font-size:23px;font-weight:bold;color:#10233f}
+.brand span{color:#1769aa}
+.eyebrow{margin-top:28px;color:#1769aa;
+ font-size:11px;font-weight:bold;letter-spacing:1.4px}
+h1{font-size:25px}
+.intro{color:#718096;font-size:14px;line-height:1.6}
+label{display:block;margin:18px 0 7px;font-weight:bold;font-size:13px}
+input{
+ width:100%;padding:13px;border:1px solid #d7e0ea;
+ border-radius:7px;font-size:15px
+}
+button{
+ width:100%;margin-top:23px;padding:14px;
+ border:0;border-radius:7px;background:#1769aa;
+ color:white;font-size:15px;font-weight:bold;cursor:pointer
+}
+button:disabled{opacity:.6}
+#message{color:#b33b3b;font-size:13px;min-height:20px}
+.note{
+ margin-top:20px;padding:13px;background:#edf5ff;
+ border-left:3px solid #1769aa;font-size:12px;line-height:1.6
+}
+footer{margin-top:24px;text-align:center;font-size:11px;color:#8793a2}
+</style>
+</head>
+<body>
+<main class="card">
+ <div class="brand">CRIPRI <span>TECHNOLOGIES</span></div>
+ <p class="eyebrow">RESTRICTED PLATFORM ACCESS</p>
+ <h1>Super Admin Sign In</h1>
+ <p class="intro">
+ Sign in using your authorised CRIPRI platform reviewer account.
+ </p>
+
+ <form id="login-form">
+  <label for="email">Email address</label>
+  <input id="email" type="email" autocomplete="username" required>
+
+  <label for="password">Password</label>
+  <input id="password" type="password"
+   autocomplete="current-password" required>
+
+  <button id="submit" type="submit">Sign in securely</button>
+  <p id="message" role="alert"></p>
+ </form>
+
+ <div class="note">
+  Signing in alone does not grant Super Admin privileges.
+  Your active authorization is also verified by Supabase.
+ </div>
+
+ <footer>CRIPRI Universal School Platform · 2026</footer>
+</main>
+
+<script type="module">
+import { createClient } from
+'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.57.4/+esm';
+
+const supabase = createClient(
+ 'https://dudrolmymjwphwivrlko.supabase.co',
+ 'sb_publishable_PLYgkSvgd79KTEHKh21o-g_CKgUTRTY'
+);
+
+const form = document.getElementById('login-form');
+const button = document.getElementById('submit');
+const message = document.getElementById('message');
+
+form.addEventListener('submit', async (event) => {
+ event.preventDefault();
+ message.textContent = '';
+ button.disabled = true;
+ button.textContent = 'Verifying access...';
+
+ try {
+  const email = document.getElementById('email').value.trim();
+  const password = document.getElementById('password').value;
+
+  const {data,error} = await supabase.auth.signInWithPassword({
+   email,password
+  });
+
+  if(error) throw error;
+  if(!data.user) throw new Error('Sign-in failed.');
+
+  const {data:reviewer,error:checkError} = await supabase
+   .from('platform_reviewers')
+   .select('user_id')
+   .eq('user_id',data.user.id)
+   .eq('active',true)
+   .maybeSingle();
+
+  if(checkError) throw checkError;
+
+  if(!reviewer){
+   await supabase.auth.signOut();
+   throw new Error('You are not authorised for Super Admin access.');
+  }
+
+  window.location.replace('super-admin-preview.html');
+
+ } catch(error) {
+  message.textContent =
+   error.message === 'Invalid login credentials'
+   ? 'Incorrect email or password.'
+   : error.message || 'Unable to sign in.';
+ } finally {
+  button.disabled = false;
+  button.textContent = 'Sign in securely';
+ }
+});
+</script>
+</body>
+</html>
