@@ -616,13 +616,16 @@ async function loadSchoolApplications() {
         : 'Not provided'
     );
 
-    const statusCell = cell('');
-    const badge = document.createElement('span');
+    
+const statusCell = document.createElement('td');
+const badge = document.createElement('span');
 
-    badge.className = 'status ' + app.status;
-    badge.textContent = app.status;
+const statusValue = app.status || 'Not provided';
 
-    statusCell.appendChild(badge);
+badge.className = 'status ' + statusValue.toLowerCase();
+badge.textContent = statusValue;
+
+statusCell.appendChild(badge);
 
     const actions = document.createElement('td');
 
