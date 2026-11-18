@@ -1,4 +1,4 @@
-ĥ
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -6,14 +6,17 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="robots" content="noindex,nofollow">
 <title>CRIPRI | Domain & Website Onboarding</title>
+
 <style>
 :root{--navy:#10233f;--blue:#1769aa;--light:#f3f6fb;--text:#26364b;--green:#15966b;--orange:#a76b0c}
 *{box-sizing:border-box}
 body{margin:0;font-family:Arial,sans-serif;background:var(--light);color:var(--text)}
 header{background:var(--navy);color:white;padding:18px 22px;display:flex;justify-content:space-between;gap:12px;align-items:center;flex-wrap:wrap}
-.brand{font-size:20px;font-weight:bold}.brand span{color:#56c4e9}
+.brand{font-size:20px;font-weight:bold}
+.brand span{color:#56c4e9}
 main{max-width:1150px;margin:auto;padding:22px}
-h1{font-size:25px;margin:0 0 7px}.muted{color:#748197;font-size:13px}
+h1{font-size:25px;margin:0 0 7px}
+.muted{color:#748197;font-size:13px}
 .panel{background:white;padding:20px;border-radius:10px;margin:18px 0;box-shadow:0 2px 9px #162b4610}
 .notice{background:#edf5ff;border-left:4px solid var(--blue);padding:13px;border-radius:5px;font-size:13px;margin:15px 0}
 .grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
@@ -31,236 +34,713 @@ th{background:#f8fafd;color:#748197}
 .row-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:15px}
 #message,#authMessage{font-size:13px;white-space:pre-wrap}
 footer{text-align:center;color:#8290a2;padding:20px;font-size:12px}
-@media(max-width:650px){main{padding:13px}.grid{grid-template-columns:1fr}.panel{padding:15px}header{padding:15px}}
+@media(max-width:650px){
+ main{padding:13px}
+ .grid{grid-template-columns:1fr}
+ .panel{padding:15px}
+ header{padding:15px}
+}
 </style>
 </head>
+
 <body>
 <header>
  <div class="brand">CRIPRI <span>TECHNOLOGIES</span></div>
  <div><strong>SUPER ADMIN</strong><br><small>Domain & Website Onboarding</small></div>
 </header>
+
 <main>
  <div class="row-actions">
   <button class="secondary" onclick="location.href='super-admin-preview.html'">← Back to Super Admin Dashboard</button>
   <button id="signOut" class="secondary">Sign Out</button>
  </div>
+
  <h1>Domain & Website Onboarding</h1>
  <div class="muted">Manage school domains, quotations, consent, DNS and website launch.</div>
- <div class="notice">Domain purchases must not proceed until the school's explicit consent is recorded. The school must retain ownership of its domain. Never enter passwords or payment card details here.</div>
+
+ <div class="notice">
+ Domain purchases must not proceed until the school's explicit consent is recorded.
+ The school must retain ownership of its domain.
+ Never enter passwords or payment card details here.
+ </div>
+
  <section id="authPanel" class="panel">
   <h3>Verifying Super Admin access…</h3>
   <p id="authMessage">Please wait.</p>
  </section>
+
  <section id="workspace" class="hidden">
+
   <div class="panel">
    <h3>Onboarding Records</h3>
    <p id="message">Loading records…</p>
+
    <div class="table-wrap">
     <table>
-     <thead><tr><th>School</th><th>Domain</th><th>Ownership</th><th>Purchase consent</th><th>Stage</th><th>Action</th></tr></thead>
-     <tbody id="records"><tr><td colspan="6">Loading…</td></tr></tbody>
+     <thead>
+      <tr>
+       <th>School</th>
+       <th>Domain</th>
+       <th>Ownership</th>
+       <th>Purchase consent</th>
+       <th>Stage</th>
+       <th>Action</th>
+      </tr>
+     </thead>
+     <tbody id="records">
+      <tr><td colspan="6">Loading…</td></tr>
+     </tbody>
     </table>
    </div>
   </div>
+
   <div class="panel">
    <h3 id="formTitle">Create onboarding record</h3>
+
    <form id="onboardingForm">
     <div class="grid">
-     <div><label for="school">School</label><select id="school" required><option value="">Loading schools…</option></select></div>
-     <div><label for="domainStatus">Domain ownership</label><select id="domainStatus"><option value="owned">School already owns a domain</option><option value="needs_purchase_help">Needs help purchasing a domain</option><option value="needs_guidance">Needs guidance</option></select></div>
-     <div><label for="existingDomain">Existing domain</label><input id="existingDomain" placeholder="schoolname.co.ke"></div>
-     <div><label for="currentRegistrar">Current registrar</label><input id="currentRegistrar" placeholder="Current domain registrar"></div>
-     <div><label for="preferredName">Preferred domain name</label><input id="preferredName" placeholder="schoolname"></div>
-     <div><label for="extension">Preferred extension</label><select id="extension"><option value="not_sure">Not sure</option><option value=".co.ke">.co.ke</option><option value=".com">.com</option><option value=".org">.org</option><option value=".school">.school</option><option value=".ac.ke">.ac.ke</option><option value=".sc.ke">.sc.ke</option><option value="other">Other</option></select></div>
-     <div><label for="assistance">Domain assistance</label><select id="assistance"><option value="guidance">Domain guidance</option><option value="availability_check">Availability check</option><option value="purchase_assistance">Purchase assistance</option><option value="dns_configuration">DNS configuration</option><option value="full_setup">Full domain setup</option><option value="none">None</option></select></div>
-     <div><label for="websiteService">Website service</label><select id="websiteService"><option value="new_website">New independent school website</option><option value="connect_existing">Connect existing website</option><option value="redesign">Redesign existing website</option><option value="none">No website service</option></select></div>
-     <div><label for="availability">Domain availability</label><select id="availability"><option value="not_checked">Not checked</option><option value="available">Available</option><option value="unavailable">Unavailable</option><option value="reserved">Reserved</option><option value="unknown">Unknown</option></select></div>
-     <div><label for="registrationCost">Quoted registration cost (KES)</label><input id="registrationCost" type="number" min="0" step="0.01"></div>
-     <div><label for="renewalCost">Quoted renewal cost (KES)</label><input id="renewalCost" type="number" min="0" step="0.01"></div>
-     
-<div>
-  <label for="quotationProvider">Quotation provider</label>
-  <input id="quotationProvider" placeholder="Registrar or supplier name">
-</div>
-<div>
-  <label for="quotationDate">Quotation date</label>
-  <input id="quotationDate" type="date">
-</div>
-<div>
-  <label for="quotationValidUntil">Quotation valid until</label>
-  <input id="quotationValidUntil" type="date">
-</div>
-<div>
-  <label for="quotationReference">Quotation reference / URL</label>
-  <input id="quotationReference" placeholder="Quote reference or supplier URL">
-</div>
 
-     <div><label for="purchaseRegistrar">Registrar used for purchase</label><input id="purchaseRegistrar" placeholder="Registrar name"></div>
-     <div><label for="consent">Purchase authorisation</label><select id="consent"><option value="not_requested">Not requested</option><option value="awaiting_school_consent">Awaiting school consent</option><option value="consent_received">Consent received</option><option value="declined">Declined</option><option value="not_required">Not required</option></select></div>
-     <div><label for="consentEvidence">Consent evidence reference / note</label><input id="consentEvidence" placeholder="Written or email consent reference"></div>
-     <div><label for="registrationDate">Domain registration date</label><input id="registrationDate" type="date"></div>
-     <div><label for="expiryDate">Domain expiry date</label><input id="expiryDate" type="date"></div>
-     <div><label for="stage">Onboarding stage</label><select id="stage"><option value="awaiting_domain_discussion">Awaiting domain discussion</option><option value="assistance_requested">Assistance requested</option><option value="awaiting_purchase_authorisation">Awaiting purchase authorisation</option><option value="domain_purchased">Domain purchased</option><option value="dns_configuration_pending">DNS configuration pending</option><option value="domain_verification_pending">Domain verification pending</option><option value="website_development_pending">Website development pending</option><option value="website_deployment_pending">Website deployment pending</option><option value="completed">Completed</option><option value="on_hold">On hold</option></select></div>
-     <div><label for="dns">DNS status</label><select id="dns"><option value="not_started">Not started</option><option value="pending">Pending</option><option value="configured">Configured</option><option value="verified">Verified</option><option value="failed">Failed</option><option value="not_applicable">Not applicable</option></select></div>
-     <div><label for="websiteStatus">Website status</label><select id="websiteStatus"><option value="not_started">Not started</option><option value="requirements_gathering">Requirements gathering</option><option value="in_development">In development</option><option value="testing">Testing</option><option value="ready_to_launch">Ready to launch</option><option value="live">Live</option><option value="on_hold">On hold</option><option value="not_required">Not required</option></select></div>
+     <div>
+      <label for="school">School</label>
+      <select id="school" required>
+       <option value="">Loading schools…</option>
+      </select>
+     </div>
+
+     <div>
+      <label for="domainStatus">Domain ownership</label>
+      <select id="domainStatus">
+       <option value="owned">School already owns a domain</option>
+       <option value="needs_purchase_help">Needs help purchasing a domain</option>
+       <option value="needs_guidance">Needs guidance</option>
+      </select>
+     </div>
+
+     <div>
+      <label for="existingDomain">Existing domain</label>
+      <input id="existingDomain" placeholder="schoolname.co.ke">
+     </div>
+
+     <div>
+      <label for="currentRegistrar">Current registrar</label>
+      <input id="currentRegistrar" placeholder="Current domain registrar">
+     </div>
+
+     <div>
+      <label for="preferredName">Preferred domain name</label>
+      <input id="preferredName" placeholder="schoolname">
+     </div>
+
+     <div>
+      <label for="extension">Preferred extension</label>
+      <select id="extension">
+       <option value="not_sure">Not sure</option>
+       <option value=".co.ke">.co.ke</option>
+       <option value=".com">.com</option>
+       <option value=".org">.org</option>
+       <option value=".school">.school</option>
+       <option value=".ac.ke">.ac.ke</option>
+       <option value=".sc.ke">.sc.ke</option>
+       <option value="other">Other</option>
+      </select>
+     </div>
+
+     <div>
+      <label for="assistance">Domain assistance</label>
+      <select id="assistance">
+       <option value="guidance">Domain guidance</option>
+       <option value="availability_check">Availability check</option>
+       <option value="purchase_assistance">Purchase assistance</option>
+       <option value="dns_configuration">DNS configuration</option>
+       <option value="full_setup">Full domain setup</option>
+       <option value="none">None</option>
+      </select>
+     </div>
+
+     <div>
+      <label for="websiteService">Website service</label>
+      <select id="websiteService">
+       <option value="new_website">New independent school website</option>
+       <option value="connect_existing">Connect existing website</option>
+       <option value="redesign">Redesign existing website</option>
+       <option value="none">No website service</option>
+      </select>
+     </div>
+
+     <div>
+      <label for="availability">Domain availability</label>
+      <select id="availability">
+       <option value="not_checked">Not checked</option>
+       <option value="available">Available</option>
+       <option value="unavailable">Unavailable</option>
+       <option value="reserved">Reserved</option>
+       <option value="unknown">Unknown</option>
+      </select>
+     </div>
+
+     <div>
+      <label for="registrationCost">Quoted registration cost (KES)</label>
+      <input id="registrationCost" type="number" min="0" step="0.01">
+     </div>
+
+     <div>
+      <label for="renewalCost">Quoted renewal cost (KES)</label>
+      <input id="renewalCost" type="number" min="0" step="0.01">
+     </div>
+
+     <div>
+      <label for="quotationProvider">Quotation provider</label>
+      <input id="quotationProvider" placeholder="Registrar or supplier name">
+     </div>
+
+     <div>
+      <label for="quotationDate">Quotation date</label>
+      <input id="quotationDate" type="date">
+     </div>
+
+     <div>
+      <label for="quotationValidUntil">Quotation valid until</label>
+      <input id="quotationValidUntil" type="date">
+     </div>
+
+     <div>
+      <label for="quotationReference">Quotation reference / URL</label>
+      <input id="quotationReference" placeholder="Quote reference or supplier URL">
+     </div>
+
+     <div>
+      <label for="purchaseRegistrar">Registrar used for purchase</label>
+      <input id="purchaseRegistrar" placeholder="Registrar name">
+     </div>
+
+     <div>
+      <label for="consent">Purchase authorisation</label>
+      <select id="consent">
+       <option value="not_requested">Not requested</option>
+       <option value="awaiting_school_consent">Awaiting school consent</option>
+       <option value="consent_received">Consent received</option>
+       <option value="declined">Declined</option>
+       <option value="not_required">Not required</option>
+      </select>
+     </div>
+
+     <div>
+      <label for="consentEvidence">Consent evidence reference / note</label>
+      <input id="consentEvidence" placeholder="Written or email consent reference">
+     </div>
+
+     <div>
+      <label for="registrationDate">Domain registration date</label>
+      <input id="registrationDate" type="date">
+     </div>
+
+     <div>
+      <label for="expiryDate">Domain expiry date</label>
+      <input id="expiryDate" type="date">
+     </div>
+
+     <div>
+      <label for="stage">Onboarding stage</label>
+      <select id="stage">
+       <option value="awaiting_domain_discussion">Awaiting domain discussion</option>
+       <option value="assistance_requested">Assistance requested</option>
+       <option value="awaiting_purchase_authorisation">Awaiting purchase authorisation</option>
+       <option value="domain_purchased">Domain purchased</option>
+       <option value="dns_configuration_pending">DNS configuration pending</option>
+       <option value="domain_verification_pending">Domain verification pending</option>
+       <option value="website_development_pending">Website development pending</option>
+       <option value="website_deployment_pending">Website deployment pending</option>
+       <option value="completed">Completed</option>
+       <option value="on_hold">On hold</option>
+      </select>
+     </div>
+
+     <div>
+      <label for="dns">DNS status</label>
+      <select id="dns">
+       <option value="not_started">Not started</option>
+       <option value="pending">Pending</option>
+       <option value="configured">Configured</option>
+       <option value="verified">Verified</option>
+       <option value="failed">Failed</option>
+       <option value="not_applicable">Not applicable</option>
+      </select>
+     </div>
+
+     <div>
+      <label for="websiteStatus">Website status</label>
+      <select id="websiteStatus">
+       <option value="not_started">Not started</option>
+       <option value="requirements_gathering">Requirements gathering</option>
+       <option value="in_development">In development</option>
+       <option value="testing">Testing</option>
+       <option value="ready_to_launch">Ready to launch</option>
+       <option value="live">Live</option>
+       <option value="on_hold">On hold</option>
+       <option value="not_required">Not required</option>
+      </select>
+     </div>
+
     </div>
-    <label for="instructions">Additional instructions</label><textarea id="instructions"></textarea>
-    <label for="notes">Internal CRIPRI notes</label><textarea id="notes"></textarea>
+
+    <label for="instructions">Additional instructions</label>
+    <textarea id="instructions"></textarea>
+
+    <label for="notes">Internal CRIPRI notes</label>
+    <textarea id="notes"></textarea>
+
     <input id="recordId" type="hidden">
+
     <div class="row-actions">
      <button id="save" type="submit">Save onboarding record</button>
      <button id="clear" type="button" class="secondary">Clear form</button>
     </div>
    </form>
   </div>
+
   <div class="panel">
    <h3>Change History</h3>
    <div class="table-wrap">
-    <table><thead><tr><th>Date</th><th>Action</th><th>Changed by</th></tr></thead><tbody id="audit"><tr><td colspan="3">Select a record to view its history.</td></tr></tbody></table>
+    <table>
+     <thead>
+      <tr><th>Date</th><th>Action</th><th>Changed by</th></tr>
+     </thead>
+     <tbody id="audit">
+      <tr><td colspan="3">Select a record to view its history.</td></tr>
+     </tbody>
+    </table>
    </div>
   </div>
+
  </section>
 </main>
+
 <footer>CRIPRI TECHNOLOGIES © 2026 | Restricted Super Admin workspace</footer>
+
 <script type="module">
+
 import {createClient} from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.57.4/+esm';
-const supabase=createClient('https://dudrolmymjwphwivrlko.supabase.co','sb_publishable_PLYgkSvgd79KTEHKh21o-g_CKgUTRTY');
-const $=id=>document.getElementById(id);
-let currentUser=null;
-const fields={
- school:'school_id',domainStatus:'domain_status',existingDomain:'existing_domain',
- currentRegistrar:'current_registrar',preferredName:'preferred_domain_name',
- extension:'preferred_extension',assistance:'domain_assistance',
- websiteService:'website_service',availability:'domain_availability',
- registrationCost:'quoted_registration_cost',renewalCost:'quoted_renewal_cost',
- purchaseRegistrar:'registrar',consent:'purchase_authorisation',
- consentEvidence:'consent_evidence',registrationDate:'registration_date',
- expiryDate:'expiry_date',stage:'onboarding_stage',dns:'dns_status',
-websiteStatus: 'website_status',
-instructions: 'additional_instructions',
-notes: 'admin_notes',
-quotationProvider: 'quotation_provider',
-quotationDate: 'quotation_date',
-quotationValidUntil: 'quotation_valid_until',
-quotationReference: 'quotation_reference'
+
+const supabase = createClient(
+ 'https://dudrolmymjwphwivrlko.supabase.co',
+ 'sb_publishable_PLYgkSvgd79KTEHKh21o-g_CKgUTRTY'
+);
+
+const $ = id => document.getElementById(id);
+
+let currentUser = null;
+
+/* DATABASE FIELD MAPPING */
+
+const fields = {
+ school: 'school_id',
+ domainStatus: 'domain_status',
+ existingDomain: 'existing_domain',
+ currentRegistrar: 'current_registrar',
+ preferredName: 'preferred_domain_name',
+ extension: 'preferred_extension',
+ assistance: 'domain_assistance',
+ websiteService: 'website_service',
+ availability: 'domain_availability',
+ registrationCost: 'quoted_registration_cost',
+ renewalCost: 'quoted_renewal_cost',
+ purchaseRegistrar: 'registrar',
+ consent: 'purchase_authorisation',
+ consentEvidence: 'consent_evidence',
+ registrationDate: 'registration_date',
+ expiryDate: 'expiry_date',
+ stage: 'onboarding_stage',
+ dns: 'dns_status',
+ websiteStatus: 'website_status',
+ instructions: 'additional_instructions',
+ notes: 'admin_notes',
+ quotationProvider: 'quotation_provider',
+ quotationDate: 'quotation_date',
+ quotationValidUntil: 'quotation_valid_until',
+ quotationReference: 'quotation_reference'
 };
-function pretty(v){return String(v||'').replaceAll('_',' ').replace(/\b\w/g,x=>x.toUpperCase())}
-function message(t){$('message').textContent=t}
-async function verify(){
- const {data,error}=await supabase.auth.getSession();
- if(error||!data.session){location.replace('super-admin-login.html');return}
- const {data:reviewer,error:check}=await supabase.from('platform_reviewers').select('user_id').eq('user_id',data.session.user.id).eq('active',true).maybeSingle();
- if(check||!reviewer){await supabase.auth.signOut();location.replace('super-admin-login.html');return}
- currentUser=data.session.user;
+
+function pretty(v) {
+ return String(v || '')
+  .replaceAll('_', ' ')
+  .replace(/\b\w/g, x => x.toUpperCase());
+}
+
+function message(t) {
+ $('message').textContent = t;
+}
+
+/* SUPER ADMIN VERIFICATION */
+
+async function verify() {
+
+ const {data,error} = await supabase.auth.getSession();
+
+ if(error || !data.session) {
+  location.replace('super-admin-login.html');
+  return;
+ }
+
+ const {data:reviewer,error:check} = await supabase
+  .from('platform_reviewers')
+  .select('user_id')
+  .eq('user_id',data.session.user.id)
+  .eq('active',true)
+  .maybeSingle();
+
+ if(check || !reviewer) {
+  await supabase.auth.signOut();
+  location.replace('super-admin-login.html');
+  return;
+ }
+
+ currentUser = data.session.user;
+
  $('authPanel').classList.add('hidden');
  $('workspace').classList.remove('hidden');
- await Promise.all([loadSchools(),loadRecords()]);
+
+ await Promise.all([
+  loadSchools(),
+  loadRecords()
+ ]);
 }
-async function loadSchools(){
- const {data,error}=await supabase.from('schools').select('id,name,status').order('name');
- if(error)throw error;
- $('school').innerHTML='<option value="">Choose a school</option>';
- (data||[]).forEach(s=>{
-  const o=document.createElement('option');o.value=s.id;
-  o.textContent=s.name+' ('+s.status+')';$('school').appendChild(o);
+
+/* LOAD SCHOOLS */
+
+async function loadSchools() {
+
+ const {data,error} = await supabase
+  .from('schools')
+  .select('id,name,status')
+  .order('name');
+
+ if(error) throw error;
+
+ $('school').innerHTML =
+  '<option value="">Choose a school</option>';
+
+ (data || []).forEach(s => {
+
+  const o = document.createElement('option');
+
+  o.value = s.id;
+  o.textContent = s.name + ' (' + s.status + ')';
+
+  $('school').appendChild(o);
  });
 }
-async function loadRecords(){
+
+/* LOAD ONBOARDING RECORDS */
+
+async function loadRecords() {
+
  message('Loading onboarding records…');
- const {data,error}=await supabase.from('school_domain_onboarding').select('id,school_id,domain_status,existing_domain,preferred_domain_name,preferred_extension,purchase_authorisation,onboarding_stage,schools(name)').order('updated_at',{ascending:false});
- if(error){message('Could not load records: '+error.message);return}
- $('records').replaceChildren();
- if(!data?.length){
-  const tr=document.createElement('tr'),td=document.createElement('td');
-  td.colSpan=6;td.textContent='No onboarding records yet. Create the first record below.';
-  tr.appendChild(td);$('records').appendChild(tr);
+
+ const {data,error} = await supabase
+  .from('school_domain_onboarding')
+  .select('id,school_id,domain_status,existing_domain,preferred_domain_name,preferred_extension,purchase_authorisation,onboarding_stage,schools(name)')
+  .order('updated_at',{ascending:false});
+
+ if(error) {
+  message('Could not load records: ' + error.message);
+  return;
  }
- (data||[]).forEach(r=>{
-  const tr=document.createElement('tr');
-  const domain=r.existing_domain||((r.preferred_domain_name||'')+(r.preferred_extension||''))||'Not specified';
-  [r.schools?.name||'School',domain,pretty(r.domain_status),pretty(r.purchase_authorisation),pretty(r.onboarding_stage)].forEach(v=>{
-   const td=document.createElement('td');td.textContent=v;tr.appendChild(td);
+
+ $('records').replaceChildren();
+
+ if(!data?.length) {
+
+  const tr = document.createElement('tr');
+  const td = document.createElement('td');
+
+  td.colSpan = 6;
+  td.textContent = 'No onboarding records yet. Create the first record below.';
+
+  tr.appendChild(td);
+  $('records').appendChild(tr);
+ }
+
+ (data || []).forEach(r => {
+
+  const tr = document.createElement('tr');
+
+  const domain =
+   r.existing_domain ||
+   ((r.preferred_domain_name || '') + (r.preferred_extension || '')) ||
+   'Not specified';
+
+  [
+   r.schools?.name || 'School',
+   domain,
+   pretty(r.domain_status),
+   pretty(r.purchase_authorisation),
+   pretty(r.onboarding_stage)
+  ].forEach(v => {
+
+   const td = document.createElement('td');
+   td.textContent = v;
+   tr.appendChild(td);
   });
-  const td=document.createElement('td'),b=document.createElement('button');
-  b.textContent='Open';b.onclick=()=>openRecord(r.id);td.appendChild(b);tr.appendChild(td);
+
+  const td = document.createElement('td');
+  const b = document.createElement('button');
+
+  b.textContent = 'Open';
+  b.onclick = () => openRecord(r.id);
+
+  td.appendChild(b);
+  tr.appendChild(td);
+
   $('records').appendChild(tr);
  });
- message((data||[]).length+' record(s) loaded from Supabase.');
+
+ message((data || []).length + ' record(s) loaded from Supabase.');
 }
-function clearForm(){
- $('onboardingForm').reset();$('recordId').value='';
- $('formTitle').textContent='Create onboarding record';
- $('save').textContent='Save onboarding record';
- $('audit').innerHTML='<tr><td colspan="3">Select a record to view its history.</td></tr>';
+
+/* CLEAR FORM */
+
+function clearForm() {
+
+ $('onboardingForm').reset();
+ $('recordId').value = '';
+
+ $('formTitle').textContent = 'Create onboarding record';
+ $('save').textContent = 'Save onboarding record';
+
+ $('audit').innerHTML =
+  '<tr><td colspan="3">Select a record to view its history.</td></tr>';
 }
-async function openRecord(id){
- const {data,error}=await supabase.from('school_domain_onboarding').select('*').eq('id',id).single();
- if(error){alert('Unable to open record: '+error.message);return}
- Object.entries(fields).forEach(([element,key])=>{
-  let value=data[key]??'';
-  if(element==='registrationDate'||element==='expiryDate')value=value?String(value).slice(0,10):'';
-  $(element).value=value;
+
+/* OPEN EXISTING RECORD */
+
+async function openRecord(id) {
+
+ const {data,error} = await supabase
+  .from('school_domain_onboarding')
+  .select('*')
+  .eq('id',id)
+  .single();
+
+ if(error) {
+  alert('Unable to open record: ' + error.message);
+  return;
+ }
+
+ Object.entries(fields).forEach(([element,key]) => {
+
+  let value = data[key] ?? '';
+
+  if(element === 'registrationDate' || element === 'expiryDate') {
+   value = value ? String(value).slice(0,10) : '';
+  }
+
+  $(element).value = value;
  });
- $('recordId').value=data.id;
- $('formTitle').textContent='Update onboarding record';
- $('save').textContent='Update onboarding record';
- await loadAudit(id);ĝ
+
+ $('recordId').value = data.id;
+
+ $('formTitle').textContent = 'Update onboarding record';
+ $('save').textContent = 'Update onboarding record';
+
+ await loadAudit(id);
+
  $('formTitle').scrollIntoView({behavior:'smooth'});
 }
-async function loadAudit(id){
- const {data,error}=await supabase.from('school_domain_onboarding_audit').select('action,changed_at,changed_by').eq('onboarding_id',id).order('changed_at',{ascending:false}).limit(30);
+
+/* LOAD AUDIT HISTORY */
+
+async function loadAudit(id) {
+
+ const {data,error} = await supabase
+  .from('school_domain_onboarding_audit')
+  .select('action,changed_at,changed_by')
+  .eq('onboarding_id',id)
+  .order('changed_at',{ascending:false})
+  .limit(30);
+
  $('audit').replaceChildren();
- if(error){
-  const tr=document.createElement('tr'),td=document.createElement('td');
-  td.colSpan=3;td.textContent='Unable to load audit history: '+error.message;
-  tr.appendChild(td);$('audit').appendChild(tr);return;
+
+ if(error) {
+
+  const tr = document.createElement('tr');
+  const td = document.createElement('td');
+
+  td.colSpan = 3;
+  td.textContent = 'Unable to load audit history: ' + error.message;
+
+  tr.appendChild(td);
+  $('audit').appendChild(tr);
+
+  return;
  }
- if(!data?.length){
-  $('audit').innerHTML='<tr><td colspan="3">No history found.</td></tr>';return;
+
+ if(!data?.length) {
+
+  $('audit').innerHTML =
+   '<tr><td colspan="3">No history found.</td></tr>';
+
+  return;
  }
- data.forEach(a=>{
-  const tr=document.createElement('tr');
-  [new Date(a.changed_at).toLocaleString(),a.action,a.changed_by||'System'].forEach(v=>{
-   const td=document.createElement('td');td.textContent=v;tr.appendChild(td);
+
+ data.forEach(a => {
+
+  const tr = document.createElement('tr');
+
+  [
+   new Date(a.changed_at).toLocaleString(),
+   a.action,
+   a.changed_by || 'System'
+  ].forEach(v => {
+
+   const td = document.createElement('td');
+   td.textContent = v;
+   tr.appendChild(td);
   });
+
   $('audit').appendChild(tr);
  });
 }
-$('onboardingForm').addEventListener('submit',async e=>{
- e.preventDefault();const btn=$('save');btn.disabled=true;
- try{
-  const payload={};
-  Object.entries(fields).forEach(([element,key])=>{
-   let v=$(element).value;payload[key]=v===''?null:v;
+
+/* SAVE OR UPDATE ONBOARDING RECORD */
+
+$('onboardingForm').addEventListener('submit', async e => {
+
+ e.preventDefault();
+
+ const btn = $('save');
+ btn.disabled = true;
+
+ try {
+
+  const payload = {};
+
+  Object.entries(fields).forEach(([element,key]) => {
+
+   let v = $(element).value;
+   payload[key] = v === '' ? null : v;
   });
-  payload.quoted_registration_cost=payload.quoted_registration_cost===null?null:Number(payload.quoted_registration_cost);
-  payload.quoted_renewal_cost=payload.quoted_renewal_cost===null?null:Number(payload.quoted_renewal_cost);
-  payload.currency='KES';payload.updated_by=currentUser.id;
-  if(!payload.school_id)throw new Error('Please select a school.');
-  if(payload.domain_status==='owned'&&!payload.existing_domain)throw new Error('Enter the existing domain for a school that already owns one.');
-  if(payload.registration_date&&payload.expiry_date&&payload.expiry_date<payload.registration_date)throw new Error('Expiry date cannot be earlier than registration date.');
-  if(payload.purchase_authorisation==='consent_received'){
-   if(!payload.consent_evidence)throw new Error('Add a reference or note confirming the school’s explicit consent.');
-   if(!confirm('Confirm that the school has explicitly authorised this domain purchase?'))return;
-   const oldConsent=$('recordId').value?await supabase.from('school_domain_onboarding').select('consent_received_at').eq('id',$('recordId').value).single():{data:null};
-   payload.consent_received_at=oldConsent.data?.consent_received_at||new Date().toISOString();
-  }else{payload.consent_received_at=null}
-  const id=$('recordId').value;let result;
-  if(id)result=await supabase.from('school_domain_onboarding').update(payload).eq('id',id).select('id').single();
-  else{payload.created_by=currentUser.id;result=await supabase.from('school_domain_onboarding').insert(payload).select('id').single()}
-  if(result.error)throw result.error;
+
+  payload.quoted_registration_cost =
+   payload.quoted_registration_cost === null
+    ? null
+    : Number(payload.quoted_registration_cost);
+
+  payload.quoted_renewal_cost =
+   payload.quoted_renewal_cost === null
+    ? null
+    : Number(payload.quoted_renewal_cost);
+
+  payload.currency = 'KES';
+  payload.updated_by = currentUser.id;
+
+  if(!payload.school_id) {
+   throw new Error('Please select a school.');
+  }
+
+  if(payload.domain_status === 'owned' && !payload.existing_domain) {
+   throw new Error('Enter the existing domain for a school that already owns one.');
+  }
+
+  if(
+   payload.registration_date &&
+   payload.expiry_date &&
+   payload.expiry_date < payload.registration_date
+  ) {
+   throw new Error('Expiry date cannot be earlier than registration date.');
+  }
+
+  if(payload.purchase_authorisation === 'consent_received') {
+
+   if(!payload.consent_evidence) {
+    throw new Error('Add a reference or note confirming the school’s explicit consent.');
+   }
+
+   if(!confirm('Confirm that the school has explicitly authorised this domain purchase?')) {
+    return;
+   }
+
+   const oldConsent = $('recordId').value
+    ? await supabase
+       .from('school_domain_onboarding')
+       .select('consent_received_at')
+       .eq('id',$('recordId').value)
+       .single()
+    : {data:null};
+
+   payload.consent_received_at =
+    oldConsent.data?.consent_received_at || new Date().toISOString();
+
+  } else {
+
+   payload.consent_received_at = null;
+  }
+
+  const id = $('recordId').value;
+  let result;
+
+  if(id) {
+
+   result = await supabase
+    .from('school_domain_onboarding')
+    .update(payload)
+    .eq('id',id)
+    .select('id')
+    .single();
+
+  } else {
+
+   payload.created_by = currentUser.id;
+
+   result = await supabase
+    .from('school_domain_onboarding')
+    .insert(payload)
+    .select('id')
+    .single();
+  }
+
+  if(result.error) throw result.error;
+
   message('Onboarding record saved successfully.');
-  await loadRecords();await openRecord(result.data.id);
- }catch(err){alert('Save failed: '+err.message)}
- finally{btn.disabled=false}
+
+  await loadRecords();
+  await openRecord(result.data.id);
+
+ } catch(err) {
+
+  alert('Save failed: ' + err.message);
+
+ } finally {
+
+  btn.disabled = false;
+ }
 });
+
+/* CLEAR BUTTON */
+
 $('clear').addEventListener('click',clearForm);
-$('signOut').addEventListener('click',async()=>{
- const {error}=await supabase.auth.signOut();
- if(error){alert(error.message);return}
+
+/* SIGN OUT */
+
+$('signOut').addEventListener('click',async () => {
+
+ const {error} = await supabase.auth.signOut();
+
+ if(error) {
+  alert(error.message);
+  return;
+ }
+
  location.replace('super-admin-login.html');
 });
-verify().catch(e=>{$('authMessage').textContent='Could not initialise secure workspace: '+e.message});
+
+/* INITIALISE WORKSPACE */
+
+verify().catch(e => {
+
+ $('authMessage').textContent =
+  'Could not initialise secure workspace: ' + e.message;
+});
+
 </script>
 </body>
 </html>
