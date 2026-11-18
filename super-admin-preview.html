@@ -282,23 +282,94 @@ footer {
   </div>
 </section>
 
+
 <!-- APPROVALS -->
 <section id="approvals" class="section">
+
   <div class="topline">
-    <div><h1>School Approvals</h1><div class="muted">Review submitted school applications.</div></div>
+    <div>
+      <h1>School Approvals</h1>
+      <div class="muted">Review and manage school registration applications.</div>
+    </div>
+    <button class="primary" id="refreshApprovals">↻ Refresh Applications</button>
   </div>
-  <div class="panel">
-    <div class="notice">Approval actions below only change this local demonstration page.</div>
-    <div class="table-wrap">
-    <table id="approvalTable">
-      <thead><tr><th>School</th><th>Application ID</th><th>Date</th><th>Status</th><th>Action</th></tr></thead>
-      <tbody>
-        <tr><td>Valley Academy</td><td>APP-001</td><td>18 Nov 2026</td><td class="state"><span class="status pending">Pending</span></td><td class="actions"><button class="approve" onclick="decide(this,'Approved')">Approve</button><button class="reject" onclick="decide(this,'Rejected')">Reject</button></td></tr>
-        <tr><td>Bright Future Academy</td><td>APP-002</td><td>16 Nov 2026</td><td class="state"><span class="status pending">Pending</span></td><td class="actions"><button class="approve" onclick="decide(this,'Approved')">Approve</button><button class="reject" onclick="decide(this,'Rejected')">Reject</button></td></tr>
-      </tbody>
-    </table>
+
+  <div class="cards">
+    <div class="card">
+      <div class="label">Total Applications</div>
+      <div class="number" id="approvalTotal">0</div>
+      <small>Applications received</small>
+    </div>
+
+    <div class="card">
+      <div class="label">Pending Review</div>
+      <div class="number" id="approvalPending">0</div>
+      <small>Awaiting decision</small>
+    </div>
+
+    <div class="card">
+      <div class="label">Approved</div>
+      <div class="number" id="approvalApproved">0</div>
+      <small>Successfully reviewed</small>
+    </div>
+
+    <div class="card">
+      <div class="label">Rejected</div>
+      <div class="number" id="approvalRejected">0</div>
+      <small>Unsuccessful applications</small>
     </div>
   </div>
+
+  <div class="panel">
+    <div class="topline">
+      <h3>Registration Applications</h3>
+
+      <select id="approvalFilter">
+        <option value="all">All Applications</option>
+        <option value="pending">Pending</option>
+        <option value="approved">Approved</option>
+        <option value="rejected">Rejected</option>
+      </select>
+    </div>
+
+    <div class="notice" id="approvalMessage">
+      Connecting to the school registration database...
+    </div>
+
+    <div class="table-wrap">
+      <table id="approvalTable">
+        <thead>
+          <tr>
+            <th>School</th>
+            <th>Contact Person</th>
+            <th>Location</th>
+            <th>Date Submitted</th>
+            <th>Status</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+
+        <tbody id="approvalTableBody">
+          <tr>
+            <td colspan="6">Loading applications...</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="panel">
+    <h3>Approval Guidelines</h3>
+    <div class="notice">
+      Only authorised CRIPRI platform reviewers can approve or reject school applications.
+      Every decision must be recorded in the platform audit trail.
+    </div>
+    <p class="muted">
+      Approved applications will have a school record created.
+      School activation and administrator onboarding remain separate steps.
+    </p>
+  </div>
+
 </section>
 
 <!-- ADMINISTRATORS -->
