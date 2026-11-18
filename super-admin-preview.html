@@ -1,0 +1,435 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CRIPRI | Super Admin Dashboard</title>
+<style>
+:root {
+  --navy:#10233f;
+  --blue:#1769aa;
+  --light:#f3f6fb;
+  --green:#15966b;
+  --orange:#e99a30;
+  --red:#d84c4c;
+  --text:#26364b;
+}
+* {box-sizing:border-box}
+body {
+  margin:0;
+  font-family:Arial,sans-serif;
+  background:var(--light);
+  color:var(--text);
+}
+header {
+  background:var(--navy);
+  color:white;
+  padding:18px 25px;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  flex-wrap:wrap;
+  gap:12px;
+}
+.brand {font-size:21px;font-weight:bold}
+.brand span {color:#56c4e9}
+header small {color:#c4d4e7}
+.layout {display:flex;min-height:calc(100vh - 70px)}
+.sidebar {
+  width:235px;
+  background:#172d4c;
+  padding:22px 12px;
+  flex-shrink:0;
+}
+.sidebar h4 {
+  color:#8fa8c7;
+  padding-left:13px;
+  font-size:11px;
+  letter-spacing:1px;
+}
+.nav {
+  display:block;
+  width:100%;
+  padding:13px;
+  margin:4px 0;
+  border:0;
+  border-radius:7px;
+  background:transparent;
+  color:#d8e5f4;
+  text-align:left;
+  cursor:pointer;
+  font-size:14px;
+}
+.nav:hover,.nav.active {background:#28527f;color:white}
+main {padding:27px;width:100%;min-width:0}
+.topline {
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  flex-wrap:wrap;
+  gap:12px;
+  margin-bottom:24px;
+}
+h1 {font-size:25px;margin:0 0 7px}
+.muted {color:#7c899b;font-size:13px}
+button,.btn {
+  cursor:pointer;
+  border:0;
+  border-radius:6px;
+  padding:10px 14px;
+  font-weight:bold;
+}
+.primary {background:var(--blue);color:white}
+.cards {
+  display:grid;
+  grid-template-columns:repeat(4,minmax(0,1fr));
+  gap:15px;
+  margin-bottom:24px;
+}
+.card {
+  background:white;
+  padding:19px;
+  border-radius:10px;
+  box-shadow:0 2px 9px #162b4610;
+}
+.card .label {font-size:13px;color:#758399}
+.card .number {font-size:29px;font-weight:bold;margin:12px 0 5px}
+.card small {color:#8491a3}
+.panel {
+  background:white;
+  border-radius:10px;
+  padding:20px;
+  margin-bottom:20px;
+  box-shadow:0 2px 9px #162b4610;
+}
+.panel h3 {margin:0 0 17px;font-size:17px}
+.table-wrap {overflow-x:auto}
+table {width:100%;border-collapse:collapse;min-width:600px}
+th,td {
+  padding:13px 11px;
+  text-align:left;
+  border-bottom:1px solid #edf0f5;
+  font-size:13px;
+}
+th {color:#748197;background:#f8fafd}
+.status {
+  display:inline-block;
+  padding:5px 9px;
+  border-radius:20px;
+  font-size:11px;
+  font-weight:bold;
+}
+.approved {background:#e0f5e9;color:#13804d}
+.pending {background:#fff1d9;color:#a76b0c}
+.rejected {background:#fde6e6;color:#b93636}
+.section {display:none}
+.section.active {display:block}
+.actions button {margin:2px;font-size:11px;padding:7px}
+.approve {background:#e0f5e9;color:#13804d}
+.reject {background:#fde6e6;color:#b93636}
+input,select {
+  padding:11px;
+  border:1px solid #dce3ec;
+  border-radius:6px;
+  margin:5px 0;
+  max-width:100%;
+}
+.search {width:250px}
+.activity {
+  border-left:3px solid #dce8f4;
+  padding:4px 15px;
+  margin:15px 0;
+  font-size:13px;
+}
+.activity small {display:block;color:#8491a3;margin-top:5px}
+.notice {
+  background:#edf5ff;
+  border-left:4px solid var(--blue);
+  padding:13px;
+  border-radius:5px;
+  font-size:13px;
+  margin-bottom:18px;
+}
+footer {
+  text-align:center;
+  color:#8290a2;
+  padding:25px;
+  font-size:12px;
+}
+@media(max-width:950px) {
+  .cards {grid-template-columns:repeat(2,1fr)}
+  .sidebar {width:190px}
+}
+@media(max-width:600px) {
+  .layout {display:block}
+  .sidebar {width:100%;display:flex;overflow-x:auto;padding:8px}
+  .sidebar h4 {display:none}
+  .nav {min-width:max-content;width:auto;padding:12px}
+  main {padding:15px}
+  .cards {grid-template-columns:1fr 1fr;gap:9px}
+  .card {padding:13px}
+  .card .number {font-size:23px}
+  .search {width:100%}
+}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="brand">CRIPRI <span>TECHNOLOGIES</span></div>
+  <div>
+    <strong>SUPER ADMIN</strong><br>
+    <small>Universal School Platform Management</small>
+  </div>
+</header>
+
+<div class="layout">
+<aside class="sidebar">
+  <h4>PLATFORM MANAGEMENT</h4>
+  <button class="nav active" onclick="showPage('overview',this)">▦ Overview</button>
+  <button class="nav" onclick="showPage('schools',this)">🏫 Schools</button>
+  <button class="nav" onclick="showPage('approvals',this)">✓ School Approvals</button>
+  <button class="nav" onclick="showPage('admins',this)">♙ Administrators</button>
+  <button class="nav" onclick="showPage('subscriptions',this)">▤ Subscriptions</button>
+  <button class="nav" onclick="showPage('payments',this)">💳 Payments</button>
+  <button class="nav" onclick="showPage('reports',this)">▥ Reports</button>
+  <button class="nav" onclick="showPage('security',this)">🔒 Security & Audit</button>
+  <button class="nav" onclick="showPage('settings',this)">⚙ Settings</button>
+</aside>
+
+<main>
+
+<!-- OVERVIEW -->
+<section id="overview" class="section active">
+  <div class="topline">
+    <div>
+      <h1>Super Admin Overview</h1>
+      <div class="muted">Welcome to CRIPRI platform control centre.</div>
+    </div>
+    <button class="primary" onclick="alert('Prototype dashboard: no live data connected.')">Platform Status</button>
+  </div>
+
+  <div class="notice">
+    DEMONSTRATION MODE — Statistics and records displayed here are sample data, not live school information.
+  </div>
+
+  <div class="cards">
+    <div class="card">
+      <div class="label">Total Registered Schools</div>
+      <div class="number" id="totalSchools">128</div>
+      <small>Sample platform figure</small>
+    </div>
+    <div class="card">
+      <div class="label">Active Schools</div>
+      <div class="number">96</div>
+      <small>Sample platform figure</small>
+    </div>
+    <div class="card">
+      <div class="label">Pending Approvals</div>
+      <div class="number" id="pendingCount">8</div>
+      <small>Awaiting review</small>
+    </div>
+    <div class="card">
+      <div class="label">Subscription Revenue</div>
+      <div class="number">KES 0</div>
+      <small>Live payment integration pending</small>
+    </div>
+  </div>
+
+  <div class="panel">
+    <h3>Recent School Registrations</h3>
+    <div class="table-wrap">
+    <table>
+      <thead>
+        <tr><th>School</th><th>Location</th><th>Registration</th><th>Status</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>Valley Academy</td><td>Kenya</td><td>18 Nov 2026</td><td><span class="status pending">Pending</span></td></tr>
+        <tr><td>Greenfield School</td><td>Kenya</td><td>17 Nov 2026</td><td><span class="status approved">Approved</span></td></tr>
+        <tr><td>Bright Future Academy</td><td>Kenya</td><td>16 Nov 2026</td><td><span class="status pending">Pending</span></td></tr>
+      </tbody>
+    </table>
+    </div>
+  </div>
+
+  <div class="panel">
+    <h3>Platform Activity</h3>
+    <div class="activity">New school registration submitted<small>18 November 2026 · Demonstration record</small></div>
+    <div class="activity">School administrator account created<small>17 November 2026 · Demonstration record</small></div>
+    <div class="activity">Subscription management reviewed<small>16 November 2026 · Demonstration record</small></div>
+  </div>
+</section>
+
+<!-- SCHOOLS -->
+<section id="schools" class="section">
+  <div class="topline">
+    <div><h1>School Management</h1><div class="muted">View and manage registered schools.</div></div>
+    <button class="primary" onclick="alert('School registration integration will be added later.')">+ Add School</button>
+  </div>
+  <div class="panel">
+    <input class="search" placeholder="Search schools..." oninput="filterTable(this,'schoolTable')">
+    <div class="table-wrap">
+    <table id="schoolTable">
+      <thead><tr><th>School Name</th><th>School ID</th><th>Location</th><th>Status</th></tr></thead>
+      <tbody>
+        <tr><td>Valley Academy</td><td>DEMO-001</td><td>Kenya</td><td><span class="status pending">Pending</span></td></tr>
+        <tr><td>Greenfield School</td><td>DEMO-002</td><td>Kenya</td><td><span class="status approved">Active</span></td></tr>
+        <tr><td>Bright Future Academy</td><td>DEMO-003</td><td>Kenya</td><td><span class="status approved">Active</span></td></tr>
+      </tbody>
+    </table>
+    </div>
+  </div>
+</section>
+
+<!-- APPROVALS -->
+<section id="approvals" class="section">
+  <div class="topline">
+    <div><h1>School Approvals</h1><div class="muted">Review submitted school applications.</div></div>
+  </div>
+  <div class="panel">
+    <div class="notice">Approval actions below only change this local demonstration page.</div>
+    <div class="table-wrap">
+    <table id="approvalTable">
+      <thead><tr><th>School</th><th>Application ID</th><th>Date</th><th>Status</th><th>Action</th></tr></thead>
+      <tbody>
+        <tr><td>Valley Academy</td><td>APP-001</td><td>18 Nov 2026</td><td class="state"><span class="status pending">Pending</span></td><td class="actions"><button class="approve" onclick="decide(this,'Approved')">Approve</button><button class="reject" onclick="decide(this,'Rejected')">Reject</button></td></tr>
+        <tr><td>Bright Future Academy</td><td>APP-002</td><td>16 Nov 2026</td><td class="state"><span class="status pending">Pending</span></td><td class="actions"><button class="approve" onclick="decide(this,'Approved')">Approve</button><button class="reject" onclick="decide(this,'Rejected')">Reject</button></td></tr>
+      </tbody>
+    </table>
+    </div>
+  </div>
+</section>
+
+<!-- ADMINISTRATORS -->
+<section id="admins" class="section">
+  <h1>Administrators</h1>
+  <p class="muted">School administrator account overview.</p>
+  <div class="panel">
+    <h3>Administrator Records</h3>
+    <div class="table-wrap">
+    <table>
+      <thead><tr><th>Name</th><th>School</th><th>Role</th><th>Status</th></tr></thead>
+      <tbody>
+        <tr><td>Demo Administrator</td><td>Greenfield School</td><td>School Admin</td><td><span class="status approved">Active</span></td></tr>
+        <tr><td>Demo Manager</td><td>Valley Academy</td><td>School Admin</td><td><span class="status pending">Pending</span></td></tr>
+      </tbody>
+    </table>
+    </div>
+  </div>
+</section>
+
+<!-- SUBSCRIPTIONS -->
+<section id="subscriptions" class="section">
+  <h1>Subscriptions</h1>
+  <p class="muted">Monitor school subscription plans.</p>
+  <div class="cards">
+    <div class="card"><div class="label">Active Subscriptions</div><div class="number">96</div></div>
+    <div class="card"><div class="label">Expired Subscriptions</div><div class="number">12</div></div>
+    <div class="card"><div class="label">Trial Accounts</div><div class="number">20</div></div>
+    <div class="card"><div class="label">Pending Renewals</div><div class="number">8</div></div>
+  </div>
+  <div class="panel">
+    <h3>Subscription Plans</h3>
+    <table>
+      <thead><tr><th>Plan</th><th>Duration</th><th>Price</th></tr></thead>
+      <tbody>
+        <tr><td>Monthly</td><td>1 Month</td><td>To be configured</td></tr>
+        <tr><td>Annual</td><td>12 Months</td><td>To be configured</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<!-- PAYMENTS -->
+<section id="payments" class="section">
+  <h1>Payments</h1>
+  <p class="muted">Financial monitoring and transaction records.</p>
+  <div class="notice">No M-Pesa or payment gateway is connected in this prototype. No real transactions are displayed.</div>
+  <div class="panel">
+    <h3>Transaction Records</h3>
+    <table>
+      <thead><tr><th>Reference</th><th>School</th><th>Amount</th><th>Status</th></tr></thead>
+      <tbody><tr><td>No live records</td><td>—</td><td>—</td><td>—</td></tr></tbody>
+    </table>
+  </div>
+</section>
+
+<!-- REPORTS -->
+<section id="reports" class="section">
+  <h1>Platform Reports</h1>
+  <p class="muted">Platform performance and management reports.</p>
+  <div class="panel">
+    <h3>Available Reports</h3>
+    <p>• School registration summary</p>
+    <p>• Subscription performance</p>
+    <p>• Payment summary</p>
+    <p>• School activity report</p>
+    <p>• Administrator activity report</p>
+    <button class="primary" onclick="window.print()">Print Dashboard</button>
+  </div>
+</section>
+
+<!-- SECURITY -->
+<section id="security" class="section">
+  <h1>Security & Audit</h1>
+  <p class="muted">Platform security monitoring.</p>
+  <div class="panel">
+    <h3>Security Controls</h3>
+    <p>Super Admin authentication: Not connected</p>
+    <p>Audit logging: Not connected</p>
+    <p>Role-based permissions: To be configured</p>
+    <p>Login monitoring: Not connected</p>
+    <div class="notice">Real administrative access must be protected by server-side authentication and authorization before deployment.</div>
+  </div>
+</section>
+
+<!-- SETTINGS -->
+<section id="settings" class="section">
+  <h1>Platform Settings</h1>
+  <p class="muted">CRIPRI platform configuration.</p>
+  <div class="panel">
+    <h3>Platform Identity</h3>
+    <label>Platform Name</label><br>
+    <input value="CRIPRI Universal School Website"><br>
+    <label>Support Email</label><br>
+    <input placeholder="Enter support email"><br>
+    <label>Default Country</label><br>
+    <select><option>Kenya</option><option>Uganda</option><option>Tanzania</option></select><br>
+    <button class="primary" onclick="alert('Demo only. Settings are not saved.')">Save Settings</button>
+  </div>
+</section>
+
+</main>
+</div>
+
+<footer>
+  CRIPRI TECHNOLOGIES © 2026 | Universal School Platform | Demonstration Interface
+</footer>
+
+<script>
+function showPage(id,button) {
+  document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  document.querySelectorAll('.nav').forEach(n=>n.classList.remove('active'));
+  button.classList.add('active');
+}
+
+function filterTable(input,id) {
+  const term=input.value.toLowerCase();
+  document.querySelectorAll('#'+id+' tbody tr').forEach(row=>{
+    row.style.display=row.innerText.toLowerCase().includes(term)?'':'none';
+  });
+}
+
+function decide(button,status) {
+  if(!confirm('Change this demonstration application to '+status+'?')) return;
+  const row=button.closest('tr');
+  row.querySelector('.state').innerHTML='<span class="status '+(status==='Approved'?'approved':'rejected')+'">'+status+'</span>';
+  row.querySelector('.actions').innerHTML='<strong>'+status+'</strong>';
+  const count=document.getElementById('pendingCount');
+  count.textContent=Math.max(0,Number(count.textContent)-1);
+}
+</script>
+</body>
+</html>
