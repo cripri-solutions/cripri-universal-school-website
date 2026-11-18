@@ -625,9 +625,14 @@ const statusValue = app.status || 'Not provided';
 badge.className = 'status ' + statusValue.toLowerCase();
 badge.textContent = statusValue;
 
+
 statusCell.appendChild(badge);
 
-    const actions = document.createElement('td');
+// ADD STATUS CELL TO THE TABLE ROW
+tr.appendChild(statusCell);
+
+const actions = document.createElement('td');
+
 
     // VIEW APPLICATION
     const view = document.createElement('button');
