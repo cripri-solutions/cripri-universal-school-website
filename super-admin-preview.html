@@ -20,7 +20,7 @@ body {
   margin:0;
   font-family:Arial,sans-serif;
   background:var(--light);
-  color:var(--text);
+  color:var(--text)
 }
 header {
   background:var(--navy);
@@ -509,29 +509,236 @@ body {
 }
 </style>
 
+
 <script type="module">
 import { createClient } from
-'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.57.4/+esm';
+  'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.57.4/+esm';
 
 const supabase = createClient(
   'https://dudrolmymjwphwivrlko.supabase.co',
   'sb_publishable_PLYgkSvgd79KTEHKh21o-g_CKgUTRTY'
 );
 
+// LOAD SCHOOL APPLICATIONS
+async function loadSchoolApplications() {
+  const body = document.getElementById('approvalTableBody');
+  const message = document.getElementById('approvalMessage');
+
+  body.innerHTML =
+    '<tr><td colspan="6">Loading applications...</td></tr>';
+
+  const { data, error } = await supabase
+    .from('school_applications')
+    .select(`
+      id,
+      school_name,
+      contact_person,
+      contact_email,
+      contact_phone,
+      contact_role,
+      school_category,
+      country,
+      region,
+      physical_address,
+      requested_slug,
+      message,
+      status,
+      created_at,
+      reviewed_at,
+      review_reason
+    `)
+    .order('created_at', { ascending: false });
+
+  if (error) {
+    message.textContent =
+      'Could not load applications: ' + error.message;
+    body.innerHTML =
+      '<tr><td colspan="6">Unable to load records.</td></tr>';
+    return;
+  }
+
+  const applications = data || [];
+
+  document.getElementById('approvalTotal').textContent =
+    applications.length;
+
+  document.getElementById('approvalPending').textContent =
+    applications.filter(a => a.status === 'pending').length;
+
+  document.getElementById('approvalApproved').textContent =
+    applications.filter(a => a.status === 'approved').length;
+
+  document.getElementById('approvalRejected').textContent =
+    applications.filter(a => a.status === 'rejected').length;
+
+  const filter =
+    document.getElementById('approvalFilter').value;
+
+  const visible = filter === 'all'
+    ? applications
+    : applications.filter(a => a.status === filter);
+
+  body.replaceChildren();
+
+  if (visible.length === 0) {
+    const tr = document.createElement('tr');
+    const td = document.createElement('td');
+
+    td.colSpan = 6;
+    td.textContent = 'No applications found for this status.';
+
+    tr.appendChild(td);
+    body.appendChild(tr);
+  }
+
+  visible.forEach(app => {
+    const tr = document.createElement('tr');
+
+    function cell(value) {
+      const td = document.createElement('td');
+      td.textContent = value || 'Not provided';
+      tr.appendChild(td);
+      return td;
+    }
+
+    cell(app.school_name);
+    cell(app.contact_person);
+
+    cell(
+      [app.region, app.country]
+        .filter(Boolean)
+        .join(', ')
+    );
+
+    cell(
+      app.created_at
+        ? new Date(app.created_at).toLocaleDateString()
+        : 'Not provided'
+    );
+
+    const statusCell = cell('');
+    const badge = document.createElement('span');
+
+    badge.className = 'status ' + app.status;
+    badge.textContent = app.status;
+
+    statusCell.appendChild(badge);
+
+    const actions = document.createElement('td');
+
+    // VIEW APPLICATION
+    const view = document.createElement('button');
+    view.textContent = 'View';
+
+    view.onclick = () => {
+      alert(
+        'SCHOOL: ' + app.school_name +
+        '\nCONTACT: ' + app.contact_person +
+        '\nEMAIL: ' + app.contact_email +
+        '\nPHONE: ' + (app.contact_phone || 'Not provided') +
+        '\nROLE: ' + (app.contact_role || 'Not provided') +
+        '\nCATEGORY: ' + (app.school_category || 'Not provided') +
+        '\nLOCATION: ' + (app.physical_address || 'Not provided') +
+        '\nREGION: ' + (app.region || 'Not provided') +
+        '\nCOUNTRY: ' + (app.country || 'Not provided') +
+        '\nREQUESTED SLUG: ' + app.requested_slug +
+        '\nMESSAGE: ' + (app.message || 'None') +
+        '\nSTATUS: ' + app.status
+      );
+    };
+
+    actions.appendChild(view);
+
+    // APPROVE OR REJECT PENDING APPLICATIONS
+    if (app.status === 'pending') {
+      ['approved', 'rejected'].forEach(decision => {
+        const button = document.createElement('button');
+
+        button.textContent =
+          decision === 'approved' ? 'Approve' : 'Reject';
+
+        button.className =
+          decision === 'approved' ? 'approve' : 'reject';
+
+        button.onclick = async () => {
+          const reason = decision === 'rejected'
+            ? prompt('Enter the reason for rejecting this application:')
+            : prompt('Optional approval note:');
+
+          if (reason === null) return;
+
+          if (decision === 'rejected' && !reason.trim()) {
+            alert('Please provide a rejection reason.');
+            return;
+          }
+
+          if (!confirm(
+            'Confirm ' + decision + ' for ' +
+            app.school_name + '?'
+          )) return;
+
+          button.disabled = true;
+
+          const { error: reviewError } = await supabase.rpc(
+            'review_school_application',
+            {
+              p_application_id: app.id,
+              p_decision: decision,
+              p_reason: reason.trim() || null
+            }
+          );
+
+          if (reviewError) {
+            alert('Decision failed: ' + reviewError.message);
+            button.disabled = false;
+            return;
+          }
+
+          alert(
+            'Application successfully ' + decision + '.'
+          );
+
+          await loadSchoolApplications();
+        };
+
+        actions.appendChild(button);
+      });
+    }
+
+    tr.appendChild(actions);
+    body.appendChild(tr);
+  });
+
+  message.textContent =
+    applications.length +
+    ' application(s) loaded from Supabase.';
+}
+
+// REFRESH AND FILTER CONTROLS
+document.getElementById('refreshApprovals')
+  .addEventListener('click', loadSchoolApplications);
+
+document.getElementById('approvalFilter')
+  .addEventListener('change', loadSchoolApplications);
+
+
+// PROTECT THE SUPER ADMIN DASHBOARD
 async function protectDashboard() {
-  const { data, error } = await supabase.auth.getSession();
+  const { data, error } =
+    await supabase.auth.getSession();
 
   if (error || !data.session) {
     window.location.replace('super-admin-login.html');
     return;
   }
 
-  const { data: reviewer, error: checkError } = await supabase
-    .from('platform_reviewers')
-    .select('user_id')
-    .eq('user_id', data.session.user.id)
-    .eq('active', true)
-    .maybeSingle();
+  const { data: reviewer, error: checkError } =
+    await supabase
+      .from('platform_reviewers')
+      .select('user_id')
+      .eq('user_id', data.session.user.id)
+      .eq('active', true)
+      .maybeSingle();
 
   if (checkError || !reviewer) {
     await supabase.auth.signOut();
@@ -541,11 +748,13 @@ async function protectDashboard() {
 
   const signOut = document.createElement('button');
   signOut.textContent = 'Sign Out';
+
   signOut.style.cssText =
     'background:#28527f;color:white;margin-left:15px';
 
   signOut.onclick = async () => {
     signOut.disabled = true;
+
     const { error } = await supabase.auth.signOut();
 
     if (error) {
@@ -558,13 +767,16 @@ async function protectDashboard() {
   };
 
   document.querySelector('header').appendChild(signOut);
+
+  // Load applications only after reviewer authorization
+  await loadSchoolApplications();
+
+  // Reveal dashboard after successful authorization
   document.body.style.visibility = 'visible';
 }
 
-protectDashboard().catch(() => {
+protectDashboard().catch(error => {
+  console.error('Dashboard initialization failed:', error);
   window.location.replace('super-admin-login.html');
 });
 </script>
-
-</body>
-</html>
