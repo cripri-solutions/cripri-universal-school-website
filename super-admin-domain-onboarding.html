@@ -1,4 +1,4 @@
-
+ĥ
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -136,11 +136,13 @@ const fields={
  purchaseRegistrar:'registrar',consent:'purchase_authorisation',
  consentEvidence:'consent_evidence',registrationDate:'registration_date',
  expiryDate:'expiry_date',stage:'onboarding_stage',dns:'dns_status',
- websiteStatus:'website_status',instructions:'additional_instructions',notes:'admin_notes'
- quotationProvider:'quotation_provider',
-quotationDate:'quotation_date',
-quotationValidUntil:'quotation_valid_until',
-quotationReference:'quotation_reference'
+websiteStatus: 'website_status',
+instructions: 'additional_instructions',
+notes: 'admin_notes',
+quotationProvider: 'quotation_provider',
+quotationDate: 'quotation_date',
+quotationValidUntil: 'quotation_valid_until',
+quotationReference: 'quotation_reference'
 };
 function pretty(v){return String(v||'').replaceAll('_',' ').replace(/\b\w/g,x=>x.toUpperCase())}
 function message(t){$('message').textContent=t}
