@@ -1,0 +1,125 @@
+
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#123b5d">
+<meta name="description" content="Official school website powered by CRIPRI Technologies.">
+<title>School Website | CRIPRI Technologies</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.57.4"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet">
+<style>
+:root{--navy:#123b5d;--blue:#1769aa;--gold:#e8b44c;--ink:#203246;--muted:#68788a;--paper:#f5f7fa;--line:#e4eaf0}
+*{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;color:var(--ink);font-family:"DM Sans",Arial,sans-serif;line-height:1.65}
+.container{width:min(1160px,calc(100% - 36px));margin:auto}.topbar{background:#0c2d49;color:#dce8f2;font-size:12px;padding:8px 0}
+.topbar .container,.footer .container{display:flex;justify-content:space-between;gap:15px;flex-wrap:wrap}
+.header{position:sticky;top:0;z-index:5;background:#fff;border-bottom:1px solid var(--line)}
+.header-inner{min-height:78px;display:flex;align-items:center;justify-content:space-between;gap:18px}
+.brand{display:flex;align-items:center;gap:12px;text-decoration:none;color:var(--navy);font-weight:700}
+.crest{width:46px;height:46px;border-radius:50%;display:grid;place-items:center;background:var(--navy);color:white;font:700 24px Georgia}
+.brand small{display:block;color:var(--muted);font-size:11px;font-weight:500}
+.nav{display:flex;gap:22px}.nav a{font-size:13px;font-weight:700;text-decoration:none;color:#42556a}
+.menu{display:none;padding:9px 13px;border:1px solid var(--line);background:white;border-radius:7px}
+.hero{min-height:490px;display:flex;align-items:center;color:white;background:linear-gradient(105deg,rgba(7,35,58,.94),rgba(18,59,93,.70)),linear-gradient(135deg,#214d6e,#102b46);background-position:center;background-size:cover;border-bottom:6px solid var(--gold)}
+.hero-copy{max-width:760px;padding:80px 0}.eyebrow{color:var(--gold);text-transform:uppercase;letter-spacing:2px;font-size:11px;font-weight:700}
+h1,h2{font-family:"Playfair Display",Georgia,serif;line-height:1.16}h1{font-size:clamp(38px,6vw,64px);margin:12px 0 18px}
+.hero p.lead{font-size:18px;color:#e0eaf2;max-width:650px}.btn{display:inline-block;padding:11px 18px;border-radius:7px;text-decoration:none;font-size:13px;font-weight:700;margin:8px 8px 0 0}
+.btn-gold{background:var(--gold);color:#182b3c}.btn-outline{border:1px solid #fff;color:white}
+section.content{padding:72px 0}.tint{background:var(--paper)}.eyebrow.dark{color:var(--blue)}
+h2{font-size:clamp(29px,4vw,42px);color:var(--navy);margin:8px 0 12px}.section-lead{color:var(--muted);max-width:720px}
+.intro{display:grid;grid-template-columns:1fr 1.3fr;gap:45px}.intro-copy{color:#536579}
+.values,.cards{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:17px;margin-top:25px}
+.value,.item{background:#fff;border:1px solid var(--line);border-radius:11px;padding:20px}
+.value strong{display:block;color:var(--navy)}.value span{font-size:13px;color:var(--muted)}
+.item .type{color:var(--blue);font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase}
+.item h3{color:var(--navy);font-size:18px;line-height:1.3;margin:9px 0}
+.item p{font-size:13px;color:var(--muted);margin:0 0 12px;overflow-wrap:anywhere}
+.item time{font-size:11px;color:#8794a2}.empty{grid-column:1/-1;padding:25px;text-align:center;border:1px dashed #cbd6e0;border-radius:10px;color:var(--muted)}
+.contact{display:grid;grid-template-columns:1fr 1fr;gap:35px}.contact-panel{padding:22px;border:1px solid var(--line);border-radius:11px}
+.contact-row{padding:10px 0;border-bottom:1px solid var(--line);font-size:14px}.contact-row:last-child{border:0}
+.contact-row strong{display:block;color:var(--navy)}.footer{background:#0c2d49;color:#d4e0eb;padding:26px 0;font-size:12px}.footer a{color:white}
+.status{min-height:100vh;display:grid;place-items:center;padding:20px;background:var(--paper)}
+.status-card{max-width:550px;text-align:center;padding:30px;background:white;border:1px solid var(--line);border-radius:14px}
+.status-card h1{font-size:32px;color:var(--navy)}.status-card p{color:var(--muted)}.hidden{display:none!important}
+@media(max-width:760px){.menu{display:block}.nav{display:none;position:absolute;top:78px;left:0;right:0;background:#fff;padding:18px;flex-direction:column;border-bottom:1px solid var(--line)}.nav.open{display:flex}.intro,.contact{grid-template-columns:1fr;gap:20px}.cards,.values{grid-template-columns:1fr 1fr}.hero{min-height:430px}}
+@media(max-width:520px){.cards,.values{grid-template-columns:1fr}.hero-copy{padding:60px 0}.hero p.lead{font-size:16px}.footer .container{display:block}}
+</style>
+</head>
+<body>
+<div id="loading" class="status"><div class="status-card"><p class="eyebrow dark">CRIPRI Technologies</p><h1>Loading school website</h1><p>Retrieving the school's public information. Please wait.</p></div></div>
+<div id="error" class="status hidden"><div class="status-card"><p class="eyebrow dark">CRIPRI Universal School Website</p><h1 id="errorTitle">Website unavailable</h1><p id="errorText">We could not load this school website.</p><a class="btn btn-gold" href="./index.html">Visit CRIPRI platform</a></div></div>
+<div id="site" class="hidden">
+<div class="topbar"><div class="container"><span id="topName">School website</span><span>Official school information and updates</span></div></div>
+<header class="header"><div class="container header-inner">
+<a class="brand" href="#home"><span class="crest" id="crest">S</span><span><span id="schoolName">School name</span><small id="schoolMotto">Welcome to our school</small></span></a>
+<button class="menu" id="menuButton" aria-expanded="false">Menu</button>
+<nav class="nav" id="nav"><a href="#about">About</a><a href="#announcements">News & Notices</a><a href="#events">Events</a><a href="#vacancies">Vacancies</a><a href="#gallery">Gallery</a><a href="#contact">Contact</a></nav>
+</div></header>
+<main>
+<section class="hero" id="home"><div class="container hero-copy"><p class="eyebrow">Welcome to <span id="heroName">our school</span></p><h1 id="heroTitle">A place to learn, grow and achieve.</h1><p class="lead" id="heroMotto">A community committed to learning, character and opportunity.</p><a class="btn btn-gold" href="#about">Discover our school</a><a class="btn btn-outline" href="#announcements">Latest updates</a></div></section>
+<section class="content" id="about"><div class="container intro"><div><p class="eyebrow dark">Our school</p><h2 id="aboutTitle">A community where learners thrive.</h2><p class="section-lead" id="aboutLead">Learn more about our school.</p></div><div><p class="intro-copy" id="aboutCopy">Our school is committed to providing a supportive environment for learning, growth and achievement. Please contact the school for further information about its programmes and services.</p><div class="values"><div class="value"><strong>Learning</strong><span>Building knowledge and lifelong skills</span></div><div class="value"><strong>Character</strong><span>Encouraging responsibility and respect</span></div><div class="value"><strong>Community</strong><span>Working together for every learner</span></div></div></div></div></section>
+<section class="content tint" id="announcements"><div class="container"><p class="eyebrow dark">From the school</p><h2>News & announcements</h2><p class="section-lead">Notices and updates published by the school.</p><div class="cards" id="announcementList"><div class="empty">Loading announcements…</div></div></div></section>
+<section class="content" id="events"><div class="container"><p class="eyebrow dark">School calendar</p><h2>Upcoming events</h2><p class="section-lead">Activities and important dates from our school community.</p><div class="cards" id="eventList"><div class="empty">Loading events…</div></div></div></section>
+<section class="content tint" id="vacancies"><div class="container"><p class="eyebrow dark">Join our community</p><h2>Vacancies & opportunities</h2><p class="section-lead">Opportunities published by the school.</p><div class="cards" id="vacancyList"><div class="empty">Loading vacancies…</div></div></div></section>
+<section class="content" id="gallery"><div class="container"><p class="eyebrow dark">Our community</p><h2>School gallery</h2><p class="section-lead">Photographs and media shared by the school.</p><div class="cards" id="galleryList"><div class="empty">Loading gallery…</div></div></div></section>
+<section class="content tint" id="contact"><div class="container contact"><div><p class="eyebrow dark">Get in touch</p><h2>Contact our school</h2><p class="section-lead">For enquiries, please use the school's official contact details.</p></div><div class="contact-panel"><div class="contact-row"><strong>School</strong><span id="contactName">—</span></div><div class="contact-row"><strong>Location</strong><span>Contact the school for location details.</span></div><div class="contact-row"><strong>Website address</strong><span id="contactSlug">—</span></div></div></div></section>
+</main>
+<footer class="footer"><div class="container"><span>© <span id="year"></span> <span id="footerName">School</span>. All rights reserved.</span><a href="./index.html">Powered by CRIPRI Technologies</a></div></footer>
+</div>
+<script>
+(async function(){
+  const SUPABASE_URL="https://dudrolmymjwphwivrlko.supabase.co";
+  const SUPABASE_KEY="sb_publishable_PLYgkSvgd79KTEHKh21o-g_CKgUTRTY";
+  const $=id=>document.getElementById(id);
+  const slug=(new URLSearchParams(location.search).get("slug")||"").trim().toLowerCase();
+  const supabase=window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
+  const text=(id,value)=>$(id).textContent=value;
+  function fail(title,message){$("loading").classList.add("hidden");$("site").classList.add("hidden");text("errorTitle",title);text("errorText",message);$("error").classList.remove("hidden");}
+  function date(value){if(!value)return "";const d=new Date(value);return Number.isNaN(d.getTime())?"":new Intl.DateTimeFormat("en-KE",{dateStyle:"medium",timeStyle:"short"}).format(d);}
+  function render(id,rows,label,emptyText){
+    const target=$(id);target.replaceChildren();
+    if(!rows.length){const e=document.createElement("div");e.className="empty";e.textContent=emptyText;target.append(e);return;}
+    rows.forEach(r=>{
+      const card=document.createElement("article");card.className="item";
+      const type=document.createElement("span");type.className="type";type.textContent=label;
+      const title=document.createElement("h3");title.textContent=r.title||"School update";
+      const summary=document.createElement("p");summary.textContent=r.summary||r.body||"Contact the school for more information.";
+      card.append(type,title,summary);
+      const when=r.event_start_at||r.publish_at||r.created_at;
+      if(when){const t=document.createElement("time");t.textContent=date(when);card.append(t);}
+      if(r.venue){const v=document.createElement("p");v.textContent="Venue: "+r.venue;card.append(v);}
+      if(r.application_deadline){const d=document.createElement("p");d.textContent="Application deadline: "+r.application_deadline;card.append(d);}
+      if(r.application_email && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(r.application_email)){const a=document.createElement("a");a.href="mailto:"+r.application_email;a.textContent="Apply by email";a.className="more";card.append(a);}
+      if(r.application_url && /^https:\/\//i.test(r.application_url)){const a=document.createElement("a");a.href=r.application_url;a.target="_blank";a.rel="noopener noreferrer";a.textContent="Application details";card.append(a);}
+      if(r.video_url && /^https:\/\//i.test(r.video_url)){const a=document.createElement("a");a.href=r.video_url;a.target="_blank";a.rel="noopener noreferrer";a.textContent="Watch video";card.append(a);}
+      target.append(card);
+    });
+  }
+  try{
+    if(!slug || !/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(slug)){fail("School address required","Open this page with the school's assigned slug, for example ?slug=telwa-girls.");return;}
+    const {data:school,error:schoolError}=await supabase.from("schools").select("id,name,slug,status,motto").eq("slug",slug).eq("status","active").maybeSingle();
+    if(schoolError)throw schoolError;
+    if(!school){fail("School website not available",'No active school was found for "'+slug+'". Check the address or contact CRIPRI Technologies.');return;}
+    const name=school.name||"School",motto=school.motto||"Learning • Growth • Opportunity";
+    document.title=name+" | Official School Website";
+    ["topName","schoolName","heroName","contactName","footerName"].forEach(id=>text(id,name));
+    ["schoolMotto","heroMotto","aboutLead"].forEach(id=>text(id,motto));
+    text("heroTitle","Welcome to "+name);text("crest",name.charAt(0).toUpperCase());text("contactSlug",school.slug);text("year",String(new Date().getFullYear()));
+    const {data:records,error}=await supabase.from("school_content_items").select("id,content_type,title,summary,body,venue,event_start_at,application_deadline,application_email,application_url,video_url,status,publish_at,created_at").eq("school_id",school.id).in("status",["published","scheduled"]).or("publish_at.is.null,publish_at.lte."+new Date().toISOString()).order("created_at",{ascending:false});
+    if(error)throw error;
+    const rows=records||[];
+    render("announcementList",rows.filter(r=>["announcement","live_update","live_stream"].includes(r.content_type)),"News & announcement","No published announcements at the moment.");
+    render("eventList",rows.filter(r=>r.content_type==="event"),"School event","No upcoming events have been published yet.");
+    render("vacancyList",rows.filter(r=>r.content_type==="vacancy"),"Opportunity","There are no current vacancies or opportunities.");
+    render("galleryList",rows.filter(r=>r.content_type==="gallery"),"Gallery","Gallery items will appear here when published.");
+    $("loading").classList.add("hidden");$("site").classList.remove("hidden");
+  }catch(err){console.error("Public website error:",err);fail("Unable to load school website","The public website could not retrieve its information. Please try again later.");}
+  const menu=$("menuButton"),nav=$("nav");
+  menu.addEventListener("click",()=>{const open=nav.classList.toggle("open");menu.setAttribute("aria-expanded",String(open));});
+  nav.querySelectorAll("a").forEach(a=>a.addEventListener("click",()=>{nav.classList.remove("open");menu.setAttribute("aria-expanded","false");}));
+})();
+</script>
+</body>
+</html>
