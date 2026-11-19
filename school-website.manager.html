@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -99,61 +98,81 @@ main {
 .section {display:none}
 .section.active {display:block}
 
-h1 {font-size:25px;margin:0 0 8px}
-h3 {margin-top:0}
-
-.muted {color:#7c899b;font-size:13px}
-
 .panel {
   background:white;
   border-radius:10px;
   padding:20px;
   margin:18px 0;
-  box-shadow:0 2px 9px #162b4610;
+  box-shadow:0 2px 10px rgba(16,35,63,.06);
 }
 
-.cards {
+.stats {
   display:grid;
-  grid-template-columns:repeat(4,minmax(0,1fr));
-  gap:14px;
+  grid-template-columns:repeat(auto-fit,minmax(150px,1fr));
+  gap:15px;
   margin:20px 0;
 }
 
-.card {
+.stat {
   background:white;
   padding:18px;
   border-radius:9px;
-  box-shadow:0 2px 9px #162b4610;
+  box-shadow:0 2px 10px rgba(16,35,63,.06);
 }
 
-.card .number {
-  font-size:27px;
-  font-weight:bold;
-  margin:12px 0;
+.stat strong {
+  display:block;
+  font-size:26px;
+  margin-top:8px;
+  color:var(--navy);
 }
 
 label {
   display:block;
   font-weight:bold;
-  font-size:13px;
-  margin:12px 0 5px;
+  margin:13px 0 6px;
 }
 
 input,select,textarea {
   width:100%;
   padding:11px;
-  border:1px solid #dce3ec;
+  border:1px solid #cbd5e1;
   border-radius:6px;
   font:inherit;
   background:white;
 }
 
-textarea {min-height:110px;resize:vertical}
+textarea {
+  min-height:100px;
+  resize:vertical;
+}
 
 .form-grid {
   display:grid;
-  grid-template-columns:1fr 1fr;
+  grid-template-columns:repeat(2,minmax(0,1fr));
   gap:12px;
+}
+
+.actions {
+  display:flex;
+  flex-wrap:wrap;
+  gap:10px;
+  margin-top:18px;
+}
+
+.message {
+  margin:12px 0;
+  font-weight:bold;
+  color:var(--red);
+}
+
+.muted {color:#64748b}
+.notice {
+  padding:12px;
+  background:#eef5ff;
+  border-left:4px solid var(--blue);
+  margin:14px 0;
+  border-radius:5px;
 }
 
 .table-wrap {overflow-x:auto}
@@ -161,87 +180,66 @@ textarea {min-height:110px;resize:vertical}
 table {
   width:100%;
   border-collapse:collapse;
-  min-width:650px;
+  background:white;
 }
 
 th,td {
   text-align:left;
   padding:12px;
-  border-bottom:1px solid #edf0f5;
-  font-size:13px;
+  border-bottom:1px solid #e5eaf1;
+  vertical-align:top;
 }
 
-th {background:#f8fafd;color:#748197}
+th {
+  background:#f4f7fb;
+  color:#334155;
+}
 
 .status {
   display:inline-block;
   padding:5px 9px;
   border-radius:20px;
-  font-size:11px;
+  font-size:12px;
   font-weight:bold;
+  text-transform:capitalize;
 }
 
-.draft {background:#edf0f5;color:#536477}
-.published {background:#e0f5e9;color:#13804d}
-.scheduled {background:#fff1d9;color:#a76b0c}
-.archived {background:#fde6e6;color:#b93636}
+.status.published {background:#dcfce7;color:#166534}
+.status.draft {background:#e2e8f0;color:#334155}
+.status.scheduled {background:#fef3c7;color:#92400e}
+.status.archived {background:#fee2e2;color:#991b1b}
 
-.notice {
-  background:#edf5ff;
-  border-left:4px solid var(--blue);
-  padding:13px;
-  border-radius:5px;
-  font-size:13px;
-  margin:15px 0;
-}
-
-.message {
-  padding:10px;
-  font-size:13px;
-  white-space:pre-wrap;
-}
-
-.actions {
-  display:flex;
-  gap:7px;
-  flex-wrap:wrap;
-}
-
-.content-image {
-  max-width:100px;
-  max-height:75px;
-  object-fit:cover;
-  border-radius:5px;
-}
-
-.hidden {display:none!important}
+.hidden {display:none !important}
 
 footer {
   text-align:center;
-  padding:20px;
-  color:#8290a2;
-  font-size:12px;
+  padding:18px;
+  color:#64748b;
+  font-size:13px;
 }
 
-@media(max-width:950px) {
-  .cards {grid-template-columns:repeat(2,1fr)}
-  .sidebar {width:190px}
+.profile-image-note {
+  font-size:13px;
+  color:#64748b;
+  margin-top:6px;
 }
 
-@media(max-width:600px) {
+@media(max-width:800px) {
   .layout {display:block}
   .sidebar {
     width:100%;
     display:flex;
-    overflow-x:auto;
-    padding:8px;
+    flex-wrap:wrap;
+    gap:5px;
   }
-  .sidebar h4 {display:none}
-  .nav {min-width:max-content;width:auto}
-  main {padding:13px}
-  .cards {grid-template-columns:1fr 1fr;gap:8px}
+  .sidebar h4 {width:100%}
+  .nav {width:auto;flex:1 1 130px}
+  main {padding:15px}
+}
+
+@media(max-width:550px) {
   .form-grid {grid-template-columns:1fr}
-  .panel {padding:14px}
+  header {padding:15px}
 }
 </style>
 </head>
@@ -249,138 +247,200 @@ footer {
 <body>
 
 <header>
-  <div class="brand">CRIPRI <span>TECHNOLOGIES</span></div>
+  <div>
+    <div class="brand">CRIPRI <span>School Website Manager</span></div>
+    <small id="schoolHeading">Secure School Management Portal</small>
+  </div>
 
   <div>
-    <strong>SCHOOL WEBSITE MANAGER</strong><br>
-    <small>Manage your school's public website</small>
+    <small id="managerRole"></small>
+    <button class="secondary" id="signOut">Sign Out</button>
   </div>
 </header>
 
 <!-- LOGIN -->
-<section id="loginSection" class="panel"
- style="max-width:430px;margin:65px auto;padding:28px">
+<section id="loginSection" class="section active">
+  <div class="panel" style="max-width:440px;margin:55px auto;">
+    <h1>School Manager Login</h1>
+    <p class="muted">Sign in using your registered school manager account.</p>
 
-  <h2>School Manager Login</h2>
-  <p class="muted">Sign in using your registered school manager account.</p>
+    <form id="loginForm">
+      <label>Email Address</label>
+      <input id="email" type="email" autocomplete="username" required>
 
-  <form id="loginForm">
+      <label>Password</label>
+      <input id="password" type="password" autocomplete="current-password" required>
 
-    <label>Email Address</label>
-    <input id="email" type="email" required autocomplete="username">
+      <div class="actions">
+        <button class="primary" id="loginButton" type="submit">Sign In</button>
+      </div>
 
-    <label>Password</label>
-    <input id="password" type="password" required autocomplete="current-password">
-
-    <button class="primary" id="loginButton"
-     type="submit" style="width:100%;margin-top:18px">
-      Sign In
-    </button>
-
-  </form>
-
-  <div id="loginMessage" class="message"></div>
+      <p id="loginMessage" class="message"></p>
+    </form>
+  </div>
 </section>
 
-<!-- DASHBOARD -->
+<!-- MANAGER WORKSPACE -->
 <div id="workspace" class="layout hidden">
 
-<aside class="sidebar">
+  <aside class="sidebar">
+    <h4>SCHOOL WEBSITE</h4>
 
-  <h4>SCHOOL MANAGEMENT</h4>
+    <button class="nav active" data-page="dashboard">Dashboard</button>
+    <button class="nav" data-page="profile">School Profile</button>
+    <button class="nav" data-page="content">All Content</button>
+    <button class="nav" data-page="announcements">Announcements</button>
+    <button class="nav" data-page="events">Events</button>
+    <button class="nav" data-page="vacancies">Vacancies</button>
+    <button class="nav" data-page="gallery">Gallery</button>
+    <button class="nav" data-page="live">Live Updates</button>
+  </aside>
 
-  <button class="nav active" data-page="overview">▦ Overview</button>
-  <button class="nav" data-page="content">▤ All Content</button>
-  <button class="nav" data-page="announcements">📢 Announcements</button>
-  <button class="nav" data-page="events">📅 Events</button>
-  <button class="nav" data-page="vacancies">💼 Vacancies</button>
-  <button class="nav" data-page="gallery">🖼 Gallery</button>
-  <button class="nav" data-page="live">🔴 Live Updates</button>
-  <button class="nav" data-page="editor">✏ Create Content</button>
+  <main>
 
-  <hr style="border-color:#344b69;margin:20px 5px">
+    <!-- DASHBOARD -->
+    <section id="dashboard" class="section active">
+      <h1>School Website Dashboard</h1>
 
-  <button class="nav" id="signOut">↪ Sign Out</button>
+      <div class="panel">
+        <h2 id="schoolNameDisplay">School</h2>
+        <p>Website slug: <strong id="schoolSlugDisplay"></strong></p>
+        <p>Account status: <strong id="schoolStatus"></strong></p>
+      </div>
 
-</aside>
+      <div class="stats">
+        <div class="stat">
+          Total Content
+          <strong id="totalCount">0</strong>
+        </div>
 
-<main>
+        <div class="stat">
+          Published
+          <strong id="publishedCount">0</strong>
+        </div>
 
-<!-- OVERVIEW -->
-<section id="overview" class="section active">
+        <div class="stat">
+          Drafts
+          <strong id="draftCount">0</strong>
+        </div>
 
-  <h1 id="schoolHeading">School Dashboard</h1>
-  <p class="muted">Welcome to your website management centre.</p>
+        <div class="stat">
+          Scheduled
+          <strong id="scheduledCount">0</strong>
+        </div>
+      </div>
 
-  <div class="notice">
-    Your content is stored separately under your school's Supabase school ID.
-  </div>
+      <div class="panel">
+        <h2>Recent Content</h2>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Title</th>
+                <th>Category</th>
+                <th>Status</th>
+                <th>Date Created</th>
+              </tr>
+            </thead>
+            <tbody id="recentContent">
+              <tr><td colspan="4">No content loaded.</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
 
-  <div class="cards">
+    <!-- SCHOOL PROFILE -->
+    <section id="profile" class="section">
+      <h1>School Profile Management</h1>
+      <p class="muted">
+        Update the information displayed on your school's public website.
+      </p>
 
-    <div class="card">
-      <div class="muted">Total Content</div>
-      <div class="number" id="totalCount">0</div>
-    </div>
+      <div class="panel">
+        <form id="profileForm">
 
-    <div class="card">
-      <div class="muted">Published</div>
-      <div class="number" id="publishedCount">0</div>
-    </div>
+          <div class="form-grid">
+            <div>
+              <label for="profileMotto">School Motto</label>
+              <input id="profileMotto" maxlength="250">
+            </div>
 
-    <div class="card">
-      <div class="muted">Drafts</div>
-      <div class="number" id="draftCount">0</div>
-    </div>
+            <div>
+              <label for="profileCountry">Country</label>
+              <input id="profileCountry" value="Kenya">
+            </div>
 
-    <div class="card">
-      <div class="muted">Scheduled</div>
-      <div class="number" id="scheduledCount">0</div>
-    </div>
+            <div>
+              <label for="profileCounty">County</label>
+              <input id="profileCounty">
+            </div>
 
-  </div>
+            <div>
+              <label for="profileAddress">Physical Address</label>
+              <input id="profileAddress">
+            </div>
 
-  <div class="panel">
-    <h3>School Information</h3>
-    <p><strong>School:</strong> <span id="schoolNameDisplay">Loading...</span></p>
-    <p><strong>Website address:</strong> <span id="schoolSlugDisplay">Loading...</span></p>
-    <p><strong>Manager role:</strong> <span id="managerRole">Loading...</span></p>
-    <p><strong>Account status:</strong> <span id="schoolStatus">Loading...</span></p>
-  </div>
+            <div>
+              <label for="profilePhone">Contact Phone</label>
+              <input id="profilePhone" type="tel">
+            </div>
 
-  <div class="panel">
-    <h3>Recent Content</h3>
-    <div class="table-wrap">
-      <table>
-        <thead>
-          <tr>
-            <th>Title</th>
-            <th>Category</th>
-            <th>Status</th>
-            <th>Date</th>
-          </tr>
-        </thead>
-        <tbody id="recentContent">
-          <tr><td colspan="4">Loading...</td></tr>
-        </tbody>
-      </table>
-    </div>
-  </div>
+            <div>
+              <label for="profileEmail">Contact Email</label>
+              <input id="profileEmail" type="email">
+            </div>
+          </div>
 
-</section>
+          <label for="profileWelcome">Welcome Message</label>
+          <textarea id="profileWelcome" maxlength="2000"
+            placeholder="Write a welcome message for visitors"></textarea>
 
-<!-- ALL CONTENT -->
-<section id="content" class="section">
+          <label for="profileDescription">About the School</label>
+          <textarea id="profileDescription" maxlength="5000"
+            placeholder="Describe your school, its history and its values"></textarea>
 
-  <h1>Website Content</h1>
-  <p class="muted">Manage your school's published and unpublished content.</p>
+          <label for="profileLogo">School Logo</label>
+          <input id="profileLogo" type="file"
+            accept="image/jpeg,image/png,image/webp,image/gif">
+          <p id="profileLogoCurrent" class="profile-image-note">No logo uploaded.</p>
 
-  <div class="panel">
+          <label for="profileBanner">Website Banner Image</label>
+          <input id="profileBanner" type="file"
+            accept="image/jpeg,image/png,image/webp,image/gif">
+          <p id="profileBannerCurrent" class="profile-image-note">No banner uploaded.</p>
 
-    <div class="form-grid">
-      <div>
-        <label>Filter by category</label>
-        <select id="filterType">
+          <div class="notice">
+            Use clear school-approved images. Maximum upload size is 50 MB per image.
+          </div>
+
+          <div class="actions">
+            <button class="primary" id="saveProfileButton" type="submit">
+              Save School Profile
+            </button>
+          </div>
+
+          <p id="profileMessage" class="message"></p>
+        </form>
+      </div>
+    </section>
+
+    <!-- ALL CONTENT -->
+    <section id="content" class="section">
+      <h1>Website Content</h1>
+
+      <div class="actions">
+        <button class="primary" data-create="announcement">+ New Announcement</button>
+        <button class="primary" data-create="event">+ New Event</button>
+        <button class="primary" data-create="vacancy">+ New Vacancy</button>
+        <button class="primary" data-create="gallery">+ Add Gallery Item</button>
+      </div>
+
+      <div class="panel">
+        <div class="form-grid">
+          <div>
+            <label>Filter by category</label>
+                    <select id="filterType">
           <option value="all">All Categories</option>
           <option value="announcement">Announcements</option>
           <option value="event">Events</option>
@@ -633,8 +693,7 @@ const categoryNames = {
   live_update:'Live Update',
   live_stream:'Live Stream'
 };
-
-// ======================================================
+  // ======================================================
 // MESSAGE HANDLER
 // ======================================================
 
@@ -663,6 +722,7 @@ function showPage(page) {
   if(nav) nav.classList.add('active');
 
   if(page === 'content') renderContent();
+  if(page === 'profile') populateSchoolProfile();
 
   if(page === 'announcements') renderCategory('announcement','announcementsList');
 
@@ -758,9 +818,6 @@ async function initialiseWorkspace() {
 
   }
 
-  // This first version automatically selects the first
-  // assigned school. Multiple-school selection can be added later.
-
   const membership = memberships[0];
 
   currentRole = membership.role;
@@ -775,7 +832,7 @@ async function initialiseWorkspace() {
 
   const {data:school,error:schoolError} = await supabase
     .from('schools')
-    .select('id,name,slug,status,motto')
+    .select('id,name,slug,status,motto,description,welcome_message,physical_address,county,country,contact_phone,contact_email,logo_path,banner_path')
     .eq('id',membership.school_id)
     .single();
 
@@ -790,6 +847,15 @@ async function initialiseWorkspace() {
   }
 
   currentSchool = school;
+  populateSchoolProfile();
+
+  if(currentRole !== 'school_admin') {
+    $('profileForm').querySelectorAll('input,textarea,button')
+      .forEach(control => control.disabled = true);
+
+    $('profileMessage').textContent =
+      'View-only: contact your School Admin to change profile details.';
+  }
 
   $('loginSection').classList.add('hidden');
   $('workspace').classList.remove('hidden');
@@ -803,6 +869,152 @@ async function initialiseWorkspace() {
   await loadContent();
 
 }
+
+// ======================================================
+// SCHOOL PROFILE MANAGEMENT
+// ======================================================
+
+function populateSchoolProfile() {
+
+  if(!currentSchool) return;
+
+  $('profileMotto').value = currentSchool.motto || '';
+  $('profileCountry').value = currentSchool.country || 'Kenya';
+  $('profileCounty').value = currentSchool.county || '';
+  $('profileAddress').value = currentSchool.physical_address || '';
+  $('profilePhone').value = currentSchool.contact_phone || '';
+  $('profileEmail').value = currentSchool.contact_email || '';
+  $('profileWelcome').value = currentSchool.welcome_message || '';
+  $('profileDescription').value = currentSchool.description || '';
+
+  $('profileLogoCurrent').textContent =
+    currentSchool.logo_path ? 'Current logo uploaded.' : 'No logo uploaded.';
+
+  $('profileBannerCurrent').textContent =
+    currentSchool.banner_path ? 'Current banner uploaded.' : 'No banner uploaded.';
+
+}
+
+// ======================================================
+// PROFILE IMAGE UPLOAD
+// ======================================================
+
+async function uploadProfileImage(file,kind) {
+
+  if(!file) return null;
+
+  if(file.size > MAX_FILE_SIZE) {
+    throw new Error('Image exceeds the 50 MB upload limit.');
+  }
+
+  if(!['image/jpeg','image/png','image/webp','image/gif'].includes(file.type)) {
+    throw new Error('Please select a JPG, PNG, WEBP or GIF image.');
+  }
+
+  const safeName = file.name.replace(/[^a-zA-Z0-9._-]/g,'_');
+
+  const path =
+    currentSchool.name + '/profile-' + kind + '-' +
+    Date.now() + '-' + safeName;
+
+  const {data,error} = await supabase.storage
+    .from('school-media')
+    .upload(path,file,{
+      cacheControl:'3600',
+      upsert:false,
+      contentType:file.type
+    });
+
+  if(error) throw error;
+
+  const {data:publicData} = await supabase.storage
+    .from('school-media')
+    .getPublicUrl(data.path);
+
+  return publicData.publicUrl;
+
+}
+
+// ======================================================
+// SAVE SCHOOL PROFILE
+// ======================================================
+
+$('profileForm').addEventListener('submit',async event => {
+
+  event.preventDefault();
+
+  if(currentRole !== 'school_admin') {
+    message('profileMessage','Only the School Admin can update the school profile.');
+    return;
+  }
+
+  const button = $('saveProfileButton');
+
+  button.disabled = true;
+  button.textContent = 'Saving profile...';
+
+  message('profileMessage','Saving school profile...');
+
+  try {
+
+    const logoFile = $('profileLogo').files[0];
+    const bannerFile = $('profileBanner').files[0];
+
+    const logoUrl = logoFile
+      ? await uploadProfileImage(logoFile,'logo')
+      : currentSchool.logo_path;
+
+    const bannerUrl = bannerFile
+      ? await uploadProfileImage(bannerFile,'banner')
+      : currentSchool.banner_path;
+
+    const payload = {
+      motto:$('profileMotto').value.trim() || null,
+      country:$('profileCountry').value.trim() || 'Kenya',
+      county:$('profileCounty').value.trim() || null,
+      physical_address:$('profileAddress').value.trim() || null,
+      contact_phone:$('profilePhone').value.trim() || null,
+      contact_email:$('profileEmail').value.trim() || null,
+      welcome_message:$('profileWelcome').value.trim() || null,
+      description:$('profileDescription').value.trim() || null,
+      logo_path:logoUrl,
+      banner_path:bannerUrl,
+      updated_at:new Date().toISOString()
+    };
+
+    const {data,error} = await supabase
+      .from('schools')
+      .update(payload)
+      .eq('id',currentSchool.id)
+      .select('id,name,slug,status,motto,description,welcome_message,physical_address,county,country,contact_phone,contact_email,logo_path,banner_path')
+      .single();
+
+    if(error) throw error;
+
+    if(!data) {
+      throw new Error('No profile was returned. Check School Admin permissions.');
+    }
+
+    currentSchool = data;
+        $('profileLogo').value = '';
+    $('profileBanner').value = '';
+
+    populateSchoolProfile();
+
+    message('profileMessage','School profile saved successfully.');
+
+  } catch(error) {
+
+    message('profileMessage','Unable to save profile: ' + error.message);
+
+  } finally {
+
+    button.disabled = false;
+    button.textContent = 'Save School Profile';
+
+  }
+
+});
 
 // ======================================================
 // LOAD SCHOOL CONTENT
@@ -954,7 +1166,8 @@ function renderContent() {
     title.textContent = record.title;
 
     const category = document.createElement('td');
-    category.textContent = categoryNames[record.content_type] || record.content_type;
+    category.textContent =
+      categoryNames[record.content_type] || record.content_type;
 
     const statusCell = document.createElement('td');
 
@@ -1147,7 +1360,7 @@ $('clearButton').addEventListener('click',clearForm);
 $('cancelButton').addEventListener('click',() => showPage('content'));
 
 // ======================================================
-// UPLOAD MEDIA
+// UPLOAD CONTENT MEDIA
 // ======================================================
 
 async function uploadMedia(file) {
@@ -1162,16 +1375,10 @@ async function uploadMedia(file) {
     throw new Error('Unsupported file format.');
   }
 
-  const safeName = file.name
-    .replace(/[^a-zA-Z0-9._-]/g,'_');
-
-  // Storage RLS requires the school name as the
-  // first folder in the school-media bucket.
+  const safeName = file.name.replace(/[^a-zA-Z0-9._-]/g,'_');
 
   const path =
-    currentSchool.name + '/' +
-    Date.now() + '-' +
-    safeName;
+    currentSchool.name + '/' + Date.now() + '-' + safeName;
 
   const {data,error} = await supabase.storage
     .from('school-media')
@@ -1183,7 +1390,7 @@ async function uploadMedia(file) {
 
   if(error) throw error;
 
-  const {data:publicData} = supabase.storage
+  const {data:publicData} = await supabase.storage
     .from('school-media')
     .getPublicUrl(data.path);
 
@@ -1207,28 +1414,19 @@ $('contentForm').addEventListener('submit',async event => {
   try {
 
     const id = $('recordId').value;
-
     const type = $('contentType').value;
-
     const title = $('title').value.trim();
 
     if(!title) {
       throw new Error('Please enter a title.');
     }
 
-    if(type === 'event' && $('eventEnd').value &&
-       $('eventStart').value &&
-       new Date($('eventEnd').value) < new Date($('eventStart').value)) {
-      throw new Error('Event end time cannot be before its start time.');
-    }
-
     if(
-      ['event','vacancy','gallery','live_update','live_stream'].includes(type) &&
-      !id &&
-      currentRole !== 'school_admin'
+      $('eventEnd').value &&
+      $('eventStart').value &&
+      new Date($('eventEnd').value) < new Date($('eventStart').value)
     ) {
-      // RLS remains the final authority. This check is
-      // only a user-interface safeguard.
+      throw new Error('Event end time cannot be before its start time.');
     }
 
     const status = $('contentStatus').value;
@@ -1264,15 +1462,10 @@ $('contentForm').addEventListener('submit',async event => {
     const payload = {
 
       school_id:currentSchool.id,
-
       content_type:type,
-
       title:title,
-
       summary:$('summary').value.trim() || null,
-
       body:$('bodyText').value.trim() || null,
-
       venue:$('venue').value.trim() || null,
 
       event_start_at:$('eventStart').value
@@ -1284,19 +1477,12 @@ $('contentForm').addEventListener('submit',async event => {
         : null,
 
       application_deadline:$('deadline').value || null,
-
       application_email:$('applicationEmail').value.trim() || null,
-
       application_url:$('applicationUrl').value.trim() || null,
-
       media_path:mediaPath,
-
       video_url:$('videoUrl').value.trim() || null,
-
       status:status,
-
       publish_at:publishAt,
-
       updated_by:currentUser.id
 
     };
@@ -1323,10 +1509,7 @@ $('contentForm').addEventListener('submit',async event => {
 
     if(result.error) throw result.error;
 
-    message(
-      'editorMessage',
-      'Content saved successfully.'
-    );
+    message('editorMessage','Content saved successfully.');
 
     clearForm();
 
@@ -1336,10 +1519,7 @@ $('contentForm').addEventListener('submit',async event => {
 
   } catch(error) {
 
-    message(
-      'editorMessage',
-      'Unable to save content: ' + error.message
-    );
+    message('editorMessage','Unable to save content: ' + error.message);
 
   } finally {
 
@@ -1369,11 +1549,8 @@ async function archiveContent(id) {
     .eq('school_id',currentSchool.id);
 
   if(error) {
-
     alert('Archive failed: ' + error.message);
-
     return;
-
   }
 
   await loadContent();
@@ -1387,11 +1564,8 @@ async function archiveContent(id) {
 async function deleteContent(id) {
 
   if(currentRole !== 'school_admin') {
-
     alert('Only the School Admin can delete content.');
-
     return;
-
   }
 
   if(!confirm('Permanently delete this content record?')) return;
@@ -1403,27 +1577,13 @@ async function deleteContent(id) {
     .eq('school_id',currentSchool.id);
 
   if(error) {
-
     alert('Delete failed: ' + error.message);
-
     return;
-
   }
 
   await loadContent();
 
 }
-
-// ======================================================
-// CONTENT ACTIONS
-// ======================================================
-
-$('contentTable').addEventListener('click',async event => {
-
-  // Actions are handled through their own event listeners.
-  // This listener is reserved for future enhancements.
-
-});
 
 // ======================================================
 // SIGN OUT
@@ -1436,14 +1596,11 @@ $('signOut').addEventListener('click',async () => {
   const {error} = await supabase.auth.signOut();
 
   if(error) {
-
     alert('Sign out failed: ' + error.message);
-
     return;
-
   }
 
-  window.location.replace('school-website-manager.html');
+  window.location.replace('school-website.manager.html');
 
 });
 
@@ -1456,11 +1613,8 @@ async function checkExistingSession() {
   const {data,error} = await supabase.auth.getSession();
 
   if(error) {
-
     message('loginMessage',error.message);
-
     return;
-
   }
 
   if(data.session) {
@@ -1468,13 +1622,9 @@ async function checkExistingSession() {
     currentUser = data.session.user;
 
     try {
-
       await initialiseWorkspace();
-
     } catch(error) {
-
       message('loginMessage',error.message);
-
     }
 
   }
@@ -1488,15 +1638,13 @@ async function checkExistingSession() {
 supabase.auth.onAuthStateChange((event,session) => {
 
   if(event === 'SIGNED_OUT') {
-
-   window.location.replace('school-website.manager.html');
-
+    window.location.replace('school-website.manager.html');
   }
 
 });
 
 // ======================================================
-// INITIALISE APPLICATION
+// START APPLICATION
 // ======================================================
 
 checkExistingSession().catch(error => {
