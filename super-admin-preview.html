@@ -37,6 +37,7 @@ th{color:#748197;background:#f8fafd}
 .rejected,.inactive{background:#fde6e6;color:#b93636}
 .section{display:none}.section.active{display:block}
 .actions button{margin:2px;font-size:11px;padding:7px}
+.activate{background:#e0f5e9;color:#13804d}
 .approve{background:#e0f5e9;color:#13804d}.reject{background:#fde6e6;color:#b93636}
 input,select{padding:11px;border:1px solid #dce3ec;border-radius:6px;margin:5px 0;max-width:100%}
 .search{width:280px}
@@ -183,10 +184,11 @@ footer{text-align:center;color:#8290a2;padding:25px;font-size:12px}
             <th>Location</th>
             <th>Status</th>
             <th>Registered</th>
+            <th>Actions</th>
           </tr>
         </thead>
         <tbody id="schoolTableBody">
-          <tr><td colspan="6" class="empty">Loading schools...</td></tr>
+          <tr><td colspan="7" class="empty">Loading schools...</td></tr>
         </tbody>
       </table>
     </div>
@@ -456,7 +458,7 @@ async function loadSchools() {
 
   if (error) {
     body.innerHTML =
-      '<tr><td colspan="6" class="empty">Unable to load school records.</td></tr>';
+      '<tr><td colspan="7" class="empty">Unable to load school records.</td></tr>';
 
     setMessage(
       'schoolsMessage',
@@ -505,7 +507,7 @@ function renderSchools() {
     const tr = document.createElement('tr');
     const td = document.createElement('td');
 
-    td.colSpan = 6;
+    td.colSpan = 7;
     td.className = 'empty';
 
     td.textContent = currentSchools.length
@@ -535,8 +537,63 @@ function renderSchools() {
     makeStatusCell(tr, s.status);
     makeCell(tr, dateText(s.created_at));
 
+    const actionCell = document.createElement('td');
+    actionCell.className = 'actions';
+
+    if (String(s.status || '').toLowerCase() === 'pending') {
+      const activateButton = document.createElement('button');
+      activateButton.type = 'button';
+      activateButton.className = 'activate';
+      activateButton.textContent = 'Activate';
+      activateButton.onclick = () => activateSchool(s.id, s.name, activateButton);
+      actionCell.appendChild(activateButton);
+    } else if (String(s.status || '').toLowerCase() === 'active') {
+      const activeLabel = document.createElement('span');
+      activeLabel.className = 'muted';
+      activeLabel.textContent = 'Already active';
+      actionCell.appendChild(activeLabel);
+    } else {
+      const unavailableLabel = document.createElement('span');
+      unavailableLabel.className = 'muted';
+      unavailableLabel.textContent = '—';
+      actionCell.appendChild(unavailableLabel);
+    }
+
+    tr.appendChild(actionCell);
     body.appendChild(tr);
   });
+}
+
+async function activateSchool(schoolId, schoolName, button) {
+  if (!schoolId) {
+    alert('Cannot activate this school: its school ID is missing.');
+    return;
+  }
+
+  if (!confirm('Activate ' + safe(schoolName) + '? This will change its school status from pending to active.')) {
+    return;
+  }
+
+  button.disabled = true;
+  button.textContent = 'Activating...';
+
+  const { data, error } = await supabase.rpc('activate_school', {
+    p_school_id: schoolId
+  });
+
+  if (error) {
+    alert('School activation failed: ' + error.message);
+    button.disabled = false;
+    button.textContent = 'Activate';
+    return;
+  }
+
+  alert(safe(schoolName) + ' has been activated successfully.');
+
+  await Promise.all([
+    loadSchools(),
+    loadOverview()
+  ]);
 }
 
 byId('schoolSearch').addEventListener('input', renderSchools);
