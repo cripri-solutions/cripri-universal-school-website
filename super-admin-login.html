@@ -1,4 +1,4 @@
-
+```html
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -6,63 +6,141 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="robots" content="noindex,nofollow">
 <title>CRIPRI Super Admin Login</title>
+
 <style>
 *{box-sizing:border-box}
+
 body{
  margin:0;min-height:100vh;display:grid;
  place-items:center;padding:20px;
  background:#f3f6fb;color:#26364b;
  font-family:Arial,sans-serif
 }
+
 .card{
  width:min(440px,100%);padding:34px;
  background:white;border-radius:15px;
  box-shadow:0 14px 42px #10233f15
 }
+
 .brand{font-size:23px;font-weight:bold;color:#10233f}
 .brand span{color:#1769aa}
-.eyebrow{margin-top:28px;color:#1769aa;
- font-size:11px;font-weight:bold;letter-spacing:1.4px}
+
+.eyebrow{
+ margin-top:28px;color:#1769aa;
+ font-size:11px;font-weight:bold;letter-spacing:1.4px
+}
+
 h1{font-size:25px}
+
 .intro{color:#718096;font-size:14px;line-height:1.6}
-label{display:block;margin:18px 0 7px;font-weight:bold;font-size:13px}
+
+label{
+ display:block;margin:18px 0 7px;
+ font-weight:bold;font-size:13px
+}
+
 input{
  width:100%;padding:13px;border:1px solid #d7e0ea;
  border-radius:7px;font-size:15px
 }
-button{
+
+.password-wrap{
+ display:flex;gap:8px;align-items:stretch
+}
+
+.password-wrap input{flex:1;min-width:0}
+
+.toggle-password{
+ width:auto;margin:0;padding:0 13px;
+ border:1px solid #d7e0ea;border-radius:7px;
+ background:#edf5ff;color:#1769aa;
+ font-size:12px;font-weight:bold;cursor:pointer
+}
+
+button.sign-in{
  width:100%;margin-top:23px;padding:14px;
  border:0;border-radius:7px;background:#1769aa;
  color:white;font-size:15px;font-weight:bold;cursor:pointer
 }
-button:disabled{opacity:.6}
-#message{color:#b33b3b;font-size:13px;min-height:20px}
+
+button:disabled{opacity:.6;cursor:not-allowed}
+
+#caps-warning{
+ display:none;margin-top:8px;
+ color:#a15c00;font-size:12px;font-weight:bold
+}
+
+#message{
+ color:#b33b3b;font-size:13px;min-height:20px
+}
+
 .note{
  margin-top:20px;padding:13px;background:#edf5ff;
- border-left:3px solid #1769aa;font-size:12px;line-height:1.6
+ border-left:3px solid #1769aa;
+ font-size:12px;line-height:1.6
 }
-footer{margin-top:24px;text-align:center;font-size:11px;color:#8793a2}
+
+footer{
+ margin-top:24px;text-align:center;
+ font-size:11px;color:#8793a2
+}
 </style>
 </head>
+
 <body>
 <main class="card">
+
  <div class="brand">CRIPRI <span>TECHNOLOGIES</span></div>
+
  <p class="eyebrow">RESTRICTED PLATFORM ACCESS</p>
+
  <h1>Super Admin Sign In</h1>
+
  <p class="intro">
  Sign in using your authorised CRIPRI platform reviewer account.
  </p>
 
  <form id="login-form">
+
   <label for="email">Email address</label>
-  <input id="email" type="email" autocomplete="username" required>
+  <input
+   id="email"
+   type="email"
+   autocomplete="username"
+   required
+  >
 
   <label for="password">Password</label>
-  <input id="password" type="password"
-   autocomplete="current-password" required>
 
-  <button id="submit" type="submit">Sign in securely</button>
+  <div class="password-wrap">
+   <input
+    id="password"
+    type="password"
+    autocomplete="current-password"
+    required
+    aria-describedby="caps-warning"
+   >
+
+   <button
+    id="toggle-password"
+    class="toggle-password"
+    type="button"
+    aria-controls="password"
+    aria-pressed="false"
+   >Show</button>
+  </div>
+
+  <p id="caps-warning" role="status" aria-live="polite">
+   Caps Lock is ON. Check your password before signing in.
+  </p>
+
+  <button id="submit" class="sign-in" type="submit">
+   Sign in securely
+  </button>
+
   <p id="message" role="alert"></p>
+
  </form>
 
  <div class="note">
@@ -71,6 +149,7 @@ footer{margin-top:24px;text-align:center;font-size:11px;color:#8793a2}
  </div>
 
  <footer>CRIPRI Universal School Platform · 2026</footer>
+
 </main>
 
 <script type="module">
@@ -85,19 +164,52 @@ const supabase = createClient(
 const form = document.getElementById('login-form');
 const button = document.getElementById('submit');
 const message = document.getElementById('message');
+const passwordInput = document.getElementById('password');
+const togglePassword = document.getElementById('toggle-password');
+const capsWarning = document.getElementById('caps-warning');
 
+// Show / hide password
+togglePassword.addEventListener('click', () => {
+ const showing = passwordInput.type === 'text';
+
+ passwordInput.type = showing ? 'password' : 'text';
+ togglePassword.textContent = showing ? 'Show' : 'Hide';
+ togglePassword.setAttribute('aria-pressed', String(!showing));
+});
+
+// Detect Caps Lock
+function checkCapsLock(event) {
+ const capsOn = event.getModifierState &&
+  event.getModifierState('CapsLock');
+
+ capsWarning.style.display = capsOn ? 'block' : 'none';
+}
+
+passwordInput.addEventListener('keydown', checkCapsLock);
+passwordInput.addEventListener('keyup', checkCapsLock);
+passwordInput.addEventListener('focus', checkCapsLock);
+
+passwordInput.addEventListener('blur', () => {
+ capsWarning.style.display = 'none';
+});
+
+// Supabase authentication and reviewer authorization
 form.addEventListener('submit', async (event) => {
  event.preventDefault();
+
+ if (button.disabled) return;
+
  message.textContent = '';
  button.disabled = true;
  button.textContent = 'Verifying access...';
 
  try {
   const email = document.getElementById('email').value.trim();
-  const password = document.getElementById('password').value;
+  const password = passwordInput.value;
 
   const {data,error} = await supabase.auth.signInWithPassword({
-   email,password
+   email,
+   password
   });
 
   if(error) throw error;
@@ -124,11 +236,14 @@ form.addEventListener('submit', async (event) => {
    error.message === 'Invalid login credentials'
    ? 'Incorrect email or password.'
    : error.message || 'Unable to sign in.';
+
  } finally {
   button.disabled = false;
   button.textContent = 'Sign in securely';
  }
 });
 </script>
+
 </body>
 </html>
+```
