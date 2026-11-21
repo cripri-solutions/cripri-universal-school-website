@@ -75,7 +75,13 @@ h2{font-size:clamp(29px,4vw,42px);color:var(--navy);margin:8px 0 12px}.section-l
   const SUPABASE_URL="https://dudrolmymjwphwivrlko.supabase.co";
   const SUPABASE_KEY="sb_publishable_PLYgkSvgd79KTEHKh21o-g_CKgUTRTY";
   const $=id=>document.getElementById(id);
-  const slug=(new URLSearchParams(location.search).get("slug")||"").trim().toLowerCase();
+  const params=new URLSearchParams(location.search);
+  const querySlug=(params.get("slug")||"").trim().toLowerCase();
+  const suffix=".criprisolutions.co.ke";
+  const host=location.hostname.toLowerCase();
+  const hostSlug=host.endsWith(suffix)?host.slice(0,-suffix.length):"";
+  const validHostSlug=hostSlug&&!hostSlug.includes(".")&&/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(hostSlug)&&!["www","admin","api","mail","ftp"].includes(hostSlug);
+  const slug=querySlug||(validHostSlug?hostSlug:"");
   const supabase=window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
   const text=(id,value)=>$(id).textContent=value;
   function fail(title,message){$("loading").classList.add("hidden");$("site").classList.add("hidden");text("errorTitle",title);text("errorText",message);$("error").classList.remove("hidden");}
