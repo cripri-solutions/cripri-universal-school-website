@@ -416,10 +416,10 @@ function setMessage(id, message, type='') {
 function buildSchoolWebsiteUrl(slug) {
   if (!slug) return '';
 
-  const url = new URL('./school.html', window.location.href);
-  url.searchParams.set('slug', slug);
+  const safeSlug = String(slug).trim().toLowerCase();
+  if (!/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(safeSlug)) return '';
 
-  return url.toString();
+  return 'https://' + safeSlug + '.criprisolutions.co.ke/';
 }
 
 async function copySchoolWebsiteLink(url, button) {
