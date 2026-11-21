@@ -1,4 +1,4 @@
-const DEFAULT_DOMAIN = "criprisolutions.co.ke";
+const DEFAULT_DOMAIN = "schools.criprisolutions.co.ke";
 const RESERVED_SUBDOMAINS = new Set(["www","api","admin","manager","app","mail","ftp","support","help","docs","status","assets","static"]);
 
 const escapeHtml = (value = "") => String(value).replace(/[&<>"']/g, (c) => ({
