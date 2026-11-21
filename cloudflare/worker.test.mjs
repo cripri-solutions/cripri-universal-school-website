@@ -21,14 +21,14 @@ function mockFetch(routes) {
   };
 }
 const env = {
-  PLATFORM_DOMAIN:"criprisolutions.co.ke",
+  PLATFORM_DOMAIN:"schools.criprisolutions.co.ke",
   SUPABASE_URL:"https://example.supabase.co",
   SUPABASE_ANON_KEY:"test-publishable-key"
 };
 
 test("serves an active school's published public page",async () => {
   mockFetch({schools:[school],school_content_items:[{title:"Open Day",summary:"Visit us",content_type:"event",status:"published"}]});
-  const response = await worker.fetch(new Request("https://telwa-girls.criprisolutions.co.ke/"),env);
+  const response = await worker.fetch(new Request("https://telwa-girls.schools.criprisolutions.co.ke/"),env);
   assert.equal(response.status,200);
   const html = await response.text();
   assert.match(html,/TELWA GIRLS/);
@@ -37,10 +37,10 @@ test("serves an active school's published public page",async () => {
 });
 test("returns 404 for unknown schools",async () => {
   mockFetch({schools:[],school_content_items:[]});
-  const response = await worker.fetch(new Request("https://unknown-school.criprisolutions.co.ke/"),env);
+  const response = await worker.fetch(new Request("https://unknown-school.schools.criprisolutions.co.ke/"),env);
   assert.equal(response.status,404);
 });
-test("does not route reserved hostnames",async () => {
+test("does not intercept the main CRIPRI www hostname",async () => {
   const response = await worker.fetch(new Request("https://www.criprisolutions.co.ke/"),env);
   assert.equal(response.status,404);
 });
