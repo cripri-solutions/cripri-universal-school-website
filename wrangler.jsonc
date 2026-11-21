@@ -1,0 +1,6 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "cripri-universal-school-website",
+  "main": "cloudflare-school-router.js",
+  "compatibility_date": "2026-11-21"
+}
