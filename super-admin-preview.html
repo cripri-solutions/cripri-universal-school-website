@@ -38,6 +38,8 @@ th{color:#748197;background:#f8fafd}
 .section{display:none}.section.active{display:block}
 .actions button{margin:2px;font-size:11px;padding:7px}
 .activate{background:#e0f5e9;color:#13804d}
+.copy-link{background:#e8eef6;color:#26364b}
+.website-open{display:inline-block;background:var(--blue);color:white;text-decoration:none;border-radius:6px;padding:7px 9px;font-size:11px;font-weight:bold;margin:2px}
 .approve{background:#e0f5e9;color:#13804d}.reject{background:#fde6e6;color:#b93636}
 input,select{padding:11px;border:1px solid #dce3ec;border-radius:6px;margin:5px 0;max-width:100%}
 .search{width:280px}
@@ -411,6 +413,29 @@ function setMessage(id, message, type='') {
   el.className = 'notice' + (type ? ' ' + type : '');
 }
 
+function buildSchoolWebsiteUrl(slug) {
+  if (!slug) return '';
+
+  const url = new URL('./school.html', window.location.href);
+  url.searchParams.set('slug', slug);
+
+  return url.toString();
+}
+
+async function copySchoolWebsiteLink(url, button) {
+  if (!url) return;
+
+  try {
+    await navigator.clipboard.writeText(url);
+    const original = button.textContent;
+    button.textContent = 'Copied!';
+    setMessage('schoolsMessage', 'Public school website link copied to clipboard.', 'success');
+    window.setTimeout(() => { button.textContent = original; }, 1800);
+  } catch (error) {
+    window.prompt('Copy this public school website link:', url);
+  }
+}
+
 function showPage(id, button) {
   document.querySelectorAll('.section').forEach(s =>
     s.classList.remove('active')
@@ -548,10 +573,30 @@ function renderSchools() {
       activateButton.onclick = () => activateSchool(s.id, s.name, activateButton);
       actionCell.appendChild(activateButton);
     } else if (String(s.status || '').toLowerCase() === 'active') {
-      const activeLabel = document.createElement('span');
-      activeLabel.className = 'muted';
-      activeLabel.textContent = 'Already active';
-      actionCell.appendChild(activeLabel);
+      const websiteUrl = buildSchoolWebsiteUrl(s.slug);
+
+      if (websiteUrl) {
+        const visitButton = document.createElement('a');
+        visitButton.className = 'website-open';
+        visitButton.href = websiteUrl;
+        visitButton.target = '_blank';
+        visitButton.rel = 'noopener noreferrer';
+        visitButton.textContent = 'Visit Website';
+        visitButton.setAttribute('aria-label', 'Visit ' + safe(s.name) + ' public website');
+        actionCell.appendChild(visitButton);
+
+        const copyButton = document.createElement('button');
+        copyButton.type = 'button';
+        copyButton.className = 'copy-link';
+        copyButton.textContent = 'Copy Link';
+        copyButton.onclick = () => copySchoolWebsiteLink(websiteUrl, copyButton);
+        actionCell.appendChild(copyButton);
+      } else {
+        const missingSlug = document.createElement('span');
+        missingSlug.className = 'muted';
+        missingSlug.textContent = 'Website slug missing';
+        actionCell.appendChild(missingSlug);
+      }
     } else {
       const unavailableLabel = document.createElement('span');
       unavailableLabel.className = 'muted';
