@@ -45,6 +45,6 @@ test("does not intercept the main CRIPRI www hostname",async () => {
   assert.equal(response.status,404);
 });
 test("rejects non-GET methods",async () => {
-  const response = await worker.fetch(new Request("https://telwa-girls.criprisolutions.co.ke/",{method:"POST"}),env);
+  const response = await worker.fetch(new Request("https://telwa-girls.schools.criprisolutions.co.ke/",{method:"POST"}),env);
   assert.equal(response.status,405);
 });
