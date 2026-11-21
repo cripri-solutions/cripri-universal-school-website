@@ -4,9 +4,9 @@
  * Deploy as a Cloudflare Worker and attach route:
  *   *.criprisolutions.co.ke/*
  *
- * Create a proxied wildcard DNS record for * on cr iprisolutions.co.ke.
- * This Worker serves the existing GitHub Pages school.html engine and
- * maps the first subdomain label to the school's registered slug.
+ * Root requests serve the dynamic school page. Static files (images, CSS,
+ * JavaScript and other assets) are forwarded to their matching GitHub Pages
+ * paths instead of incorrectly receiving school.html.
  */
 const PAGES_ORIGIN = "https://cripri-solutions.github.io";
 const PAGES_BASE = "/cripri-universal-school-website/";
@@ -19,12 +19,10 @@ function getSchoolSlug(hostname) {
 
   const slug = host.slice(0, -suffix.length);
 
-  // Only one school subdomain label is supported.
   if (!slug || slug.includes(".") || !/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(slug)) {
     return null;
   }
 
-  // Reserve platform hostnames; they must not resolve to school records.
   if (["www", "admin", "api", "mail", "ftp"].includes(slug)) return null;
 
   return slug;
@@ -42,19 +40,40 @@ export default {
       });
     }
 
-    const destination = new URL(
-      PAGES_BASE + "school.html",
-      PAGES_ORIGIN
-    );
-    destination.searchParams.set("slug", slug);
+    // Serve the school engine at the subdomain root. For every other path,
+    // proxy the corresponding static asset from the GitHub Pages project.
+    const requestedPath = incoming.pathname.replace(/^\/+/, "");
+    const assetPath = requestedPath || "school.html";
 
-    // Preserve request method and headers while sending to the existing site engine.
+    // Reject traversal attempts rather than allowing paths outside the site.
+    const decodedPath = decodeURIComponent(assetPath);
+    if (decodedPath.split("/").some(part => part === "." || part === "..")) {
+      return new Response("Invalid asset path.", {
+        status: 400,
+        headers: { "content-type": "text/plain; charset=utf-8" }
+      });
+    }
+
+    const destination = new URL(PAGES_BASE + assetPath, PAGES_ORIGIN);
+
+    // Pass the school slug only to the dynamic HTML engine.
+    if (assetPath === "school.html") {
+      destination.searchParams.set("slug", slug);
+    } else {
+      incoming.searchParams.forEach((value, key) => {
+        destination.searchParams.set(key, value);
+      });
+    }
+
     const upstreamRequest = new Request(destination.toString(), request);
     const upstreamResponse = await fetch(upstreamRequest);
 
     const headers = new Headers(upstreamResponse.headers);
     headers.set("X-CRIPRI-School-Slug", slug);
-    headers.set("Cache-Control", "public, max-age=300");
+    headers.set(
+      "Cache-Control",
+      assetPath === "school.html" ? "public, max-age=300" : "public, max-age=3600"
+    );
 
     return new Response(upstreamResponse.body, {
       status: upstreamResponse.status,
