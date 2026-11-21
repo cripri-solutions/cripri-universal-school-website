@@ -84,7 +84,7 @@ h2{font-size:clamp(29px,4vw,42px);color:var(--navy);margin:8px 0 12px}.section-l
     <p class="eyebrow dark">Our campus and facilities</p>
     <h2>A modern environment for learning and growth</h2>
     <p class="section-lead">Explore the learning spaces, student amenities and shared facilities that support our school community.</p>
-    <div class="facilities-showcase">
+    <div class="facilities-showcase" id="telwaCampusConcept">
       <img src="./images/telwa-campus-concept.svg" alt="Illustrative school campus architectural concept" loading="lazy">
       <div class="facilities-showcase-copy">
         <p class="eyebrow dark">Campus overview</p>
@@ -128,6 +128,9 @@ h2{font-size:clamp(29px,4vw,42px);color:var(--navy);margin:8px 0 12px}.section-l
   const hostSlug=host.endsWith(suffix)?host.slice(0,-suffix.length):"";
   const validHostSlug=hostSlug&&!hostSlug.includes(".")&&/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(hostSlug)&&!["www","admin","api","mail","ftp"].includes(hostSlug);
   const slug=querySlug||(validHostSlug?hostSlug:"");
+  // Keep TELWA-specific campus artwork off every other school's website.
+  const telwaCampusConcept=document.getElementById("telwaCampusConcept");
+  if(telwaCampusConcept && slug!=="telwa-girls") telwaCampusConcept.remove();
   const supabase=window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
   const text=(id,value)=>$(id).textContent=value;
   function fail(title,message){$("loading").classList.add("hidden");$("site").classList.add("hidden");text("errorTitle",title);text("errorText",message);$("error").classList.remove("hidden");}
