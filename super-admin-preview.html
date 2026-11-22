@@ -306,8 +306,11 @@ footer{text-align:center;color:#8290a2;padding:25px;font-size:12px}
     <div class="card"><div class="label">Active</div><div class="number" id="subscriptionActive">—</div><small>Currently marked active</small></div>
     <div class="card"><div class="label">Pending</div><div class="number" id="subscriptionPending">—</div><small>Awaiting activation</small></div>
     <div class="card"><div class="label">Available Plans</div><div class="number" id="subscriptionPlanTotal">—</div><small>Active subscription plans</small></div>
+    <div class="card"><div class="label">Expiring Soon</div><div class="number" id="subscriptionExpiring">—</div><small>Active or trial ending within 30 days</small></div>
+    <div class="card"><div class="label">Expired</div><div class="number" id="subscriptionExpired">—</div><small>Requires renewal or review</small></div>
   </div>
   <div class="notice" id="subscriptionsMessage">Loading subscription records...</div>
+  <div class="notice" id="subscriptionHealthMessage">Expiry monitoring will appear here.</div>
   <div class="panel">
     <h3 id="planFormHeading">Create a subscription plan</h3>
     <p class="muted">Monthly pricing: Basic KES 1,500; Standard KES 2,500; Premium KES 4,500. Every plan includes a CRIPRI school subdomain. Custom domains and additional hosting remain optional add-ons.</p>
@@ -1143,6 +1146,21 @@ async function loadSubscriptions() {
   byId('subscriptionActive').textContent = currentSubscriptions.filter(s => s.status === 'active').length;
   byId('subscriptionPending').textContent = currentSubscriptions.filter(s => s.status === 'pending').length;
   byId('subscriptionPlanTotal').textContent = currentPlans.filter(p => p.active).length;
+  const now = Date.now();
+  const thirtyDays = now + 30 * 24 * 60 * 60 * 1000;
+  const expiringSoon = currentSubscriptions.filter(s =>
+    ['active','trial'].includes(s.status) && s.ends_at &&
+    new Date(s.ends_at).getTime() > now &&
+    new Date(s.ends_at).getTime() <= thirtyDays
+  );
+  const expiredSubscriptions = currentSubscriptions.filter(s => s.status === 'expired');
+  byId('subscriptionExpiring').textContent = expiringSoon.length;
+  byId('subscriptionExpired').textContent = expiredSubscriptions.length;
+  const healthParts = [];
+  if (expiringSoon.length) healthParts.push(expiringSoon.length + ' subscription(s) expire within 30 days.');
+  if (expiredSubscriptions.length) healthParts.push(expiredSubscriptions.length + ' subscription(s) have expired and need review.');
+  if (!healthParts.length) healthParts.push('No subscriptions are currently due to expire within 30 days.');
+  setMessage('subscriptionHealthMessage', 'Expiry monitor: ' + healthParts.join(' '), expiringSoon.length || expiredSubscriptions.length ? 'error' : 'success');
   renderSubscriptionPlans();
   renderSchoolSubscriptions();
   populateSubscriptionSelects();
@@ -1291,6 +1309,57 @@ function renderSchoolSubscriptions() {
       });
       actionCell.appendChild(paymentSelect);
       actionCell.appendChild(activateButton);
+    } else if (s.status === 'expired' && !String(s.admin_notes || '').toLowerCase().includes('demonstration trial')) {
+      const subscriptionPlan = currentPlans.find(plan => plan.id === s.plan_id);
+      const requiredAmount = Number(subscriptionPlan?.price_kes || 0);
+      const eligiblePayments = currentConfirmedSubscriptionPayments.filter(p =>
+        p.subscription_id === s.id && p.school_id === s.school_id &&
+        String(p.transaction_reference || '').trim() &&
+        Number(p.amount_kes) >= requiredAmount
+      );
+      const paymentSelect = document.createElement('select');
+      paymentSelect.setAttribute('aria-label', 'Confirmed renewal payment for ' + (s.schools?.name || 'school'));
+      const prompt = document.createElement('option');
+      prompt.value = '';
+      prompt.textContent = eligiblePayments.length ? 'Select renewal payment' : 'No confirmed renewal payment';
+      paymentSelect.appendChild(prompt);
+      eligiblePayments.forEach(p => {
+        const option = document.createElement('option');
+        option.value = p.id;
+        option.textContent = 'KES ' + Number(p.amount_kes).toLocaleString('en-KE') + ' — ' + p.transaction_reference;
+        paymentSelect.appendChild(option);
+      });
+      const renewButton = document.createElement('button');
+      renewButton.type = 'button';
+      renewButton.className = 'activate';
+      renewButton.textContent = 'Renew';
+      renewButton.disabled = eligiblePayments.length === 0;
+      renewButton.addEventListener('click', async () => {
+        if (!paymentSelect.value) {
+          setMessage('subscriptionsMessage', 'Select a confirmed payment linked to this subscription.', 'error');
+          return;
+        }
+        if (!window.confirm('Renew this expired subscription using the selected verified payment?')) return;
+        renewButton.disabled = true;
+        const result = await supabase.rpc('renew_school_subscription', {
+          p_subscription_id: s.id,
+          p_payment_id: paymentSelect.value
+        });
+        renewButton.disabled = false;
+        if (result.error) {
+          setMessage('subscriptionsMessage', 'Renewal failed: ' + result.error.message, 'error');
+          return;
+        }
+        setMessage('Subscription renewed after payment verification.', 'success');
+        await loadSubscriptions();
+      });
+      actionCell.appendChild(paymentSelect);
+      actionCell.appendChild(renewButton);
+    } else if (s.status === 'expired') {
+      const label = document.createElement('span');
+      label.className = 'muted';
+      label.textContent = 'Demo trial expired — create paid subscription if converting';
+      actionCell.appendChild(label);
     } else if (s.status === 'active') {
       const label = document.createElement('span');
       label.className = 'muted'; label.textContent = 'Expiry monitored';
