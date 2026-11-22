@@ -63,6 +63,14 @@ h2{font-size:clamp(29px,4vw,42px);color:var(--navy);margin:8px 0 12px}.section-l
 @media(max-width:900px){.facility-grid-live{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media(max-width:650px){.facilities-showcase{grid-template-columns:1fr;padding:12px}.facilities-showcase-copy{padding:8px 4px}.facility-grid-live{grid-template-columns:1fr}.facility-card-live img{height:210px}}
 
+
+.telwa-modern-gallery{display:none;grid-template-columns:repeat(2,minmax(0,1fr));gap:22px;margin:28px 0}
+.telwa-modern-gallery figure{margin:0;overflow:hidden;border-radius:14px;background:#fff;border:1px solid var(--line);box-shadow:0 10px 28px rgba(18,59,93,.08)}
+.telwa-modern-gallery img{display:block;width:100%;height:300px;object-fit:cover}
+.telwa-modern-gallery figcaption{padding:14px 16px;color:var(--navy);font-weight:700}
+.telwa-photo-note{display:none;color:var(--muted);font-size:12px;margin:0 0 20px}
+@media(max-width:650px){.telwa-modern-gallery{grid-template-columns:1fr}.telwa-modern-gallery img{height:230px}}
+
 </style>
 </head>
 <body>
@@ -84,6 +92,11 @@ h2{font-size:clamp(29px,4vw,42px);color:var(--navy);margin:8px 0 12px}.section-l
     <p class="eyebrow dark">Our campus and facilities</p>
     <h2>A modern environment for learning and growth</h2>
     <p class="section-lead">Explore the learning spaces, student amenities and shared facilities that support our school community.</p>
+    <div class="telwa-modern-gallery" id="telwaModernGallery">
+      <figure><img src="./images/Sunny%20School%20Courtyard%20Gathering-1.png?v=20261122" alt="Illustrative school courtyard and learner community" loading="lazy"><figcaption>Welcoming School Community</figcaption></figure>
+      <figure><img src="./images/Modern%20School%20Campus%20Entrance-2.png?v=20261122" alt="Illustrative modern school campus entrance" loading="lazy"><figcaption>Modern Campus Environment</figcaption></figure>
+    </div>
+    <p class="telwa-photo-note" id="telwaPhotoNote">AI-generated illustrative images for website demonstration. They are not verified photographs of actual TELWA GIRLS facilities or learners.</p>
     <div class="facilities-showcase" id="telwaCampusConcept">
       <img src="./images/telwa-campus-concept.svg" alt="Illustrative school campus architectural concept" loading="lazy">
       <div class="facilities-showcase-copy">
@@ -130,7 +143,17 @@ h2{font-size:clamp(29px,4vw,42px);color:var(--navy);margin:8px 0 12px}.section-l
   const slug=querySlug||(validHostSlug?hostSlug:"");
   // Keep TELWA-specific campus artwork off every other school's website.
   const telwaCampusConcept=document.getElementById("telwaCampusConcept");
-  if(telwaCampusConcept && slug!=="telwa-girls") telwaCampusConcept.remove();
+  const telwaModernGallery=document.getElementById("telwaModernGallery");
+  const telwaPhotoNote=document.getElementById("telwaPhotoNote");
+  const facilityGrid=document.querySelector(".facility-grid-live");
+  const facilityDisclaimer=document.querySelector(".facility-disclaimer");
+  if(slug==="telwa-girls"){
+    if(telwaModernGallery)telwaModernGallery.style.display="grid";
+    if(telwaPhotoNote)telwaPhotoNote.style.display="block";
+    if(telwaCampusConcept)telwaCampusConcept.remove();
+    if(facilityGrid)facilityGrid.remove();
+    if(facilityDisclaimer)facilityDisclaimer.remove();
+  }else if(telwaCampusConcept){telwaCampusConcept.remove();}
   const supabase=window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
   const text=(id,value)=>$(id).textContent=value;
   function fail(title,message){$("loading").classList.add("hidden");$("site").classList.add("hidden");text("errorTitle",title);text("errorText",message);$("error").classList.remove("hidden");}
