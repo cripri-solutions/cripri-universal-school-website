@@ -818,6 +818,13 @@ async function initialiseWorkspace() {
 
   }
 
+  if(memberships.length !== 1) {
+    await supabase.auth.signOut();
+    throw new Error(
+      'This account must be assigned to exactly one school. Contact CRIPRI to correct its school membership.'
+    );
+  }
+
   const membership = memberships[0];
 
   currentRole = membership.role;
@@ -914,7 +921,7 @@ async function uploadProfileImage(file,kind) {
   const safeName = file.name.replace(/[^a-zA-Z0-9._-]/g,'_');
 
   const path =
-    currentSchool.name + '/profile-' + kind + '-' +
+    currentSchool.id + '/profile-' + kind + '-' +
     Date.now() + '-' + safeName;
 
   const {data,error} = await supabase.storage
@@ -1378,7 +1385,7 @@ async function uploadMedia(file) {
   const safeName = file.name.replace(/[^a-zA-Z0-9._-]/g,'_');
 
   const path =
-    currentSchool.name + '/' + Date.now() + '-' + safeName;
+    currentSchool.id + '/' + Date.now() + '-' + safeName;
 
   const {data,error} = await supabase.storage
     .from('school-media')
