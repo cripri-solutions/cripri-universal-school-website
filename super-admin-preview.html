@@ -1219,9 +1219,12 @@ function renderSchoolSubscriptions() {
 
     const actionCell = document.createElement('td');
     if (['pending','trial'].includes(s.status)) {
+      const subscriptionPlan = currentPlans.find(plan => plan.id === s.plan_id);
+      const requiredAmount = Number(subscriptionPlan?.price_kes || 0);
       const eligiblePayments = currentConfirmedSubscriptionPayments.filter(p =>
         p.subscription_id === s.id && p.school_id === s.school_id &&
-        String(p.transaction_reference || '').trim()
+        String(p.transaction_reference || '').trim() &&
+        Number(p.amount_kes) >= requiredAmount
       );
       const paymentSelect = document.createElement('select');
       paymentSelect.setAttribute('aria-label', 'Confirmed payment for ' + (s.schools?.name || 'school'));
