@@ -153,3 +153,41 @@ h3 { margin-bottom: 9px; color: var(--navy); font-size: 1.18rem; }
   .tag-one { right:0; }.tag-two { left:0; }
 }
 @media(max-width:480px) { .process-grid { grid-template-columns:1fr; }.floating-tag { font-size:.72rem; padding:9px 11px; } }
+
+/* TELWA GIRLS - High Quality Facility Gallery */
+.telwa-modern-gallery {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 22px;
+    align-items: start;
+}
+
+.telwa-modern-gallery figure {
+    margin: 0;
+    overflow: hidden;
+    border-radius: 16px;
+    background: #fff;
+    box-shadow: 0 8px 25px rgba(18, 59, 93, 0.10);
+}
+
+.telwa-modern-gallery img {
+    display: block;
+    width: 100%;
+    height: auto;
+    max-width: 100%;
+    object-fit: contain;
+    image-rendering: auto;
+}
+
+.telwa-modern-gallery figcaption {
+    padding: 15px 18px;
+    color: #123b5d;
+    font-weight: 600;
+}
+
+@media (max-width: 600px) {
+    .telwa-modern-gallery {
+        grid-template-columns: 1fr;
+    }
+}
+
