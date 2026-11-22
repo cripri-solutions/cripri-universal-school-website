@@ -1218,6 +1218,29 @@ function renderSchoolSubscriptions() {
     makeCell(tr, addons.length ? addons.join(', ') : 'None');
 
     const actionCell = document.createElement('td');
+    if (s.status === 'pending' && s.schools?.slug === 'telwa-girls') {
+      const trialButton = document.createElement('button');
+      trialButton.type = 'button';
+      trialButton.className = 'activate';
+      trialButton.textContent = 'Start 30-day Demo Trial';
+      trialButton.addEventListener('click', async () => {
+        const accepted = window.confirm('Start a free 30-day CRIPRI demonstration trial for TELWA GIRLS? No payment will be recorded or collected.');
+        if (!accepted) return;
+        trialButton.disabled = true;
+        const result = await supabase.rpc('activate_school_demo_trial', {
+          p_subscription_id: s.id,
+          p_trial_days: 30
+        });
+        trialButton.disabled = false;
+        if (result.error) {
+          setMessage('subscriptionsMessage', 'Demo trial was not started: ' + result.error.message, 'error');
+          return;
+        }
+        setMessage('subscriptionsMessage', 'TELWA GIRLS demo trial started for 30 days. This is a free trial, not a paid subscription.', 'success');
+        await loadSubscriptions();
+      });
+      actionCell.appendChild(trialButton);
+    }
     if (['pending','trial'].includes(s.status)) {
       const subscriptionPlan = currentPlans.find(plan => plan.id === s.plan_id);
       const requiredAmount = Number(subscriptionPlan?.price_kes || 0);
