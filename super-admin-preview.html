@@ -1130,7 +1130,7 @@ async function loadSubscriptions() {
   const [plansResult, schoolsResult, subsResult, paymentsResult] = await Promise.all([
     supabase.from('website_subscription_plans').select('id,code,name,description,billing_interval,price_kes,includes_cripri_subdomain,active').order('name'),
     supabase.from('schools').select('id,name,slug,status').order('name'),
-    supabase.from('school_subscriptions').select('id,school_id,plan_id,status,starts_at,ends_at,next_renewal_at,includes_cripri_subdomain,custom_domain,custom_domain_addon,additional_hosting_addon,created_at,schools(name,slug),website_subscription_plans(name,code,price_kes)').order('created_at', { ascending: false }),
+    supabase.from('school_subscriptions').select('id,school_id,plan_id,status,starts_at,ends_at,next_renewal_at,includes_cripri_subdomain,custom_domain,custom_domain_addon,additional_hosting_addon,admin_notes,created_at,schools(name,slug),website_subscription_plans(name,code,price_kes)').order('created_at', { ascending: false }),
     supabase.from('platform_payments').select('id,school_id,subscription_id,amount_kes,transaction_reference,status').eq('status','confirmed').not('subscription_id','is',null)
   ]);
   const failed = plansResult.error || schoolsResult.error || subsResult.error || paymentsResult.error;
@@ -1160,7 +1160,7 @@ async function loadSubscriptions() {
   if (expiringSoon.length) healthParts.push(expiringSoon.length + ' subscription(s) expire within 30 days.');
   if (expiredSubscriptions.length) healthParts.push(expiredSubscriptions.length + ' subscription(s) have expired and need review.');
   if (!healthParts.length) healthParts.push('No subscriptions are currently due to expire within 30 days.');
-  setMessage('subscriptionHealthMessage', 'Expiry monitor: ' + healthParts.join(' '), expiringSoon.length || expiredSubscriptions.length ? 'error' : 'success');
+  setMessage('subscriptionHealthMessage', 'Expiry monitor: ' + healthParts.join(' ') + ' Alerts are shown in this dashboard; automatic SMS/email delivery is not configured.', expiringSoon.length || expiredSubscriptions.length ? 'error' : 'success');
   renderSubscriptionPlans();
   renderSchoolSubscriptions();
   populateSubscriptionSelects();
@@ -1309,7 +1309,12 @@ function renderSchoolSubscriptions() {
       });
       actionCell.appendChild(paymentSelect);
       actionCell.appendChild(activateButton);
-    } else if (s.status === 'expired' && !String(s.admin_notes || '').toLowerCase().includes('demonstration trial')) {
+    } else if (
+      (s.status === 'expired' ||
+       (s.status === 'active' && s.ends_at &&
+        new Date(s.ends_at).getTime() <= Date.now() + 30 * 24 * 60 * 60 * 1000)) &&
+      !String(s.admin_notes || '').toLowerCase().includes('demonstration trial')
+    ) {
       const subscriptionPlan = currentPlans.find(plan => plan.id === s.plan_id);
       const requiredAmount = Number(subscriptionPlan?.price_kes || 0);
       const eligiblePayments = currentConfirmedSubscriptionPayments.filter(p =>
@@ -1362,7 +1367,7 @@ function renderSchoolSubscriptions() {
       actionCell.appendChild(label);
     } else if (s.status === 'active') {
       const label = document.createElement('span');
-      label.className = 'muted'; label.textContent = 'Expiry monitored';
+      label.className = 'muted'; label.textContent = 'Expiry monitored — renewal opens 30 days before expiry';
       actionCell.appendChild(label);
     } else {
       const label = document.createElement('span');
