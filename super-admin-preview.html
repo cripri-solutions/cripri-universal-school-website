@@ -297,13 +297,56 @@ footer{text-align:center;color:#8290a2;padding:25px;font-size:12px}
 </section>
 
 <section id="subscriptions" class="section">
-  <h1>Subscriptions</h1>
-  <p class="muted">Subscription management is not yet connected to a verified live data source.</p>
+  <div class="topline">
+    <div><h1>Website Subscriptions</h1><div class="muted">Manage plans and school subscription records. Payments are not processed here.</div></div>
+    <button class="primary" id="refreshSubscriptions">↻ Refresh</button>
+  </div>
+  <div class="cards">
+    <div class="card"><div class="label">Subscription Records</div><div class="number" id="subscriptionTotal">—</div><small>All recorded subscriptions</small></div>
+    <div class="card"><div class="label">Active</div><div class="number" id="subscriptionActive">—</div><small>Currently marked active</small></div>
+    <div class="card"><div class="label">Pending</div><div class="number" id="subscriptionPending">—</div><small>Awaiting activation</small></div>
+    <div class="card"><div class="label">Available Plans</div><div class="number" id="subscriptionPlanTotal">—</div><small>Active subscription plans</small></div>
+  </div>
+  <div class="notice" id="subscriptionsMessage">Loading subscription records...</div>
   <div class="panel">
-    <div class="notice">
-      Subscription totals and revenue are intentionally not displayed as live figures
-      until the subscription records are connected.
-    </div>
+    <h3>Create a subscription plan</h3>
+    <p class="muted">Every plan includes a CRIPRI school subdomain. Leave the price blank until the fee is approved.</p>
+    <form id="planForm">
+      <div class="cards">
+        <div><label for="planName">Plan name</label><input id="planName" required maxlength="100" placeholder="e.g. Standard Website"></div>
+        <div><label for="planCode">Plan code</label><input id="planCode" required maxlength="40" placeholder="e.g. STANDARD"></div>
+        <div><label for="planInterval">Billing interval</label><select id="planInterval"><option value="monthly">Monthly</option><option value="annual">Annual</option><option value="one_time">One-time</option></select></div>
+        <div><label for="planPrice">Plan price (KES)</label><input id="planPrice" type="number" min="0" step="0.01" placeholder="Not set"></div>
+      </div>
+      <label for="planDescription">Description</label><input id="planDescription" maxlength="500" placeholder="What the plan includes">
+      <div class="notice">Included: schoolname.criprisolutions.co.ke. Custom domains and additional hosting are optional add-ons; no domain will be purchased automatically.</div>
+      <button class="primary" type="submit" id="savePlanButton">Save Plan</button>
+    </form>
+  </div>
+  <div class="panel">
+    <h3>Assign a subscription to a school</h3>
+    <form id="subscriptionForm">
+      <div class="cards">
+        <div><label for="subscriptionSchool">School</label><select id="subscriptionSchool" required><option value="">Loading schools...</option></select></div>
+        <div><label for="subscriptionPlan">Plan</label><select id="subscriptionPlan"><option value="">No plan selected</option></select></div>
+        <div><label for="subscriptionStatus">Initial status</label><select id="subscriptionStatus"><option value="pending">Pending</option><option value="trial">Trial</option><option value="active">Active</option></select></div>
+        <div><label for="subscriptionStart">Start date</label><input id="subscriptionStart" type="date"></div>
+        <div><label for="subscriptionEnd">End date</label><input id="subscriptionEnd" type="date"></div>
+        <div><label for="subscriptionDomain">School-owned custom domain (optional)</label><input id="subscriptionDomain" maxlength="253" placeholder="www.school.ac.ke"></div>
+      </div>
+      <label><input id="subscriptionCustomDomainAddon" type="checkbox"> Custom-domain service add-on selected (record only)</label>
+      <label><input id="subscriptionHostingAddon" type="checkbox"> Additional hosting add-on selected (record only)</label>
+      <div class="notice">The CRIPRI subdomain is included by default. Selecting an add-on records the service choice only; it does not purchase a domain, configure DNS, or charge the school.</div>
+      <button class="primary" type="submit" id="saveSubscriptionButton">Save Subscription Record</button>
+    </form>
+  </div>
+  <div class="panel">
+    <h3>Registered subscription plans</h3>
+    <div class="table-wrap"><table><thead><tr><th>Plan</th><th>Code</th><th>Billing</th><th>Price (KES)</th><th>CRIPRI Subdomain</th><th>Status</th></tr></thead><tbody id="planTableBody"><tr><td colspan="6" class="empty">Loading plans...</td></tr></tbody></table></div>
+  </div>
+  <div class="panel">
+    <h3>School subscription records</h3>
+    <div class="table-wrap"><table><thead><tr><th>School</th><th>Plan</th><th>Status</th><th>Start</th><th>End</th><th>Custom Domain</th><th>Add-ons</th></tr></thead><tbody id="subscriptionTableBody"><tr><td colspan="7" class="empty">Loading subscriptions...</td></tr></tbody></table></div>
   </div>
 </section>
 
@@ -463,6 +506,7 @@ function showPage(id, button) {
   if (id === 'schools') loadSchools();
   if (id === 'approvals') loadSchoolApplications();
   if (id === 'admins') loadAdministrators();
+  if (id === 'subscriptions') loadSubscriptions();
 }
 
 document.querySelectorAll('.sidebar .nav[data-page]').forEach(button => {
@@ -1038,6 +1082,159 @@ async function loadOverview() {
   );
 }
 
+/* ==========================================
+   WEBSITE SUBSCRIPTIONS
+========================================== */
+let currentPlans = [];
+let currentSubscriptions = [];
+let currentSubscriptionSchools = [];
+
+async function loadSubscriptions() {
+  setMessage('subscriptionsMessage', 'Loading plans, schools and subscription records...');
+  const [plansResult, schoolsResult, subsResult] = await Promise.all([
+    supabase.from('website_subscription_plans').select('id,code,name,description,billing_interval,price_kes,includes_cripri_subdomain,active').order('name'),
+    supabase.from('schools').select('id,name,slug,status').order('name'),
+    supabase.from('school_subscriptions').select('id,school_id,plan_id,status,starts_at,ends_at,next_renewal_at,includes_cripri_subdomain,custom_domain,custom_domain_addon,additional_hosting_addon,created_at,schools(name,slug),website_subscription_plans(name,code,price_kes)').order('created_at', { ascending: false })
+  ]);
+  const failed = plansResult.error || schoolsResult.error || subsResult.error;
+  if (failed) {
+    setMessage('subscriptionsMessage', 'Could not load subscription data: ' + failed.message, 'error');
+    return;
+  }
+  currentPlans = plansResult.data || [];
+  currentSubscriptionSchools = schoolsResult.data || [];
+  currentSubscriptions = subsResult.data || [];
+  byId('subscriptionTotal').textContent = currentSubscriptions.length;
+  byId('subscriptionActive').textContent = currentSubscriptions.filter(s => s.status === 'active').length;
+  byId('subscriptionPending').textContent = currentSubscriptions.filter(s => s.status === 'pending').length;
+  byId('subscriptionPlanTotal').textContent = currentPlans.filter(p => p.active).length;
+  renderSubscriptionPlans();
+  renderSchoolSubscriptions();
+  populateSubscriptionSelects();
+  setMessage('subscriptionsMessage', 'Loaded ' + currentPlans.length + ' plan(s), ' + currentSubscriptionSchools.length + ' school(s), and ' + currentSubscriptions.length + ' subscription record(s).', 'success');
+}
+
+function populateSubscriptionSelects() {
+  const schoolSelect = byId('subscriptionSchool');
+  const previousSchool = schoolSelect.value;
+  schoolSelect.replaceChildren();
+  const schoolPrompt = document.createElement('option');
+  schoolPrompt.value = ''; schoolPrompt.textContent = 'Select a school'; schoolSelect.appendChild(schoolPrompt);
+  currentSubscriptionSchools.forEach(s => {
+    const option = document.createElement('option');
+    option.value = s.id; option.textContent = s.name + ' (' + s.slug + ')';
+    schoolSelect.appendChild(option);
+  });
+  if (currentSubscriptionSchools.some(s => s.id === previousSchool)) schoolSelect.value = previousSchool;
+
+  const planSelect = byId('subscriptionPlan');
+  const previousPlan = planSelect.value;
+  planSelect.replaceChildren();
+  const noPlan = document.createElement('option');
+  noPlan.value = ''; noPlan.textContent = 'No plan selected'; planSelect.appendChild(noPlan);
+  currentPlans.filter(p => p.active).forEach(p => {
+    const option = document.createElement('option');
+    option.value = p.id;
+    option.textContent = p.name + (p.price_kes == null ? ' (price not set)' : ' (KES ' + Number(p.price_kes).toLocaleString() + ')');
+    planSelect.appendChild(option);
+  });
+  if (currentPlans.some(p => p.id === previousPlan && p.active)) planSelect.value = previousPlan;
+}
+
+function renderSubscriptionPlans() {
+  const body = byId('planTableBody'); body.replaceChildren();
+  if (!currentPlans.length) {
+    const tr = document.createElement('tr'), td = document.createElement('td');
+    td.colSpan = 6; td.className = 'empty'; td.textContent = 'No plans created yet.';
+    tr.appendChild(td); body.appendChild(tr); return;
+  }
+  currentPlans.forEach(p => {
+    const tr = document.createElement('tr');
+    makeCell(tr, p.name); makeCell(tr, p.code); makeCell(tr, p.billing_interval);
+    makeCell(tr, p.price_kes == null ? 'Not set' : Number(p.price_kes).toLocaleString());
+    makeStatusCell(tr, p.includes_cripri_subdomain ? 'Included' : 'Not included');
+    makeStatusCell(tr, p.active ? 'Active' : 'Inactive');
+    body.appendChild(tr);
+  });
+}
+
+function renderSchoolSubscriptions() {
+  const body = byId('subscriptionTableBody'); body.replaceChildren();
+  if (!currentSubscriptions.length) {
+    const tr = document.createElement('tr'), td = document.createElement('td');
+    td.colSpan = 7; td.className = 'empty'; td.textContent = 'No school subscription records yet.';
+    tr.appendChild(td); body.appendChild(tr); return;
+  }
+  currentSubscriptions.forEach(s => {
+    const tr = document.createElement('tr');
+    makeCell(tr, s.schools?.name || s.school_id);
+    makeCell(tr, s.website_subscription_plans?.name || 'No plan');
+    makeStatusCell(tr, s.status);
+    makeCell(tr, dateText(s.starts_at)); makeCell(tr, dateText(s.ends_at));
+    makeCell(tr, s.custom_domain || '—');
+    const addons = [];
+    if (s.custom_domain_addon) addons.push('Custom domain');
+    if (s.additional_hosting_addon) addons.push('Additional hosting');
+    makeCell(tr, addons.length ? addons.join(', ') : 'None');
+    body.appendChild(tr);
+  });
+}
+
+byId('planForm').addEventListener('submit', async event => {
+  event.preventDefault();
+  const button = byId('savePlanButton'); button.disabled = true;
+  const rawPrice = byId('planPrice').value.trim();
+  const payload = {
+    name: byId('planName').value.trim(),
+    code: byId('planCode').value.trim().toUpperCase().replace(/[^A-Z0-9_-]/g, '_'),
+    description: byId('planDescription').value.trim() || null,
+    billing_interval: byId('planInterval').value,
+    price_kes: rawPrice === '' ? null : Number(rawPrice),
+    includes_cripri_subdomain: true,
+    custom_domain_available: true,
+    additional_hosting_available: true,
+    active: true
+  };
+  const { error } = await supabase.from('website_subscription_plans').insert(payload);
+  button.disabled = false;
+  if (error) { setMessage('subscriptionsMessage', 'Plan was not saved: ' + error.message, 'error'); return; }
+  byId('planForm').reset();
+  setMessage('subscriptionsMessage', 'Subscription plan saved.', 'success');
+  await loadSubscriptions();
+});
+
+byId('subscriptionForm').addEventListener('submit', async event => {
+  event.preventDefault();
+  const schoolId = byId('subscriptionSchool').value;
+  if (!schoolId) { setMessage('subscriptionsMessage', 'Select a school before saving.', 'error'); return; }
+  const start = byId('subscriptionStart').value;
+  const end = byId('subscriptionEnd').value;
+  if (start && end && end < start) { setMessage('subscriptionsMessage', 'The end date cannot be earlier than the start date.', 'error'); return; }
+  const button = byId('saveSubscriptionButton'); button.disabled = true;
+  const payload = {
+    school_id: schoolId,
+    plan_id: byId('subscriptionPlan').value || null,
+    status: byId('subscriptionStatus').value,
+    starts_at: start ? new Date(start + 'T00:00:00').toISOString() : null,
+    ends_at: end ? new Date(end + 'T23:59:59').toISOString() : null,
+    includes_cripri_subdomain: true,
+    custom_domain: byId('subscriptionDomain').value.trim() || null,
+    custom_domain_addon: byId('subscriptionCustomDomainAddon').checked,
+    additional_hosting_addon: byId('subscriptionHostingAddon').checked
+  };
+  const { error } = await supabase.from('school_subscriptions').insert(payload);
+  button.disabled = false;
+  if (error) { setMessage('subscriptionsMessage', 'Subscription record was not saved: ' + error.message, 'error'); return; }
+  byId('subscriptionForm').reset();
+  setMessage('subscriptionsMessage', 'School subscription record saved. No payment was taken.', 'success');
+  await loadSubscriptions();
+});
+
+byId('refreshSubscriptions').addEventListener('click', loadSubscriptions);
+
+/* ==========================================
+   REFRESH ALL DASHBOARD DATA
+========================================== */
 byId('refreshAll').addEventListener('click', async () => {
 
   await Promise.all([
