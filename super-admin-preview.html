@@ -310,7 +310,7 @@ footer{text-align:center;color:#8290a2;padding:25px;font-size:12px}
   <div class="notice" id="subscriptionsMessage">Loading subscription records...</div>
   <div class="panel">
     <h3 id="planFormHeading">Create a subscription plan</h3>
-    <p class="muted">Every plan includes a CRIPRI school subdomain. Leave the price blank until the fee is approved.</p>
+    <p class="muted">Monthly pricing: Basic KES 1,500; Standard KES 2,500; Premium KES 4,500. Every plan includes a CRIPRI school subdomain. Custom domains and additional hosting remain optional add-ons.</p>
     <form id="planForm">
       <div class="cards">
         <div><label for="planName">Plan name</label><input id="planName" required maxlength="100" placeholder="e.g. Standard Website"></div>
@@ -330,7 +330,7 @@ footer{text-align:center;color:#8290a2;padding:25px;font-size:12px}
       <div class="cards">
         <div><label for="subscriptionSchool">School</label><select id="subscriptionSchool" required><option value="">Loading schools...</option></select></div>
         <div><label for="subscriptionPlan">Plan</label><select id="subscriptionPlan"><option value="">No plan selected</option></select></div>
-        <div><label for="subscriptionStatus">Initial status</label><select id="subscriptionStatus"><option value="pending">Pending</option><option value="trial">Trial</option><option value="active">Active</option></select></div>
+        <div><label for="subscriptionStatus">Initial status</label><select id="subscriptionStatus"><option value="pending">Pending</option><option value="trial">Trial</option></select></div>
         <div><label for="subscriptionStart">Start date</label><input id="subscriptionStart" type="date"></div>
         <div><label for="subscriptionEnd">End date</label><input id="subscriptionEnd" type="date"></div>
         <div><label for="subscriptionDomain">School-owned custom domain (optional)</label><input id="subscriptionDomain" maxlength="253" placeholder="www.school.ac.ke"></div>
@@ -1328,20 +1328,57 @@ byId('planTableBody').addEventListener('click', event => {
 
 byId('cancelPlanEdit').addEventListener('click', resetPlanEditor);
 
+function calculateSubscriptionEnd(startDate, interval) {
+  const end = new Date(startDate);
+  const originalDay = end.getDate();
+  if (interval === 'monthly') {
+    end.setDate(1);
+    end.setMonth(end.getMonth() + 1);
+    const lastDay = new Date(end.getFullYear(), end.getMonth() + 1, 0).getDate();
+    end.setDate(Math.min(originalDay, lastDay));
+  } else if (interval === 'annual') {
+    const originalMonth = end.getMonth();
+    end.setFullYear(end.getFullYear() + 1);
+    if (end.getMonth() !== originalMonth) end.setDate(0);
+  } else {
+    return null;
+  }
+  end.setHours(23, 59, 59, 0);
+  return end;
+}
+
 byId('subscriptionForm').addEventListener('submit', async event => {
   event.preventDefault();
   const schoolId = byId('subscriptionSchool').value;
   if (!schoolId) { setMessage('subscriptionsMessage', 'Select a school before saving.', 'error'); return; }
-  const start = byId('subscriptionStart').value;
-  const end = byId('subscriptionEnd').value;
-  if (start && end && end < start) { setMessage('subscriptionsMessage', 'The end date cannot be earlier than the start date.', 'error'); return; }
+
+  const selectedPlan = currentPlans.find(p => p.id === byId('subscriptionPlan').value && p.active);
+  if (!selectedPlan) { setMessage('subscriptionsMessage', 'Select an active subscription plan before assigning the school.', 'error'); return; }
+  if (selectedPlan.price_kes == null || Number(selectedPlan.price_kes) <= 0) {
+    setMessage('subscriptionsMessage', 'This plan has no valid price. Set its price before assigning it.', 'error'); return;
+  }
+
+  const startInput = byId('subscriptionStart').value;
+  const endInput = byId('subscriptionEnd').value;
+  if (startInput && endInput && endInput < startInput) {
+    setMessage('subscriptionsMessage', 'The end date cannot be earlier than the start date.', 'error'); return;
+  }
+
+  const startDate = startInput ? new Date(startInput + 'T00:00:00') : new Date();
+  let endDate = endInput ? new Date(endInput + 'T23:59:59') : calculateSubscriptionEnd(startDate, selectedPlan.billing_interval);
+  if (endDate && endDate <= startDate) {
+    setMessage('subscriptionsMessage', 'The expiry date must be after the start date.', 'error'); return;
+  }
+
   const button = byId('saveSubscriptionButton'); button.disabled = true;
+  const endsAt = endDate ? endDate.toISOString() : null;
   const payload = {
     school_id: schoolId,
-    plan_id: byId('subscriptionPlan').value || null,
+    plan_id: selectedPlan.id,
     status: byId('subscriptionStatus').value,
-    starts_at: start ? new Date(start + 'T00:00:00').toISOString() : null,
-    ends_at: end ? new Date(end + 'T23:59:59').toISOString() : null,
+    starts_at: startDate.toISOString(),
+    ends_at: endsAt,
+    next_renewal_at: selectedPlan.billing_interval === 'one_time' ? null : endsAt,
     includes_cripri_subdomain: true,
     custom_domain: byId('subscriptionDomain').value.trim() || null,
     custom_domain_addon: byId('subscriptionCustomDomainAddon').checked,
@@ -1351,7 +1388,7 @@ byId('subscriptionForm').addEventListener('submit', async event => {
   button.disabled = false;
   if (error) { setMessage('subscriptionsMessage', 'Subscription record was not saved: ' + error.message, 'error'); return; }
   byId('subscriptionForm').reset();
-  setMessage('subscriptionsMessage', 'School subscription record saved. No payment was taken.', 'success');
+  setMessage('subscriptionsMessage', 'Pending school subscription saved. Record and verify payment in the Payments Register before activation.', 'success');
   await loadSubscriptions();
 });
 
