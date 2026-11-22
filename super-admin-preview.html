@@ -312,6 +312,11 @@ footer{text-align:center;color:#8290a2;padding:25px;font-size:12px}
   <div class="notice" id="subscriptionsMessage">Loading subscription records...</div>
   <div class="notice" id="subscriptionHealthMessage">Expiry monitoring will appear here.</div>
   <div class="panel">
+    <h3>Renewal reminders and expired subscriptions</h3>
+    <div class="muted">Schools with an active or trial subscription expiring within 30 days, plus expired records requiring attention.</div>
+    <div id="subscriptionReminderList" class="notice">Loading renewal reminders...</div>
+  </div>
+  <div class="panel">
     <h3 id="planFormHeading">Create a subscription plan</h3>
     <p class="muted">Monthly pricing: Basic KES 1,500; Standard KES 2,500; Premium KES 4,500. Every plan includes a CRIPRI school subdomain. Custom domains and additional hosting remain optional add-ons.</p>
     <form id="planForm">
@@ -1161,6 +1166,26 @@ async function loadSubscriptions() {
   if (expiredSubscriptions.length) healthParts.push(expiredSubscriptions.length + ' subscription(s) have expired and need review.');
   if (!healthParts.length) healthParts.push('No subscriptions are currently due to expire within 30 days.');
   setMessage('subscriptionHealthMessage', 'Expiry monitor: ' + healthParts.join(' ') + ' Alerts are shown in this dashboard; automatic SMS/email delivery is not configured.', expiringSoon.length || expiredSubscriptions.length ? 'error' : 'success');
+
+  const reminderBox = byId('subscriptionReminderList');
+  reminderBox.replaceChildren();
+  const reminderRows = [
+    ...expiringSoon.map(s => ({subscription:s, kind:'Expiring soon'})),
+    ...expiredSubscriptions.map(s => ({subscription:s, kind:'Expired'}))
+  ];
+  if (!reminderRows.length) {
+    reminderBox.textContent = 'No renewal reminders or expired subscriptions at this time.';
+  } else {
+    reminderRows.forEach(({subscription,kind}) => {
+      const line = document.createElement('div');
+      line.className = 'notice' + (kind === 'Expired' ? ' error' : '');
+      const schoolName = subscription.schools?.name || 'School';
+      const expiry = subscription.ends_at ? dateText(subscription.ends_at) : 'No expiry date';
+      line.textContent = schoolName + ' — ' + kind + ' — ' + subscription.status.toUpperCase() + ' — expiry: ' + expiry;
+      reminderBox.appendChild(line);
+    });
+  }
+
   renderSubscriptionPlans();
   renderSchoolSubscriptions();
   populateSubscriptionSelects();
