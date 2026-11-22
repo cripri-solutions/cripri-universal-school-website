@@ -372,7 +372,7 @@ footer{text-align:center;color:#8290a2;padding:25px;font-size:12px}
         <div><label for="paymentAmount">Amount (KES)</label><input id="paymentAmount" type="number" min="0.01" step="0.01" required></div>
         <div><label for="paymentMethod">Payment method</label><select id="paymentMethod" required><option value="mpesa">M-Pesa</option><option value="bank_transfer">Bank transfer</option><option value="cash">Cash</option><option value="card">Card</option><option value="other">Other</option></select></div>
         <div><label for="paymentReference">Transaction reference</label><input id="paymentReference" maxlength="180" placeholder="Required to confirm a payment"></div>
-        <div><label for="paymentStatus">Record status</label><select id="paymentStatus"><option value="pending">Pending verification</option><option value="confirmed">Confirmed (verified)</option><option value="failed">Failed</option><option value="reversed">Reversed</option></select></div>
+        <div><label for="paymentStatus">Record status</label><select id="paymentStatus"><option value="pending">Pending verification</option><option value="failed">Failed</option><option value="reversed">Reversed</option></select></div>
         <div><label for="paymentDate">Payment date</label><input id="paymentDate" type="datetime-local"></div>
       </div>
       <label for="paymentNotes">Internal notes</label><input id="paymentNotes" maxlength="1000" placeholder="Optional reconciliation note">
@@ -383,7 +383,7 @@ footer{text-align:center;color:#8290a2;padding:25px;font-size:12px}
   <div class="panel">
     <h3>Payment history</h3>
     <input class="search" id="paymentSearch" placeholder="Search school, reference or status...">
-    <div class="table-wrap"><table><thead><tr><th>School</th><th>Amount (KES)</th><th>Method</th><th>Reference</th><th>Status</th><th>Paid at</th><th>Recorded</th></tr></thead><tbody id="paymentTableBody"><tr><td colspan="7" class="empty">Loading payments...</td></tr></tbody></table></div>
+    <div class="table-wrap"><table><thead><tr><th>School</th><th>Amount (KES)</th><th>Method</th><th>Reference</th><th>Status</th><th>Paid at</th><th>Recorded</th><th>Actions</th></tr></thead><tbody id="paymentTableBody"><tr><td colspan="7" class="empty">Loading payments...</td></tr></tbody></table></div>
   </div>
 </section>
 
@@ -1366,7 +1366,7 @@ function renderPayments() {
   body.replaceChildren();
   if (!rows.length) {
     const tr = document.createElement('tr'), td = document.createElement('td');
-    td.colSpan = 7; td.className = 'empty';
+    td.colSpan = 8; td.className = 'empty';
     td.textContent = currentPayments.length ? 'No payments match your search.' : 'No payment records have been entered.';
     tr.appendChild(td); body.appendChild(tr); return;
   }
@@ -1379,8 +1379,58 @@ function renderPayments() {
     makeStatusCell(tr, p.status);
     makeCell(tr, p.paid_at ? new Date(p.paid_at).toLocaleString() : '—');
     makeCell(tr, dateText(p.created_at));
+    const actionCell = document.createElement('td');
+    if (p.status === 'pending') {
+      const confirmButton = document.createElement('button');
+      confirmButton.type = 'button';
+      confirmButton.className = 'activate';
+      confirmButton.textContent = 'Verify & Confirm';
+      confirmButton.addEventListener('click', () => confirmPayment(p));
+      actionCell.appendChild(confirmButton);
+    } else {
+      const dash = document.createElement('span');
+      dash.className = 'muted';
+      dash.textContent = '—';
+      actionCell.appendChild(dash);
+    }
+    tr.appendChild(actionCell);
     body.appendChild(tr);
   });
+}
+
+async function confirmPayment(payment) {
+  if (!payment || payment.status !== 'pending') {
+    setMessage('paymentsMessage', 'Only pending payment records can be confirmed.', 'error');
+    return;
+  }
+
+  const referenceInput = window.prompt(
+    'Enter the transaction reference from the verified provider record:',
+    payment.transaction_reference || ''
+  );
+  if (referenceInput === null) return;
+  const reference = referenceInput.trim();
+  if (!reference) {
+    setMessage('paymentsMessage', 'A transaction reference is required before confirmation.', 'error');
+    return;
+  }
+
+  const verified = window.confirm(
+    'Have you independently checked this transaction reference and amount against the M-Pesa, bank, or other provider record? Confirm only if the payment was genuinely received.'
+  );
+  if (!verified) return;
+
+  const result = await supabase.from('platform_payments')
+    .update({ status: 'confirmed', transaction_reference: reference })
+    .eq('id', payment.id)
+    .eq('status', 'pending');
+
+  if (result.error) {
+    setMessage('paymentsMessage', 'Payment was not confirmed: ' + result.error.message, 'error');
+    return;
+  }
+  setMessage('Payment confirmed after reviewer verification.', 'success');
+  await loadPayments();
 }
 
 byId('paymentSchool').addEventListener('change', populatePaymentSubscriptions);
@@ -1397,8 +1447,8 @@ byId('paymentForm').addEventListener('submit', async event => {
   if (!schoolId || !Number.isFinite(amount) || amount <= 0) {
     setMessage('paymentsMessage', 'Select a school and enter a valid positive amount.', 'error'); return;
   }
-  if (status === 'confirmed' && !reference) {
-    setMessage('paymentsMessage', 'A transaction reference is required before marking a payment confirmed.', 'error'); return;
+  if (status === 'confirmed') {
+    setMessage('paymentsMessage', 'New payments must be recorded as Pending. Use Verify & Confirm after checking the provider transaction.', 'error'); return;
   }
   const subscriptionId = byId('paymentSubscription').value || null;
   if (subscriptionId && !paymentSubscriptions.some(s => s.id === subscriptionId && s.school_id === schoolId)) {
