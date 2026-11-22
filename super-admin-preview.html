@@ -1240,7 +1240,12 @@ function renderSchoolSubscriptions() {
         await loadSubscriptions();
       });
       actionCell.appendChild(trialButton);
-    } else if (['pending','trial'].includes(s.status)) {
+    } else if (s.status === 'trial') {
+      const label = document.createElement('span');
+      label.className = 'muted';
+      label.textContent = 'Demo trial — no payment required';
+      actionCell.appendChild(label);
+    } else if (s.status === 'pending') {
       const subscriptionPlan = currentPlans.find(plan => plan.id === s.plan_id);
       const requiredAmount = Number(subscriptionPlan?.price_kes || 0);
       const eligiblePayments = currentConfirmedSubscriptionPayments.filter(p =>
