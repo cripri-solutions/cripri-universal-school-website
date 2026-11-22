@@ -309,7 +309,7 @@ footer{text-align:center;color:#8290a2;padding:25px;font-size:12px}
   </div>
   <div class="notice" id="subscriptionsMessage">Loading subscription records...</div>
   <div class="panel">
-    <h3>Create a subscription plan</h3>
+    <h3 id="planFormHeading">Create a subscription plan</h3>
     <p class="muted">Every plan includes a CRIPRI school subdomain. Leave the price blank until the fee is approved.</p>
     <form id="planForm">
       <div class="cards">
@@ -321,6 +321,7 @@ footer{text-align:center;color:#8290a2;padding:25px;font-size:12px}
       <label for="planDescription">Description</label><input id="planDescription" maxlength="500" placeholder="What the plan includes">
       <div class="notice">Included: schoolname.criprisolutions.co.ke. Custom domains and additional hosting are optional add-ons; no domain will be purchased automatically.</div>
       <button class="primary" type="submit" id="savePlanButton">Save Plan</button>
+      <button type="button" id="cancelPlanEdit" hidden>Cancel Edit</button>
     </form>
   </div>
   <div class="panel">
@@ -342,7 +343,7 @@ footer{text-align:center;color:#8290a2;padding:25px;font-size:12px}
   </div>
   <div class="panel">
     <h3>Registered subscription plans</h3>
-    <div class="table-wrap"><table><thead><tr><th>Plan</th><th>Code</th><th>Billing</th><th>Price (KES)</th><th>CRIPRI Subdomain</th><th>Status</th></tr></thead><tbody id="planTableBody"><tr><td colspan="6" class="empty">Loading plans...</td></tr></tbody></table></div>
+    <div class="table-wrap"><table><thead><tr><th>Plan</th><th>Code</th><th>Billing</th><th>Price (KES)</th><th>CRIPRI Subdomain</th><th>Status</th><th>Actions</th></tr></thead><tbody id="planTableBody"><tr><td colspan="6" class="empty">Loading plans...</td></tr></tbody></table></div>
   </div>
   <div class="panel">
     <h3>School subscription records</h3>
@@ -351,13 +352,38 @@ footer{text-align:center;color:#8290a2;padding:25px;font-size:12px}
 </section>
 
 <section id="payments" class="section">
-  <h1>Payments</h1>
-  <p class="muted">Financial monitoring and transaction records.</p>
+  <div class="topline">
+    <div><h1>Payments Register</h1><div class="muted">Record and reconcile school payments. This does not initiate M-Pesa or bank transactions.</div></div>
+    <button class="primary" id="refreshPayments">↻ Refresh Payments</button>
+  </div>
+  <div class="cards">
+    <div class="card"><div class="label">Recorded Payments</div><div class="number" id="paymentTotal">—</div><small>All payment records</small></div>
+    <div class="card"><div class="label">Confirmed Amount (KES)</div><div class="number" id="paymentConfirmedAmount">—</div><small>Verified records only</small></div>
+    <div class="card"><div class="label">Pending</div><div class="number" id="paymentPending">—</div><small>Awaiting verification</small></div>
+    <div class="card"><div class="label">Failed / Reversed</div><div class="number" id="paymentExceptions">—</div><small>Not counted as revenue</small></div>
+  </div>
+  <div class="notice" id="paymentsMessage">Loading payment register...</div>
   <div class="panel">
-    <div class="notice">
-      No M-Pesa or payment gateway records are connected to this dashboard.
-      No real transactions or revenue are displayed.
-    </div>
+    <h3>Record a payment</h3>
+    <form id="paymentForm">
+      <div class="cards">
+        <div><label for="paymentSchool">School</label><select id="paymentSchool" required><option value="">Select a school</option></select></div>
+        <div><label for="paymentSubscription">Subscription (optional)</label><select id="paymentSubscription"><option value="">Not linked</option></select></div>
+        <div><label for="paymentAmount">Amount (KES)</label><input id="paymentAmount" type="number" min="0.01" step="0.01" required></div>
+        <div><label for="paymentMethod">Payment method</label><select id="paymentMethod" required><option value="mpesa">M-Pesa</option><option value="bank_transfer">Bank transfer</option><option value="cash">Cash</option><option value="card">Card</option><option value="other">Other</option></select></div>
+        <div><label for="paymentReference">Transaction reference</label><input id="paymentReference" maxlength="180" placeholder="Required to confirm a payment"></div>
+        <div><label for="paymentStatus">Record status</label><select id="paymentStatus"><option value="pending">Pending verification</option><option value="confirmed">Confirmed (verified)</option><option value="failed">Failed</option><option value="reversed">Reversed</option></select></div>
+        <div><label for="paymentDate">Payment date</label><input id="paymentDate" type="datetime-local"></div>
+      </div>
+      <label for="paymentNotes">Internal notes</label><input id="paymentNotes" maxlength="1000" placeholder="Optional reconciliation note">
+      <div class="notice">Only mark a payment Confirmed after checking the transaction against the relevant M-Pesa, bank or other provider record. This register does not collect money or verify transactions automatically.</div>
+      <button class="primary" type="submit" id="savePaymentButton">Save Payment Record</button>
+    </form>
+  </div>
+  <div class="panel">
+    <h3>Payment history</h3>
+    <input class="search" id="paymentSearch" placeholder="Search school, reference or status...">
+    <div class="table-wrap"><table><thead><tr><th>School</th><th>Amount (KES)</th><th>Method</th><th>Reference</th><th>Status</th><th>Paid at</th><th>Recorded</th></tr></thead><tbody id="paymentTableBody"><tr><td colspan="7" class="empty">Loading payments...</td></tr></tbody></table></div>
   </div>
 </section>
 
@@ -507,6 +533,7 @@ function showPage(id, button) {
   if (id === 'approvals') loadSchoolApplications();
   if (id === 'admins') loadAdministrators();
   if (id === 'subscriptions') loadSubscriptions();
+  if (id === 'payments') loadPayments();
 }
 
 document.querySelectorAll('.sidebar .nav[data-page]').forEach(button => {
@@ -972,7 +999,6 @@ byId('approvalFilter').addEventListener(
   'change',
   renderApplications
 );
-
 /* ==========================================
    LIVE OVERVIEW
 ========================================== */
@@ -1086,6 +1112,7 @@ async function loadOverview() {
    WEBSITE SUBSCRIPTIONS
 ========================================== */
 let currentPlans = [];
+let editingPlanId = null;
 let currentSubscriptions = [];
 let currentSubscriptionSchools = [];
 
@@ -1145,7 +1172,7 @@ function renderSubscriptionPlans() {
   const body = byId('planTableBody'); body.replaceChildren();
   if (!currentPlans.length) {
     const tr = document.createElement('tr'), td = document.createElement('td');
-    td.colSpan = 6; td.className = 'empty'; td.textContent = 'No plans created yet.';
+    td.colSpan = 7; td.className = 'empty'; td.textContent = 'No plans created yet.';
     tr.appendChild(td); body.appendChild(tr); return;
   }
   currentPlans.forEach(p => {
@@ -1154,6 +1181,11 @@ function renderSubscriptionPlans() {
     makeCell(tr, p.price_kes == null ? 'Not set' : Number(p.price_kes).toLocaleString());
     makeStatusCell(tr, p.includes_cripri_subdomain ? 'Included' : 'Not included');
     makeStatusCell(tr, p.active ? 'Active' : 'Inactive');
+    const actionCell = document.createElement('td');
+    const editButton = document.createElement('button');
+    editButton.type = 'button'; editButton.className = 'secondary'; editButton.textContent = 'Edit';
+    editButton.dataset.editPlanId = p.id;
+    actionCell.appendChild(editButton); tr.appendChild(actionCell);
     body.appendChild(tr);
   });
 }
@@ -1195,13 +1227,43 @@ byId('planForm').addEventListener('submit', async event => {
     additional_hosting_available: true,
     active: true
   };
-  const { error } = await supabase.from('website_subscription_plans').insert(payload);
+  const wasEditing = Boolean(editingPlanId);
+  const result = wasEditing
+    ? await supabase.from('website_subscription_plans').update(payload).eq('id', editingPlanId)
+    : await supabase.from('website_subscription_plans').insert(payload);
   button.disabled = false;
-  if (error) { setMessage('subscriptionsMessage', 'Plan was not saved: ' + error.message, 'error'); return; }
-  byId('planForm').reset();
-  setMessage('subscriptionsMessage', 'Subscription plan saved.', 'success');
+  if (result.error) { setMessage('subscriptionsMessage', 'Plan was not saved: ' + result.error.message, 'error'); return; }
+  resetPlanEditor();
+  setMessage('subscriptionsMessage', wasEditing ? 'Subscription plan updated.' : 'Subscription plan saved.', 'success');
   await loadSubscriptions();
 });
+
+function resetPlanEditor() {
+  editingPlanId = null;
+  byId('planForm').reset();
+  byId('planFormHeading').textContent = 'Create a subscription plan';
+  byId('savePlanButton').textContent = 'Save Plan';
+  byId('cancelPlanEdit').hidden = true;
+}
+
+byId('planTableBody').addEventListener('click', event => {
+  const button = event.target.closest('[data-edit-plan-id]');
+  if (!button) return;
+  const plan = currentPlans.find(item => item.id === button.dataset.editPlanId);
+  if (!plan) return;
+  editingPlanId = plan.id;
+  byId('planName').value = plan.name || '';
+  byId('planCode').value = plan.code || '';
+  byId('planDescription').value = plan.description || '';
+  byId('planInterval').value = plan.billing_interval || 'monthly';
+  byId('planPrice').value = plan.price_kes == null ? '' : plan.price_kes;
+  byId('planFormHeading').textContent = 'Edit subscription plan';
+  byId('savePlanButton').textContent = 'Update Plan';
+  byId('cancelPlanEdit').hidden = false;
+  byId('planName').focus();
+});
+
+byId('cancelPlanEdit').addEventListener('click', resetPlanEditor);
 
 byId('subscriptionForm').addEventListener('submit', async event => {
   event.preventDefault();
@@ -1230,7 +1292,139 @@ byId('subscriptionForm').addEventListener('submit', async event => {
   await loadSubscriptions();
 });
 
+
 byId('refreshSubscriptions').addEventListener('click', loadSubscriptions);
+
+/* ==========================================
+   PAYMENT REGISTER (MANUAL RECONCILIATION)
+========================================== */
+let currentPayments = [];
+let paymentSchools = [];
+let paymentSubscriptions = [];
+
+async function loadPayments() {
+  setMessage('paymentsMessage', 'Loading verified payment records...');
+  const [paymentsResult, schoolsResult, subscriptionsResult] = await Promise.all([
+    supabase.from('platform_payments')
+      .select('id,school_id,subscription_id,amount_kes,payment_method,transaction_reference,status,paid_at,created_at,notes,schools(name)')
+      .order('created_at', { ascending: false }),
+    supabase.from('schools').select('id,name').order('name'),
+    supabase.from('school_subscriptions')
+      .select('id,school_id,status,website_subscription_plans(name)')
+      .order('created_at', { ascending: false })
+  ]);
+  const failed = paymentsResult.error || schoolsResult.error || subscriptionsResult.error;
+  if (failed) {
+    setMessage('paymentsMessage', 'Could not load payment register: ' + failed.message, 'error');
+    return;
+  }
+  currentPayments = paymentsResult.data || [];
+  paymentSchools = schoolsResult.data || [];
+  paymentSubscriptions = subscriptionsResult.data || [];
+  byId('paymentTotal').textContent = currentPayments.length;
+  const confirmed = currentPayments.filter(p => p.status === 'confirmed');
+  const confirmedAmount = confirmed.reduce((sum, p) => sum + Number(p.amount_kes || 0), 0);
+  byId('paymentConfirmedAmount').textContent = confirmedAmount.toLocaleString('en-KE', {maximumFractionDigits:2});
+  byId('paymentPending').textContent = currentPayments.filter(p => p.status === 'pending').length;
+  byId('paymentExceptions').textContent = currentPayments.filter(p => ['failed','reversed'].includes(p.status)).length;
+  populatePaymentSelects();
+  renderPayments();
+  setMessage('paymentsMessage', currentPayments.length + ' payment record(s) loaded. Confirmed totals include verified records only.', 'success');
+}
+
+function populatePaymentSelects() {
+  const schoolSelect = byId('paymentSchool');
+  const oldSchool = schoolSelect.value;
+  schoolSelect.replaceChildren();
+  const prompt = document.createElement('option'); prompt.value = ''; prompt.textContent = 'Select a school'; schoolSelect.appendChild(prompt);
+  paymentSchools.forEach(s => {
+    const option = document.createElement('option'); option.value = s.id; option.textContent = s.name; schoolSelect.appendChild(option);
+  });
+  if (paymentSchools.some(s => s.id === oldSchool)) schoolSelect.value = oldSchool;
+  populatePaymentSubscriptions();
+}
+
+function populatePaymentSubscriptions() {
+  const schoolId = byId('paymentSchool').value;
+  const select = byId('paymentSubscription');
+  select.replaceChildren();
+  const none = document.createElement('option'); none.value = ''; none.textContent = 'Not linked'; select.appendChild(none);
+  paymentSubscriptions.filter(s => !schoolId || s.school_id === schoolId).forEach(s => {
+    const option = document.createElement('option');
+    option.value = s.id;
+    option.textContent = (s.website_subscription_plans?.name || 'Unplanned subscription') + ' — ' + s.status;
+    select.appendChild(option);
+  });
+}
+
+function renderPayments() {
+  const body = byId('paymentTableBody');
+  const term = (byId('paymentSearch').value || '').trim().toLowerCase();
+  const rows = currentPayments.filter(p => [
+    p.schools?.name, p.transaction_reference, p.payment_method, p.status
+  ].some(v => String(v || '').toLowerCase().includes(term)));
+  body.replaceChildren();
+  if (!rows.length) {
+    const tr = document.createElement('tr'), td = document.createElement('td');
+    td.colSpan = 7; td.className = 'empty';
+    td.textContent = currentPayments.length ? 'No payments match your search.' : 'No payment records have been entered.';
+    tr.appendChild(td); body.appendChild(tr); return;
+  }
+  rows.forEach(p => {
+    const tr = document.createElement('tr');
+    makeCell(tr, p.schools?.name || p.school_id);
+    makeCell(tr, Number(p.amount_kes).toLocaleString('en-KE', {minimumFractionDigits:2, maximumFractionDigits:2}));
+    makeCell(tr, p.payment_method.replace('_',' '));
+    makeCell(tr, p.transaction_reference);
+    makeStatusCell(tr, p.status);
+    makeCell(tr, p.paid_at ? new Date(p.paid_at).toLocaleString() : '—');
+    makeCell(tr, dateText(p.created_at));
+    body.appendChild(tr);
+  });
+}
+
+byId('paymentSchool').addEventListener('change', populatePaymentSubscriptions);
+byId('paymentSearch').addEventListener('input', renderPayments);
+byId('refreshPayments').addEventListener('click', loadPayments);
+
+byId('paymentForm').addEventListener('submit', async event => {
+  event.preventDefault();
+  const schoolId = byId('paymentSchool').value;
+  const status = byId('paymentStatus').value;
+  const reference = byId('paymentReference').value.trim();
+  const amount = Number(byId('paymentAmount').value);
+  const paidAtValue = byId('paymentDate').value;
+  if (!schoolId || !Number.isFinite(amount) || amount <= 0) {
+    setMessage('paymentsMessage', 'Select a school and enter a valid positive amount.', 'error'); return;
+  }
+  if (status === 'confirmed' && !reference) {
+    setMessage('paymentsMessage', 'A transaction reference is required before marking a payment confirmed.', 'error'); return;
+  }
+  const subscriptionId = byId('paymentSubscription').value || null;
+  if (subscriptionId && !paymentSubscriptions.some(s => s.id === subscriptionId && s.school_id === schoolId)) {
+    setMessage('paymentsMessage', 'The selected subscription does not belong to this school.', 'error'); return;
+  }
+  const button = byId('savePaymentButton'); button.disabled = true;
+  const payload = {
+    school_id: schoolId,
+    subscription_id: subscriptionId,
+    amount_kes: amount,
+    payment_method: byId('paymentMethod').value,
+    transaction_reference: reference || null,
+    status,
+    paid_at: paidAtValue ? new Date(paidAtValue).toISOString() : null,
+    notes: byId('paymentNotes').value.trim() || null
+  };
+  const { error } = await supabase.from('platform_payments').insert(payload);
+  button.disabled = false;
+  if (error) {
+    setMessage('paymentsMessage', 'Payment record was not saved: ' + error.message, 'error'); return;
+  }
+  byId('paymentForm').reset();
+  setMessage('paymentsMessage', 'Payment record saved. No money was collected by this dashboard.', 'success');
+  await loadPayments();
+});
+
 
 /* ==========================================
    REFRESH ALL DASHBOARD DATA
