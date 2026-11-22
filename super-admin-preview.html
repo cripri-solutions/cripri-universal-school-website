@@ -277,13 +277,22 @@ footer{text-align:center;color:#8290a2;padding:25px;font-size:12px}
 </section>
 
 <section id="admins" class="section">
-  <h1>Administrators</h1>
-  <p class="muted">Administrator management is not yet connected to a verified live data source.</p>
+  <div class="topline">
+    <div><h1>School Administrators</h1><div class="muted">Live school membership records. This view is read-only.</div></div>
+    <button class="primary" id="refreshAdmins">↻ Refresh Administrators</button>
+  </div>
+  <div class="cards">
+    <div class="card"><div class="label">Total Memberships</div><div class="number" id="adminTotal">—</div><small>Registered school roles</small></div>
+    <div class="card"><div class="label">School Administrators</div><div class="number" id="adminOwners">—</div><small>School admin memberships</small></div>
+    <div class="card"><div class="label">Content Editors</div><div class="number" id="adminEditors">—</div><small>Content editor memberships</small></div>
+    <div class="card"><div class="label">Schools With Admins</div><div class="number" id="adminSchools">—</div><small>Schools represented</small></div>
+  </div>
   <div class="panel">
-    <div class="notice">
-      No administrator records are displayed here. This section will be connected
-      after its database table and access rules are verified.
-    </div>
+    <input class="search" id="adminSearch" placeholder="Search school, user ID or role...">
+    <div class="notice" id="adminsMessage">Loading administrator memberships...</div>
+    <div class="table-wrap"><table><thead><tr><th>School</th><th>Website Slug</th><th>Administrator User ID</th><th>Role</th><th>School Status</th><th>Joined</th></tr></thead>
+    <tbody id="adminTableBody"><tr><td colspan="6" class="empty">Loading...</td></tr></tbody></table></div>
+    <p class="muted">This first release displays existing membership records only. It does not create accounts, reset passwords, or change roles.</p>
   </div>
 </section>
 
@@ -453,6 +462,7 @@ function showPage(id, button) {
 
   if (id === 'schools') loadSchools();
   if (id === 'approvals') loadSchoolApplications();
+  if (id === 'admins') loadAdministrators();
 }
 
 document.querySelectorAll('.sidebar .nav[data-page]').forEach(button => {
@@ -644,6 +654,55 @@ async function activateSchool(schoolId, schoolName, button) {
 byId('schoolSearch').addEventListener('input', renderSchools);
 
 byId('refreshSchools').addEventListener('click', loadSchools);
+
+/* ==========================================
+   SCHOOL ADMINISTRATORS
+========================================== */
+let currentAdministrators = [];
+async function loadAdministrators() {
+  const body = byId('adminTableBody');
+  body.innerHTML = '<tr><td colspan="6" class="empty">Loading administrator memberships...</td></tr>';
+  setMessage('adminsMessage', 'Loading school membership records...');
+  const { data, error } = await supabase.from('school_memberships')
+    .select('id,school_id,user_id,role,created_at,schools(name,slug,status)')
+    .order('created_at', { ascending: false });
+  if (error) {
+    body.innerHTML = '<tr><td colspan="6" class="empty">Unable to load administrator records.</td></tr>';
+    setMessage('adminsMessage', 'Could not load memberships: ' + error.message, 'error');
+    return;
+  }
+  currentAdministrators = data || [];
+  byId('adminTotal').textContent = currentAdministrators.length;
+  byId('adminOwners').textContent = currentAdministrators.filter(a => a.role === 'school_admin').length;
+  byId('adminEditors').textContent = currentAdministrators.filter(a => a.role === 'content_editor').length;
+  byId('adminSchools').textContent = new Set(currentAdministrators.map(a => a.school_id)).size;
+  renderAdministrators();
+  setMessage('adminsMessage', currentAdministrators.length + ' school membership record(s) loaded.', 'success');
+}
+function renderAdministrators() {
+  const body = byId('adminTableBody');
+  const term = (byId('adminSearch').value || '').trim().toLowerCase();
+  const visible = currentAdministrators.filter(a => {
+    const school = a.schools || {};
+    return [school.name, school.slug, a.user_id, a.role, school.status].some(v => String(v || '').toLowerCase().includes(term));
+  });
+  body.replaceChildren();
+  if (!visible.length) {
+    const tr = document.createElement('tr'); const td = document.createElement('td');
+    td.colSpan = 6; td.className = 'empty';
+    td.textContent = currentAdministrators.length ? 'No memberships match your search.' : 'No school administrator memberships have been registered yet.';
+    tr.appendChild(td); body.appendChild(tr); return;
+  }
+  visible.forEach(a => {
+    const tr = document.createElement('tr'); const school = a.schools || {};
+    makeCell(tr, school.name || a.school_id); makeCell(tr, school.slug);
+    makeCell(tr, a.user_id); makeStatusCell(tr, a.role);
+    makeStatusCell(tr, school.status); makeCell(tr, dateText(a.created_at));
+    body.appendChild(tr);
+  });
+}
+byId('refreshAdmins').addEventListener('click', loadAdministrators);
+byId('adminSearch').addEventListener('input', renderAdministrators);
 
 /* ==========================================
    SCHOOL APPLICATIONS
