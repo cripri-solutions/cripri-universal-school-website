@@ -1240,8 +1240,7 @@ function renderSchoolSubscriptions() {
         await loadSubscriptions();
       });
       actionCell.appendChild(trialButton);
-    }
-    if (['pending','trial'].includes(s.status)) {
+    } else if (['pending','trial'].includes(s.status)) {
       const subscriptionPlan = currentPlans.find(plan => plan.id === s.plan_id);
       const requiredAmount = Number(subscriptionPlan?.price_kes || 0);
       const eligiblePayments = currentConfirmedSubscriptionPayments.filter(p =>
