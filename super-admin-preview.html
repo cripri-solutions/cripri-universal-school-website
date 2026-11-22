@@ -347,7 +347,7 @@ footer{text-align:center;color:#8290a2;padding:25px;font-size:12px}
   </div>
   <div class="panel">
     <h3>School subscription records</h3>
-    <div class="table-wrap"><table><thead><tr><th>School</th><th>Plan</th><th>Status</th><th>Start</th><th>End</th><th>Custom Domain</th><th>Add-ons</th></tr></thead><tbody id="subscriptionTableBody"><tr><td colspan="7" class="empty">Loading subscriptions...</td></tr></tbody></table></div>
+    <div class="table-wrap"><table><thead><tr><th>School</th><th>Plan</th><th>Status</th><th>Start</th><th>End</th><th>Custom Domain</th><th>Add-ons</th><th>Activation</th></tr></thead><tbody id="subscriptionTableBody"><tr><td colspan="8" class="empty">Loading subscriptions...</td></tr></tbody></table></div>
   </div>
 </section>
 
@@ -1115,15 +1115,22 @@ let currentPlans = [];
 let editingPlanId = null;
 let currentSubscriptions = [];
 let currentSubscriptionSchools = [];
+let currentConfirmedSubscriptionPayments = [];
 
 async function loadSubscriptions() {
-  setMessage('subscriptionsMessage', 'Loading plans, schools and subscription records...');
-  const [plansResult, schoolsResult, subsResult] = await Promise.all([
+  setMessage('subscriptionsMessage', 'Checking expiry and loading subscription records...');
+  const expiryResult = await supabase.rpc('refresh_expired_school_subscriptions');
+  if (expiryResult.error) {
+    setMessage('subscriptionsMessage', 'Could not refresh subscription expiry: ' + expiryResult.error.message, 'error');
+    return;
+  }
+  const [plansResult, schoolsResult, subsResult, paymentsResult] = await Promise.all([
     supabase.from('website_subscription_plans').select('id,code,name,description,billing_interval,price_kes,includes_cripri_subdomain,active').order('name'),
     supabase.from('schools').select('id,name,slug,status').order('name'),
-    supabase.from('school_subscriptions').select('id,school_id,plan_id,status,starts_at,ends_at,next_renewal_at,includes_cripri_subdomain,custom_domain,custom_domain_addon,additional_hosting_addon,created_at,schools(name,slug),website_subscription_plans(name,code,price_kes)').order('created_at', { ascending: false })
+    supabase.from('school_subscriptions').select('id,school_id,plan_id,status,starts_at,ends_at,next_renewal_at,includes_cripri_subdomain,custom_domain,custom_domain_addon,additional_hosting_addon,created_at,schools(name,slug),website_subscription_plans(name,code,price_kes)').order('created_at', { ascending: false }),
+    supabase.from('platform_payments').select('id,school_id,subscription_id,amount_kes,transaction_reference,status').eq('status','confirmed').not('subscription_id','is',null)
   ]);
-  const failed = plansResult.error || schoolsResult.error || subsResult.error;
+  const failed = plansResult.error || schoolsResult.error || subsResult.error || paymentsResult.error;
   if (failed) {
     setMessage('subscriptionsMessage', 'Could not load subscription data: ' + failed.message, 'error');
     return;
@@ -1131,6 +1138,7 @@ async function loadSubscriptions() {
   currentPlans = plansResult.data || [];
   currentSubscriptionSchools = schoolsResult.data || [];
   currentSubscriptions = subsResult.data || [];
+  currentConfirmedSubscriptionPayments = paymentsResult.data || [];
   byId('subscriptionTotal').textContent = currentSubscriptions.length;
   byId('subscriptionActive').textContent = currentSubscriptions.filter(s => s.status === 'active').length;
   byId('subscriptionPending').textContent = currentSubscriptions.filter(s => s.status === 'pending').length;
@@ -1194,7 +1202,7 @@ function renderSchoolSubscriptions() {
   const body = byId('subscriptionTableBody'); body.replaceChildren();
   if (!currentSubscriptions.length) {
     const tr = document.createElement('tr'), td = document.createElement('td');
-    td.colSpan = 7; td.className = 'empty'; td.textContent = 'No school subscription records yet.';
+    td.colSpan = 8; td.className = 'empty'; td.textContent = 'No school subscription records yet.';
     tr.appendChild(td); body.appendChild(tr); return;
   }
   currentSubscriptions.forEach(s => {
@@ -1208,6 +1216,61 @@ function renderSchoolSubscriptions() {
     if (s.custom_domain_addon) addons.push('Custom domain');
     if (s.additional_hosting_addon) addons.push('Additional hosting');
     makeCell(tr, addons.length ? addons.join(', ') : 'None');
+
+    const actionCell = document.createElement('td');
+    if (['pending','trial'].includes(s.status)) {
+      const eligiblePayments = currentConfirmedSubscriptionPayments.filter(p =>
+        p.subscription_id === s.id && p.school_id === s.school_id &&
+        String(p.transaction_reference || '').trim()
+      );
+      const paymentSelect = document.createElement('select');
+      paymentSelect.setAttribute('aria-label', 'Confirmed payment for ' + (s.schools?.name || 'school'));
+      const prompt = document.createElement('option');
+      prompt.value = ''; prompt.textContent = eligiblePayments.length ? 'Select verified payment' : 'No confirmed payment';
+      paymentSelect.appendChild(prompt);
+      eligiblePayments.forEach(p => {
+        const option = document.createElement('option');
+        option.value = p.id;
+        option.textContent = 'KES ' + Number(p.amount_kes).toLocaleString('en-KE') + ' — ' + p.transaction_reference;
+        paymentSelect.appendChild(option);
+      });
+      const activateButton = document.createElement('button');
+      activateButton.type = 'button';
+      activateButton.className = 'activate';
+      activateButton.textContent = 'Activate';
+      activateButton.disabled = eligiblePayments.length === 0;
+      activateButton.addEventListener('click', async () => {
+        if (!paymentSelect.value) {
+          setMessage('subscriptionsMessage', 'Select a confirmed payment linked to this exact subscription.', 'error');
+          return;
+        }
+        const accepted = window.confirm('Activate this subscription using the selected confirmed payment?');
+        if (!accepted) return;
+        activateButton.disabled = true;
+        const result = await supabase.rpc('activate_school_subscription', {
+          p_subscription_id: s.id,
+          p_payment_id: paymentSelect.value
+        });
+        activateButton.disabled = false;
+        if (result.error) {
+          setMessage('subscriptionsMessage', 'Subscription was not activated: ' + result.error.message, 'error');
+          return;
+        }
+        setMessage('Subscription activated after payment verification.', 'success');
+        await loadSubscriptions();
+      });
+      actionCell.appendChild(paymentSelect);
+      actionCell.appendChild(activateButton);
+    } else if (s.status === 'active') {
+      const label = document.createElement('span');
+      label.className = 'muted'; label.textContent = 'Expiry monitored';
+      actionCell.appendChild(label);
+    } else {
+      const label = document.createElement('span');
+      label.className = 'muted'; label.textContent = 'No action';
+      actionCell.appendChild(label);
+    }
+    tr.appendChild(actionCell);
     body.appendChild(tr);
   });
 }
