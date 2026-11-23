@@ -1943,22 +1943,39 @@ byId('savePlatformSettings').addEventListener('click', async () => {
     setMessage('settingsMessage', 'Platform name and default country are both required.', 'error');
     return;
   }
+  if (!signedInUser?.id) {
+    setMessage('settingsMessage', 'Your admin session is not available. Please sign in again.', 'error');
+    return;
+  }
+
   const button = byId('savePlatformSettings');
   button.disabled = true;
   button.textContent = 'Saving...';
-  const rows = [
-    { setting_key: 'platform_name', setting_value: platformName, updated_by: signedInUser.id, updated_at: new Date().toISOString() },
-    { setting_key: 'default_country', setting_value: defaultCountry, updated_by: signedInUser.id, updated_at: new Date().toISOString() }
-  ];
-  const { error } = await supabase.from('platform_settings').upsert(rows, { onConflict: 'setting_key' });
-  button.disabled = false;
-  button.textContent = 'Save Settings';
-  if (error) {
-    setMessage('settingsMessage', 'Settings were not saved: ' + error.message, 'error');
-    return;
+  setMessage('settingsMessage', 'Saving platform settings to Supabase...');
+
+  try {
+    const rows = [
+      { setting_key: 'platform_name', setting_value: platformName, updated_by: signedInUser.id, updated_at: new Date().toISOString() },
+      { setting_key: 'default_country', setting_value: defaultCountry, updated_by: signedInUser.id, updated_at: new Date().toISOString() }
+    ];
+    const { data, error } = await supabase
+      .from('platform_settings')
+      .upsert(rows, { onConflict: 'setting_key' })
+      .select('setting_key,setting_value');
+
+    if (error) throw error;
+    if (!data || data.length !== 2) {
+      throw new Error('Supabase did not confirm both settings were saved.');
+    }
+
+    setMessage('settingsMessage', 'Platform settings saved successfully to Supabase.', 'success');
+  } catch (error) {
+    console.error('Platform settings save failed:', error);
+    setMessage('settingsMessage', 'Save failed: ' + (error?.message || 'Unknown error. Please retry.'), 'error');
+  } finally {
+    button.disabled = false;
+    button.textContent = 'Save Settings';
   }
-  setMessage('settingsMessage', 'Platform settings saved successfully.', 'success');
-  await loadPlatformSettings();
 });
 
 /* ==========================================
