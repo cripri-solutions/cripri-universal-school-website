@@ -192,6 +192,9 @@ h2{font-size:clamp(29px,4vw,42px);color:var(--navy);margin:8px 0 12px}.section-l
     const {data:school,error:schoolError}=await supabase.from("schools").select("id,name,slug,status,motto,description,welcome_message,physical_address,county,country,contact_phone,contact_email,logo_path,banner_path").eq("slug",slug).eq("status","active").maybeSingle();
     if(schoolError)throw schoolError;
     if(!school){fail("School website not available",'No active school was found for "'+slug+'". Check the address or contact CRIPRI Technologies.');return;}
+    const {data:subscriptionValid,error:subscriptionError}=await supabase.rpc("is_school_website_subscription_valid",{p_school_id:school.id});
+    if(subscriptionError)throw subscriptionError;
+    if(subscriptionValid!==true){fail("School subscription inactive","This school's website subscription is not currently active. Please contact CRIPRI Technologies to arrange or renew the subscription.");return;}
     const name=school.name||"School",motto=school.motto||"Learning • Growth • Opportunity";
     const welcome=school.welcome_message||("Welcome to "+name+".");
     const location=[school.physical_address,school.county,school.country].filter(Boolean).join(", ");
