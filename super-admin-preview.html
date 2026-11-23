@@ -305,7 +305,7 @@ footer{text-align:center;color:#8290a2;padding:25px;font-size:12px}
 </section>
 
 <section id="admins" class="section">
-  <div class="topline"><div><h1>School Administrators</h1><div class="muted">Invite school administrators, assign content-editor access and manage memberships.</div></div><button class="primary" id="refreshAdmins">↻ Refresh Administrators</button></div>
+  <div class="topline"><div><h1>School Administrators</h1><div class="muted">Invite school administrators, assign content-editor access and manage memberships.</div></div><div style="display:flex;gap:8px;flex-wrap:wrap"><button class="primary" type="button" id="adminInviteShortcut">＋ Invite Administrator</button><button class="primary" id="refreshAdmins">↻ Refresh Administrators</button></div></div>
   <div class="cards">
     <div class="card"><div class="label">Total Memberships</div><div class="number" id="adminTotal">—</div><small>Registered school roles</small></div>
     <div class="card"><div class="label">School Administrators</div><div class="number" id="adminOwners">—</div><small>School admin memberships</small></div>
@@ -997,7 +997,8 @@ byId('adminInviteForm').addEventListener('submit',async event=>{
   } catch(e){setMessage('adminsMessage','Invitation failed: '+e.message,'error');}
   finally{button.disabled=false;button.textContent='Send Invitation';}
 });
-byId('refreshAdmins').addEventListener('click', loadAdministrators);
+byId('adminInviteShortcut').addEventListener('click', () => { byId('adminInviteForm').scrollIntoView({behavior:'smooth',block:'center'}); byId('adminInviteSchool').focus({preventScroll:true}); });
+ byId('refreshAdmins').addEventListener('click', loadAdministrators);
 byId('adminSearch').addEventListener('input', renderAdministrators);
 
 /* ==========================================
