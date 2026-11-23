@@ -305,23 +305,26 @@ footer{text-align:center;color:#8290a2;padding:25px;font-size:12px}
 </section>
 
 <section id="admins" class="section">
-  <div class="topline">
-    <div><h1>School Administrators</h1><div class="muted">Live school membership records. This view is read-only.</div></div>
-    <button class="primary" id="refreshAdmins">↻ Refresh Administrators</button>
-  </div>
+  <div class="topline"><div><h1>School Administrators</h1><div class="muted">Invite school administrators, assign content-editor access and manage memberships.</div></div><button class="primary" id="refreshAdmins">↻ Refresh Administrators</button></div>
   <div class="cards">
     <div class="card"><div class="label">Total Memberships</div><div class="number" id="adminTotal">—</div><small>Registered school roles</small></div>
     <div class="card"><div class="label">School Administrators</div><div class="number" id="adminOwners">—</div><small>School admin memberships</small></div>
     <div class="card"><div class="label">Content Editors</div><div class="number" id="adminEditors">—</div><small>Content editor memberships</small></div>
     <div class="card"><div class="label">Schools With Admins</div><div class="number" id="adminSchools">—</div><small>Schools represented</small></div>
   </div>
-  <div class="panel">
-    <input class="search" id="adminSearch" placeholder="Search school, user ID or role...">
-    <div class="notice" id="adminsMessage">Loading administrator memberships...</div>
-    <div class="table-wrap"><table><thead><tr><th>School</th><th>Website Slug</th><th>Administrator User ID</th><th>Role</th><th>School Status</th><th>Joined</th></tr></thead>
-    <tbody id="adminTableBody"><tr><td colspan="6" class="empty">Loading...</td></tr></tbody></table></div>
-    <p class="muted">This first release displays existing membership records only. It does not create accounts, reset passwords, or change roles.</p>
+  <div class="panel"><h3>Invite a school administrator or content editor</h3>
+    <form id="adminInviteForm"><div class="cards">
+      <div><label for="adminInviteSchool">School</label><select id="adminInviteSchool" required><option value="">Select active school</option></select></div>
+      <div><label for="adminInviteEmail">Email address</label><input id="adminInviteEmail" type="email" maxlength="254" required placeholder="person@school.org"></div>
+      <div><label for="adminInviteRole">Access role</label><select id="adminInviteRole"><option value="school_admin">School Admin</option><option value="content_editor">Content Editor</option></select></div>
+    </div><div class="notice">The invitation is sent by Supabase Auth. The recipient sets their own password. Access is limited to the selected school.</div>
+    <button class="primary" id="adminInviteButton" type="submit">Send Invitation</button></form>
   </div>
+  <div class="panel"><input class="search" id="adminSearch" placeholder="Search school, user ID or role...">
+    <div class="notice" id="adminsMessage">Loading administrator memberships...</div>
+    <div class="table-wrap"><table><thead><tr><th>School</th><th>Website Slug</th><th>User ID</th><th>Role</th><th>School Status</th><th>Joined</th><th>Actions</th></tr></thead><tbody id="adminTableBody"><tr><td colspan="7" class="empty">Loading...</td></tr></tbody></table></div>
+  </div>
+  <div class="panel"><h3>Administrator audit history</h3><div class="table-wrap"><table><thead><tr><th>Date</th><th>School ID</th><th>Action</th><th>Target user</th><th>Role</th><th>Changed by</th></tr></thead><tbody id="adminAuditBody"><tr><td colspan="6" class="empty">Loading audit history...</td></tr></tbody></table></div></div>
 </section>
 
 <section id="subscriptions" class="section">
@@ -925,46 +928,75 @@ byId('refreshNotifications').addEventListener('click', loadNotifications);
 let currentAdministrators = [];
 async function loadAdministrators() {
   const body = byId('adminTableBody');
-  body.innerHTML = '<tr><td colspan="6" class="empty">Loading administrator memberships...</td></tr>';
+  body.innerHTML = '<tr><td colspan="7" class="empty">Loading administrator memberships...</td></tr>';
   setMessage('adminsMessage', 'Loading school membership records...');
-  const { data, error } = await supabase.from('school_memberships')
-    .select('id,school_id,user_id,role,created_at,schools(name,slug,status)')
-    .order('created_at', { ascending: false });
-  if (error) {
-    body.innerHTML = '<tr><td colspan="6" class="empty">Unable to load administrator records.</td></tr>';
-    setMessage('adminsMessage', 'Could not load memberships: ' + error.message, 'error');
+  const [memberships, schools] = await Promise.all([
+    supabase.from('school_memberships').select('id,school_id,user_id,role,created_at,schools(name,slug,status)').order('created_at',{ascending:false}),
+    supabase.from('schools').select('id,name,status,slug').eq('status','active').order('name')
+  ]);
+  if (memberships.error || schools.error) {
+    setMessage('adminsMessage', 'Could not load administrator records: ' + (memberships.error || schools.error).message, 'error');
     return;
   }
-  currentAdministrators = data || [];
+  currentAdministrators = memberships.data || [];
+  const select = byId('adminInviteSchool'), previous = select.value;
+  select.replaceChildren(new Option('Select active school',''));
+  (schools.data || []).forEach(s => select.add(new Option(s.name + ' (' + s.slug + ')', s.id)));
+  if ((schools.data || []).some(s => s.id === previous)) select.value = previous;
   byId('adminTotal').textContent = currentAdministrators.length;
   byId('adminOwners').textContent = currentAdministrators.filter(a => a.role === 'school_admin').length;
   byId('adminEditors').textContent = currentAdministrators.filter(a => a.role === 'content_editor').length;
   byId('adminSchools').textContent = new Set(currentAdministrators.map(a => a.school_id)).size;
   renderAdministrators();
   setMessage('adminsMessage', currentAdministrators.length + ' school membership record(s) loaded.', 'success');
+  await loadAdminAudit();
 }
 function renderAdministrators() {
-  const body = byId('adminTableBody');
-  const term = (byId('adminSearch').value || '').trim().toLowerCase();
-  const visible = currentAdministrators.filter(a => {
-    const school = a.schools || {};
-    return [school.name, school.slug, a.user_id, a.role, school.status].some(v => String(v || '').toLowerCase().includes(term));
-  });
+  const body = byId('adminTableBody'), term = (byId('adminSearch').value || '').trim().toLowerCase();
+  const visible = currentAdministrators.filter(a => [a.schools?.name,a.schools?.slug,a.user_id,a.role,a.schools?.status].some(v => String(v || '').toLowerCase().includes(term)));
   body.replaceChildren();
-  if (!visible.length) {
-    const tr = document.createElement('tr'); const td = document.createElement('td');
-    td.colSpan = 6; td.className = 'empty';
-    td.textContent = currentAdministrators.length ? 'No memberships match your search.' : 'No school administrator memberships have been registered yet.';
-    tr.appendChild(td); body.appendChild(tr); return;
-  }
+  if (!visible.length) { const tr=document.createElement('tr'),td=document.createElement('td'); td.colSpan=7;td.className='empty';td.textContent=currentAdministrators.length?'No memberships match your search.':'No school memberships have been registered yet.';tr.appendChild(td);body.appendChild(tr);return; }
   visible.forEach(a => {
-    const tr = document.createElement('tr'); const school = a.schools || {};
-    makeCell(tr, school.name || a.school_id); makeCell(tr, school.slug);
-    makeCell(tr, a.user_id); makeStatusCell(tr, a.role);
-    makeStatusCell(tr, school.status); makeCell(tr, dateText(a.created_at));
-    body.appendChild(tr);
+    const tr=document.createElement('tr'); makeCell(tr,a.schools?.name || a.school_id); makeCell(tr,a.schools?.slug); makeCell(tr,a.user_id); makeStatusCell(tr,a.role); makeStatusCell(tr,a.schools?.status); makeCell(tr,dateText(a.created_at));
+    const td=document.createElement('td');
+    const role=document.createElement('button'); role.className='copy-link'; role.textContent='Change Role'; role.addEventListener('click',()=>changeAdminRole(a)); td.appendChild(role);
+    const remove=document.createElement('button'); remove.className='reject'; remove.textContent='Remove'; remove.addEventListener('click',()=>removeAdminMembership(a)); td.appendChild(remove); tr.appendChild(td); body.appendChild(tr);
   });
 }
+async function callAdminManagement(payload) {
+  const {data,error}=await supabase.functions.invoke('school-admin-management',{body:payload});
+  if(error) throw error;
+  if(data?.error) throw new Error(data.error);
+  return data;
+}
+async function changeAdminRole(a) {
+  const next=window.prompt('Enter new role: school_admin or content_editor',a.role);
+  if(next===null)return;
+  if(!['school_admin','content_editor'].includes(next.trim())){setMessage('adminsMessage','Role must be school_admin or content_editor.','error');return;}
+  if(next.trim()===a.role)return;
+  try { await callAdminManagement({action:'change_role',school_id:a.school_id,user_id:a.user_id,role:next.trim()}); setMessage('adminsMessage','Membership role updated.','success'); await loadAdministrators(); }
+  catch(e){setMessage('adminsMessage','Role update failed: '+e.message,'error');}
+}
+async function removeAdminMembership(a) {
+  if(!window.confirm('Remove this user’s membership from '+(a.schools?.name || 'this school')+'? Their Supabase account will not be deleted.'))return;
+  try { await callAdminManagement({action:'remove',school_id:a.school_id,user_id:a.user_id,role:a.role}); setMessage('adminsMessage','School membership removed.','success'); await loadAdministrators(); }
+  catch(e){setMessage('adminsMessage','Removal failed: '+e.message,'error');}
+}
+async function loadAdminAudit() {
+  const body=byId('adminAuditBody'); body.replaceChildren();
+  const {data,error}=await supabase.from('school_admin_audit').select('school_id,target_user_id,actor_user_id,action,role,created_at').order('created_at',{ascending:false}).limit(30);
+  if(error){const tr=document.createElement('tr'),td=document.createElement('td');td.colSpan=6;td.className='empty';td.textContent='Audit history unavailable: '+error.message;tr.appendChild(td);body.appendChild(tr);return;}
+  (data||[]).forEach(a=>{const tr=document.createElement('tr');makeCell(tr,dateText(a.created_at));makeCell(tr,a.school_id);makeCell(tr,a.action);makeCell(tr,a.target_user_id);makeCell(tr,a.role);makeCell(tr,a.actor_user_id);body.appendChild(tr);});
+  if(!data?.length){const tr=document.createElement('tr'),td=document.createElement('td');td.colSpan=6;td.className='empty';td.textContent='No administrator changes recorded yet.';tr.appendChild(td);body.appendChild(tr);}
+}
+byId('adminInviteForm').addEventListener('submit',async event=>{
+  event.preventDefault(); const button=byId('adminInviteButton'); button.disabled=true; button.textContent='Sending invitation...';
+  try {
+    const result=await callAdminManagement({action:'invite',school_id:byId('adminInviteSchool').value,email:byId('adminInviteEmail').value.trim(),role:byId('adminInviteRole').value});
+    setMessage('adminsMessage',result.message+' Recipient: '+result.email,'success'); byId('adminInviteForm').reset(); await loadAdministrators();
+  } catch(e){setMessage('adminsMessage','Invitation failed: '+e.message,'error');}
+  finally{button.disabled=false;button.textContent='Send Invitation';}
+});
 byId('refreshAdmins').addEventListener('click', loadAdministrators);
 byId('adminSearch').addEventListener('input', renderAdministrators);
 
