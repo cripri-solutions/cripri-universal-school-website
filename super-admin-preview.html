@@ -453,17 +453,15 @@ footer{text-align:center;color:#8290a2;padding:25px;font-size:12px}
 
 <section id="settings" class="section">
   <h1>Platform Settings</h1>
-  <p class="muted">Platform configuration.</p>
+  <p class="muted">Manage the platform identity and default registration settings.</p>
   <div class="panel">
     <h3>Platform Identity</h3>
-    <label>Platform Name</label><br>
-    <input value="CRIPRI Universal School Website" readonly><br>
-    <label>Default Country</label><br>
-    <input value="Kenya" readonly><br>
-    <div class="notice">
-      Settings editing is not connected to a verified settings table.
-      These values are display-only.
-    </div>
+    <label for="platformName">Platform Name</label><br>
+    <input id="platformName" type="text" maxlength="120" autocomplete="off"><br>
+    <label for="defaultCountry">Default Country</label><br>
+    <input id="defaultCountry" type="text" maxlength="80" autocomplete="off"><br>
+    <button class="primary" id="savePlatformSettings">Save Settings</button>
+    <div class="notice" id="settingsMessage">Loading saved platform settings...</div>
   </div>
 </section>
 
@@ -571,6 +569,7 @@ function showPage(id, button) {
   if (id === 'admins') loadAdministrators();
   if (id === 'subscriptions') loadSubscriptions();
   if (id === 'payments') loadPayments();
+  if (id === 'settings') loadPlatformSettings();
 }
 
 document.querySelectorAll('.sidebar .nav[data-page]').forEach(button => {
@@ -1917,6 +1916,50 @@ async function protectDashboard() {
 
   document.body.style.visibility = 'visible';
 }
+
+/* ==========================================
+   PLATFORM SETTINGS
+========================================== */
+async function loadPlatformSettings() {
+  setMessage('settingsMessage', 'Loading saved platform settings...');
+  const { data, error } = await supabase
+    .from('platform_settings')
+    .select('setting_key,setting_value')
+    .in('setting_key', ['platform_name','default_country']);
+  if (error) {
+    setMessage('settingsMessage', 'Could not load settings: ' + error.message, 'error');
+    return;
+  }
+  const values = Object.fromEntries((data || []).map(row => [row.setting_key, row.setting_value]));
+  byId('platformName').value = values.platform_name || 'CRIPRI Universal School Website';
+  byId('defaultCountry').value = values.default_country || 'Kenya';
+  setMessage('settingsMessage', 'Saved settings loaded from Supabase.', 'success');
+}
+
+byId('savePlatformSettings').addEventListener('click', async () => {
+  const platformName = byId('platformName').value.trim();
+  const defaultCountry = byId('defaultCountry').value.trim();
+  if (!platformName || !defaultCountry) {
+    setMessage('settingsMessage', 'Platform name and default country are both required.', 'error');
+    return;
+  }
+  const button = byId('savePlatformSettings');
+  button.disabled = true;
+  button.textContent = 'Saving...';
+  const rows = [
+    { setting_key: 'platform_name', setting_value: platformName, updated_by: signedInUser.id, updated_at: new Date().toISOString() },
+    { setting_key: 'default_country', setting_value: defaultCountry, updated_by: signedInUser.id, updated_at: new Date().toISOString() }
+  ];
+  const { error } = await supabase.from('platform_settings').upsert(rows, { onConflict: 'setting_key' });
+  button.disabled = false;
+  button.textContent = 'Save Settings';
+  if (error) {
+    setMessage('settingsMessage', 'Settings were not saved: ' + error.message, 'error');
+    return;
+  }
+  setMessage('settingsMessage', 'Platform settings saved successfully.', 'success');
+  await loadPlatformSettings();
+});
 
 /* ==========================================
    SIGN OUT
