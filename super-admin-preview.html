@@ -76,6 +76,7 @@ footer{text-align:center;color:#8290a2;padding:25px;font-size:12px}
   <button class="nav active" data-page="overview">▦ Overview</button>
   <button class="nav" data-page="schools">🏫 Schools</button>
   <button class="nav" data-page="approvals">✓ School Approvals</button>
+  <button class="nav" data-page="notifications">🔔 Notifications <span id="notificationNavCount" style="float:right;background:#d84c4c;color:white;border-radius:12px;padding:2px 7px;font-size:11px">0</span></button>
   <a class="nav" href="super-admin-domain-onboarding.html">🌐 Domain &amp; Website Onboarding</a>
   <button class="nav" data-page="admins">♙ Administrators</button>
   <button class="nav" data-page="subscriptions">▤ Subscriptions</button>
@@ -273,6 +274,33 @@ footer{text-align:center;color:#8290a2;padding:25px;font-size:12px}
       An approved application may have a school record whose status remains pending
       until the school is activated.
     </p>
+  </div>
+</section>
+
+<section id="notifications" class="section">
+  <div class="topline">
+    <div>
+      <h1>Notifications</h1>
+      <div class="muted">CRIPRI school application alerts and email delivery status.</div>
+    </div>
+    <button class="primary" id="refreshNotifications">↻ Refresh Notifications</button>
+  </div>
+  <div class="cards">
+    <div class="card"><div class="label">Total Notifications</div><div class="number" id="notificationTotal">—</div><small>Recorded platform alerts</small></div>
+    <div class="card"><div class="label">Unread</div><div class="number" id="notificationUnread">—</div><small>Not yet marked as read</small></div>
+    <div class="card"><div class="label">Pending Email</div><div class="number" id="notificationPending">—</div><small>Waiting to be sent</small></div>
+    <div class="card"><div class="label">Sent Email</div><div class="number" id="notificationSent">—</div><small>Accepted by Resend</small></div>
+  </div>
+  <div class="notice" id="notificationsMessage">Loading platform notifications...</div>
+  <div class="panel">
+    <h3>School notifications</h3>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>School / Event</th><th>Notification</th><th>Recipient</th><th>Created</th><th>Email status</th><th>Actions</th></tr></thead>
+        <tbody id="notificationTableBody"><tr><td colspan="6" class="empty">Loading notifications...</td></tr></tbody>
+      </table>
+    </div>
+    <p class="muted">Send Email invokes the protected Supabase function using your signed-in Super Admin session. “Sent” means Resend accepted the message; check Resend email logs for final delivery or bounce events.</p>
   </div>
 </section>
 
@@ -539,6 +567,7 @@ function showPage(id, button) {
 
   if (id === 'schools') loadSchools();
   if (id === 'approvals') loadSchoolApplications();
+  if (id === 'notifications') loadNotifications();
   if (id === 'admins') loadAdministrators();
   if (id === 'subscriptions') loadSubscriptions();
   if (id === 'payments') loadPayments();
@@ -733,6 +762,121 @@ async function activateSchool(schoolId, schoolName, button) {
 byId('schoolSearch').addEventListener('input', renderSchools);
 
 byId('refreshSchools').addEventListener('click', loadSchools);
+
+/* ==========================================
+   PLATFORM NOTIFICATIONS + RESEND DELIVERY
+========================================== */
+let currentNotifications = [];
+
+async function loadNotifications() {
+  const body = byId('notificationTableBody');
+  body.innerHTML = '<tr><td colspan="6" class="empty">Loading notifications...</td></tr>';
+  setMessage('notificationsMessage', 'Loading platform notifications from Supabase...');
+
+  const { data, error } = await supabase
+    .from('platform_notifications')
+    .select('id,application_id,event_type,title,message,recipient_email,email_status,email_error,created_at,sent_at,read_at')
+    .order('created_at', { ascending: false });
+
+  if (error) {
+    body.innerHTML = '<tr><td colspan="6" class="empty">Unable to load notifications.</td></tr>';
+    setMessage('notificationsMessage', 'Could not load notifications: ' + error.message, 'error');
+    return;
+  }
+
+  currentNotifications = data || [];
+  const unread = currentNotifications.filter(n => !n.read_at).length;
+  byId('notificationTotal').textContent = currentNotifications.length;
+  byId('notificationUnread').textContent = unread;
+  byId('notificationPending').textContent = currentNotifications.filter(n => n.email_status === 'pending').length;
+  byId('notificationSent').textContent = currentNotifications.filter(n => n.email_status === 'sent').length;
+  byId('notificationNavCount').textContent = unread;
+  byId('notificationNavCount').style.display = unread ? 'inline-block' : 'none';
+
+  body.replaceChildren();
+  if (!currentNotifications.length) {
+    const tr = document.createElement('tr');
+    const td = document.createElement('td');
+    td.colSpan = 6; td.className = 'empty';
+    td.textContent = 'No platform notifications have been recorded yet.';
+    tr.appendChild(td); body.appendChild(tr);
+  } else {
+    currentNotifications.forEach(n => {
+      const tr = document.createElement('tr');
+      const app = currentApplications.find(a => a.id === n.application_id);
+      const schoolCell = makeCell(tr, app?.school_name || n.event_type.replaceAll('_', ' '));
+      const titleCell = document.createElement('td');
+      const title = document.createElement('strong'); title.textContent = safe(n.title);
+      const message = document.createElement('div'); message.className = 'muted'; message.textContent = safe(n.message);
+      titleCell.append(title, message);
+      if (n.email_error) {
+        const error = document.createElement('div'); error.className = 'notice error'; error.style.marginTop = '8px'; error.textContent = 'Email error: ' + n.email_error;
+        titleCell.appendChild(error);
+      }
+      tr.appendChild(titleCell);
+      makeCell(tr, n.recipient_email);
+      makeCell(tr, dateText(n.created_at));
+      makeStatusCell(tr, n.email_status);
+      const actions = document.createElement('td'); actions.className = 'actions';
+      if (n.email_status !== 'sent') {
+        const send = document.createElement('button');
+        send.type = 'button'; send.className = 'primary'; send.textContent = n.email_status === 'failed' ? 'Retry Email' : 'Send Email';
+        send.addEventListener('click', () => sendSchoolNotification(n, send));
+        actions.appendChild(send);
+      } else {
+        const sent = document.createElement('span'); sent.className = 'muted'; sent.textContent = n.sent_at ? 'Sent ' + new Date(n.sent_at).toLocaleString() : 'Accepted by Resend';
+        actions.appendChild(sent);
+      }
+      if (!n.read_at) {
+        const read = document.createElement('button'); read.type = 'button'; read.className = 'copy-link'; read.textContent = 'Mark Read';
+        read.addEventListener('click', () => markNotificationRead(n, read));
+        actions.appendChild(read);
+      }
+      tr.appendChild(actions);
+      body.appendChild(tr);
+    });
+  }
+  setMessage('notificationsMessage', currentNotifications.length + ' notification(s) loaded. ' + unread + ' unread.', 'success');
+}
+
+async function sendSchoolNotification(notification, button) {
+  if (!notification?.id) return;
+  if (!notification.recipient_email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(notification.recipient_email)) {
+    setMessage('notificationsMessage', 'This notification has no valid recipient email. Correct the school application contact email before sending.', 'error');
+    return;
+  }
+  const school = currentApplications.find(a => a.id === notification.application_id)?.school_name || 'this school';
+  if (!window.confirm('Send this CRIPRI notification to ' + notification.recipient_email + ' for ' + school + '?')) return;
+
+  button.disabled = true; button.textContent = 'Sending...';
+  const { data, error } = await supabase.functions.invoke('send-school-notification', {
+    body: { notification_id: notification.id }
+  });
+  if (error || data?.error) {
+    const message = data?.error || error?.message || 'The email function did not return a success response.';
+    setMessage('notificationsMessage', 'Email was not confirmed as sent: ' + message, 'error');
+    button.disabled = false; button.textContent = notification.email_status === 'failed' ? 'Retry Email' : 'Send Email';
+    await loadNotifications();
+    return;
+  }
+  setMessage('notificationsMessage', data?.already_sent ? 'This notification was already sent.' : 'Resend accepted the email for ' + notification.recipient_email + '.', 'success');
+  await loadNotifications();
+}
+
+async function markNotificationRead(notification, button) {
+  button.disabled = true;
+  const { error } = await supabase.from('platform_notifications')
+    .update({ read_at: new Date().toISOString() })
+    .eq('id', notification.id);
+  if (error) {
+    button.disabled = false;
+    setMessage('notificationsMessage', 'Could not mark notification as read: ' + error.message, 'error');
+    return;
+  }
+  await loadNotifications();
+}
+
+byId('refreshNotifications').addEventListener('click', loadNotifications);
 
 /* ==========================================
    SCHOOL ADMINISTRATORS
