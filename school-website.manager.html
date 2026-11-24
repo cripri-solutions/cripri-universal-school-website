@@ -1158,7 +1158,8 @@ function renderContent() {
   const type = $('filterType').value;
   const status = $('filterStatus').value;
 
-  let records = [...contentRecords];
+  // Recovery items are managed only from the Recovery Bin.
+  let records = contentRecords.filter(r => r.status !== 'recovery');
 
   if(type !== 'all') {
     records = records.filter(r => r.content_type === type);
@@ -1252,7 +1253,7 @@ function renderRecoveryBin() {
 function renderCategory(type,elementId) {
 
   const records = contentRecords.filter(
-    r => r.content_type === type
+    r => r.content_type === type && r.status !== 'recovery'
   );
 
   renderItems(records,elementId);
@@ -1341,6 +1342,11 @@ function newContent(type='announcement') {
 // ======================================================
 
 function editContent(record) {
+
+  if(record && record.status === 'recovery') {
+    alert('Restore this item from the Recovery Bin before editing it.');
+    return;
+  }
 
   clearForm();
 
