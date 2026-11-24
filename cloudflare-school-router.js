@@ -11,6 +11,12 @@
 const PAGES_ORIGIN = "https://cripri-solutions.github.io";
 const PAGES_BASE = "/cripri-universal-school-website/";
 
+// Public subdomains may differ from the canonical database school slug.
+// Keep explicit aliases here so host routing resolves the correct tenant.
+const HOST_TO_SCHOOL_SLUG = {
+  telwa: "telwa-girls"
+};
+
 function isValidSchoolSlug(slug) {
   if (!slug || slug.includes(".") || !/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(slug)) {
     return false;
@@ -24,8 +30,9 @@ function getSchoolSlug(hostname, searchParams) {
 
   // Production school sites always derive their slug from the real hostname.
   if (host.endsWith(suffix)) {
-    const slug = host.slice(0, -suffix.length);
-    return isValidSchoolSlug(slug) ? slug : null;
+    const hostSlug = host.slice(0, -suffix.length);
+    const schoolSlug = HOST_TO_SCHOOL_SLUG[hostSlug] || hostSlug;
+    return isValidSchoolSlug(schoolSlug) ? schoolSlug : null;
   }
 
   // Preview-only override: lets us test a tenant on the Cloudflare Workers
