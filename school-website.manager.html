@@ -1642,7 +1642,7 @@ function getSchoolMediaObjectPath(mediaValue) {
   const value = String(mediaValue).trim();
   const marker = '/storage/v1/object/public/school-media/';
   try {
-    if(/^https?:\\/\\//i.test(value)) {
+    if(value.startsWith('https://') || value.startsWith('http://')) {
       const pathname = new URL(value).pathname;
       const at = pathname.indexOf(marker);
       if(at < 0) throw new Error('The media URL is not a recognized school-media object.');
