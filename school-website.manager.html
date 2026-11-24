@@ -1197,6 +1197,15 @@ function renderContent() {
 
     actions.appendChild(edit);
 
+    if(currentRole === 'school_admin') {
+      const remove = document.createElement('button');
+      remove.className = 'danger';
+      remove.textContent = 'Delete';
+      remove.style.marginLeft = '6px';
+      remove.addEventListener('click',() => deleteContent(record));
+      actions.appendChild(remove);
+    }
+
     tr.append(title,category,statusCell,date,actions);
 
     body.appendChild(tr);
@@ -1256,6 +1265,15 @@ function renderItems(records,elementId) {
     edit.addEventListener('click',() => editContent(record));
 
     article.append(heading,description,status,edit);
+
+    if(currentRole === 'school_admin') {
+      const remove = document.createElement('button');
+      remove.className = 'danger';
+      remove.textContent = 'Delete';
+      remove.style.marginLeft = '6px';
+      remove.addEventListener('click',() => deleteContent(record));
+      article.appendChild(remove);
+    }
 
     container.appendChild(article);
 
@@ -1568,27 +1586,41 @@ async function archiveContent(id) {
 // DELETE CONTENT
 // ======================================================
 
-async function deleteContent(id) {
+async function deleteContent(record) {
 
   if(currentRole !== 'school_admin') {
     alert('Only the School Admin can delete content.');
     return;
   }
 
-  if(!confirm('Permanently delete this content record?')) return;
-
-  const {error} = await supabase
-    .from('school_content_items')
-    .delete()
-    .eq('id',id)
-    .eq('school_id',currentSchool.id);
-
-  if(error) {
-    alert('Delete failed: ' + error.message);
+  if(!record || !record.id || !currentSchool) {
+    alert('Unable to identify this school content record.');
     return;
   }
 
-  await loadContent();
+  const label = record.title || 'this content';
+  if(!confirm('Permanently delete "' + label + '"? This action cannot be undone.')) return;
+
+  try {
+    const {data,error} = await supabase
+      .from('school_content_items')
+      .delete()
+      .eq('id',record.id)
+      .eq('school_id',currentSchool.id)
+      .select('id');
+
+    if(error) throw error;
+
+    if(!data || data.length === 0) {
+      throw new Error('No record was deleted. Check that you are the School Admin and that this content belongs to your school.');
+    }
+
+    await loadContent();
+    alert('Content deleted successfully.');
+  } catch(error) {
+    console.error('Content deletion failed:',error);
+    alert('Delete failed: ' + error.message);
+  }
 
 }
 
