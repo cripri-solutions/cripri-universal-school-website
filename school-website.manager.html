@@ -294,6 +294,7 @@ footer {
     <button class="nav" data-page="vacancies">Vacancies</button>
     <button class="nav" data-page="gallery">Gallery</button>
     <button class="nav" data-page="live">Live Updates</button>
+    <button class="nav" data-page="recovery">Recovery Bin</button>
   </aside>
 
   <main>
@@ -484,6 +485,14 @@ footer {
     </div>
 
   </div>
+</section>
+
+<!-- RECOVERY BIN -->
+<section id="recovery" class="section">
+  <h1>Recovery Bin</h1>
+  <p class="muted">Withdrawn content is hidden from the public website but retained here. Restore items as drafts or permanently erase them after confirmation.</p>
+  <div class="panel table-wrap"><table><thead><tr><th>Title</th><th>Category</th><th>Moved to recovery</th><th>Actions</th></tr></thead><tbody id="recoveryTable"><tr><td colspan="4">Loading...</td></tr></tbody></table></div>
+  <p id="recoveryMessage" class="message"></p>
 </section>
 
 <!-- CATEGORY PAGES -->
@@ -722,6 +731,7 @@ function showPage(page) {
   if(nav) nav.classList.add('active');
 
   if(page === 'content') renderContent();
+  if(page === 'recovery') renderRecoveryBin();
   if(page === 'profile') populateSchoolProfile();
 
   if(page === 'announcements') renderCategory('announcement','announcementsList');
@@ -1197,12 +1207,12 @@ function renderContent() {
 
     actions.appendChild(edit);
 
-    if(currentRole === 'school_admin') {
+    if(currentRole === 'school_admin' && record.status !== 'recovery') {
       const remove = document.createElement('button');
       remove.className = 'danger';
-      remove.textContent = 'Delete';
+      remove.textContent = 'Move to Recovery';
       remove.style.marginLeft = '6px';
-      remove.addEventListener('click',() => deleteContent(record));
+      remove.addEventListener('click',() => moveToRecovery(record));
       actions.appendChild(remove);
     }
 
@@ -1217,6 +1227,25 @@ function renderContent() {
 // ======================================================
 // CATEGORY CONTENT
 // ======================================================
+
+function renderRecoveryBin() {
+  const body = $('recoveryTable');
+  body.replaceChildren();
+  const records = contentRecords.filter(r => r.status === 'recovery');
+  if(!records.length) { body.innerHTML = '<tr><td colspan="4">The Recovery Bin is empty.</td></tr>'; return; }
+  records.forEach(record => {
+    const tr=document.createElement('tr');
+    const title=document.createElement('td'); title.textContent=record.title;
+    const category=document.createElement('td'); category.textContent=categoryNames[record.content_type] || record.content_type;
+    const date=document.createElement('td'); date.textContent=formatDate(record.updated_at);
+    const actions=document.createElement('td');
+    const restore=document.createElement('button'); restore.className='success'; restore.textContent='Restore as Draft';
+    restore.addEventListener('click',()=>manageRecoveredContent(record,'restore'));
+    const erase=document.createElement('button'); erase.className='danger'; erase.textContent='Permanently Erase'; erase.style.marginLeft='6px';
+    erase.addEventListener('click',()=>manageRecoveredContent(record,'permanent_delete'));
+    actions.append(restore,erase); tr.append(title,category,date,actions); body.appendChild(tr);
+  });
+}
 
 function renderCategory(type,elementId) {
 
@@ -1266,12 +1295,12 @@ function renderItems(records,elementId) {
 
     article.append(heading,description,status,edit);
 
-    if(currentRole === 'school_admin') {
+    if(currentRole === 'school_admin' && record.status !== 'recovery') {
       const remove = document.createElement('button');
       remove.className = 'danger';
-      remove.textContent = 'Delete';
+      remove.textContent = 'Move to Recovery';
       remove.style.marginLeft = '6px';
-      remove.addEventListener('click',() => deleteContent(record));
+      remove.addEventListener('click',() => moveToRecovery(record));
       article.appendChild(remove);
     }
 
@@ -1586,42 +1615,34 @@ async function archiveContent(id) {
 // DELETE CONTENT
 // ======================================================
 
-async function deleteContent(record) {
-
-  if(currentRole !== 'school_admin') {
-    alert('Only the School Admin can delete content.');
-    return;
-  }
-
-  if(!record || !record.id || !currentSchool) {
-    alert('Unable to identify this school content record.');
-    return;
-  }
-
-  const label = record.title || 'this content';
-  if(!confirm('Permanently delete "' + label + '"? This action cannot be undone.')) return;
-
+async function moveToRecovery(record) {
+  if(currentRole !== 'school_admin') { alert('Only the School Admin can withdraw public content.'); return; }
+  if(!record || !record.id) { alert('Unable to identify this content record.'); return; }
+  if(!confirm('Move "' + (record.title || 'this item') + '" to the Recovery Bin? It will be hidden from the public website, but can be restored.')) return;
   try {
-    const {data,error} = await supabase
-      .from('school_content_items')
-      .delete()
-      .eq('id',record.id)
-      .eq('school_id',currentSchool.id)
-      .select('id');
-
+    const {error} = await supabase.rpc('manage_school_content_item', {
+      p_content_id:record.id, p_action:'recover', p_confirm_permanent_delete:false
+    });
     if(error) throw error;
-
-    if(!data || data.length === 0) {
-      throw new Error('No record was deleted. Check that you are the School Admin and that this content belongs to your school.');
-    }
-
     await loadContent();
-    alert('Content deleted successfully.');
-  } catch(error) {
-    console.error('Content deletion failed:',error);
-    alert('Delete failed: ' + error.message);
-  }
+    alert('Content moved to the Recovery Bin.');
+  } catch(error) { alert('Could not move content to Recovery Bin: ' + error.message); }
+}
 
+async function manageRecoveredContent(record,action) {
+  if(currentRole !== 'school_admin') { alert('Only the School Admin can manage recovered content.'); return; }
+  if(action === 'restore' && !confirm('Restore "' + record.title + '" as a draft? It will not be public until republished.')) return;
+  if(action === 'permanent_delete' && !confirm('PERMANENTLY ERASE "' + record.title + '"? The database record cannot be restored. Its stored media file will not be deleted automatically.')) return;
+  try {
+    const {error} = await supabase.rpc('manage_school_content_item', {
+      p_content_id:record.id, p_action:action,
+      p_confirm_permanent_delete:action === 'permanent_delete'
+    });
+    if(error) throw error;
+    await loadContent();
+    renderRecoveryBin();
+    alert(action === 'restore' ? 'Content restored as a draft.' : 'Content record permanently erased. The media file, if any, remains in Storage.');
+  } catch(error) { alert('Recovery action failed: ' + error.message); }
 }
 
 // ======================================================
