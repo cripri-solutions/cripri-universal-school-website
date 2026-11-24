@@ -39,6 +39,10 @@ create table if not exists public.school_content_item_audit (
   occurred_at timestamptz not null default now()
 );
 
+-- Preserve the Storage object key in the audit trail before a content row is erased.
+alter table public.school_content_item_audit
+  add column if not exists media_path text;
+
 create index if not exists school_content_item_audit_school_time_idx
   on public.school_content_item_audit (school_id, occurred_at desc);
 
@@ -128,10 +132,10 @@ begin
     end if;
 
     insert into public.school_content_item_audit
-      (school_id, content_id, actor_user_id, action, content_title, previous_status, new_status)
+      (school_id, content_id, actor_user_id, action, content_title, previous_status, new_status, media_path)
     values
       (v_item.school_id, v_item.id, v_actor, 'PERMANENTLY_DELETED',
-       v_item.title, 'recovery', 'permanently_deleted');
+       v_item.title, 'recovery', 'permanently_deleted', v_item.media_path);
 
     delete from public.school_content_items where id = v_item.id;
     return jsonb_build_object('content_id', v_item.id, 'status', 'permanently_deleted');
