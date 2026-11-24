@@ -1637,20 +1637,59 @@ async function moveToRecovery(record) {
   } catch(error) { alert('Could not move content to Recovery Bin: ' + error.message); }
 }
 
+function getSchoolMediaObjectPath(mediaValue) {
+  if(!mediaValue) return null;
+  const value = String(mediaValue).trim();
+  const marker = '/storage/v1/object/public/school-media/';
+  try {
+    if(/^https?:\\/\\//i.test(value)) {
+      const pathname = new URL(value).pathname;
+      const at = pathname.indexOf(marker);
+      if(at < 0) throw new Error('The media URL is not a recognized school-media object.');
+      return decodeURIComponent(pathname.slice(at + marker.length));
+    }
+  } catch(error) { throw new Error('Could not identify the Storage object safely: ' + error.message); }
+  if(value.startsWith(currentSchool.id + '/')) return value;
+  throw new Error('The media path is not a recognized school-media object.');
+}
+
 async function manageRecoveredContent(record,action) {
   if(currentRole !== 'school_admin') { alert('Only the School Admin can manage recovered content.'); return; }
   if(action === 'restore' && !confirm('Restore "' + record.title + '" as a draft? It will not be public until republished.')) return;
-  if(action === 'permanent_delete' && !confirm('PERMANENTLY ERASE "' + record.title + '"? The database record cannot be restored. Its stored media file will not be deleted automatically.')) return;
+  if(action === 'permanent_delete' && !confirm('PERMANENTLY ERASE "' + record.title + '" and its attached school-media file, if any? This cannot be undone.')) return;
+  let databaseDeleted = false;
   try {
     const {error} = await supabase.rpc('manage_school_content_item', {
       p_content_id:record.id, p_action:action,
       p_confirm_permanent_delete:action === 'permanent_delete'
     });
     if(error) throw error;
+    databaseDeleted = action === 'permanent_delete';
+
+    if(databaseDeleted && record.media_path) {
+      const objectPath = getSchoolMediaObjectPath(record.media_path);
+      const {error:storageError} = await supabase.storage
+        .from('school-media').remove([objectPath]);
+      if(storageError) {
+        await loadContent();
+        renderRecoveryBin();
+        alert('The database record was permanently erased, but the Storage file could not be removed: ' + storageError.message + '. Its object path was retained in the audit record for cleanup.');
+        return;
+      }
+    }
+
     await loadContent();
     renderRecoveryBin();
-    alert(action === 'restore' ? 'Content restored as a draft.' : 'Content record permanently erased. The media file, if any, remains in Storage.');
-  } catch(error) { alert('Recovery action failed: ' + error.message); }
+    alert(action === 'restore'
+      ? 'Content restored as a draft.'
+      : 'Content record and attached Storage file permanently erased.');
+  } catch(error) {
+    if(databaseDeleted) {
+      alert('The database record was erased, but Storage cleanup needs attention: ' + error.message + '. The media path is retained in the audit record.');
+      return;
+    }
+    alert('Recovery action failed: ' + error.message);
+  }
 }
 
 // ======================================================
