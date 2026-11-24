@@ -78,6 +78,21 @@ $;
 revoke all on function public.is_active_cripri_school_admin(uuid) from public, anon;
 grant execute on function public.is_active_cripri_school_admin(uuid) to authenticated;
 
+create or replace function public.is_active_cripri_school(p_school_id uuid)
+returns boolean
+language sql
+stable
+security definer
+set search_path = ''
+as $
+  select exists (
+    select 1 from public.cripri_content_schools s
+    where s.school_id = p_school_id and s.status = 'ACTIVE'
+  );
+$;
+revoke all on function public.is_active_cripri_school(uuid) from public;
+grant execute on function public.is_active_cripri_school(uuid) to anon, authenticated;
+
 create index if not exists school_content_audit_school_time_idx
   on public.school_content_audit (school_id, occurred_at desc);
 
@@ -97,10 +112,7 @@ create policy "public reads published active school content"
 on public.school_site_content for select to anon, authenticated
 using (
   status = 'PUBLISHED'
-  and exists (
-    select 1 from public.cripri_content_schools s
-    where s.school_id = school_site_content.school_id and s.status = 'ACTIVE'
-  )
+  and public.is_active_cripri_school(school_id)
 );
 
 drop policy if exists "school admins read own school content" on public.school_site_content;
