@@ -11,27 +11,37 @@
 const PAGES_ORIGIN = "https://cripri-solutions.github.io";
 const PAGES_BASE = "/cripri-universal-school-website/";
 
-function getSchoolSlug(hostname) {
-  const suffix = ".criprisolutions.co.ke";
-  const host = hostname.toLowerCase();
-
-  if (!host.endsWith(suffix)) return null;
-
-  const slug = host.slice(0, -suffix.length);
-
+function isValidSchoolSlug(slug) {
   if (!slug || slug.includes(".") || !/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(slug)) {
-    return null;
+    return false;
+  }
+  return !["www", "admin", "api", "mail", "ftp"].includes(slug);
+}
+
+function getSchoolSlug(hostname, searchParams) {
+  const host = hostname.toLowerCase();
+  const suffix = ".criprisolutions.co.ke";
+
+  // Production school sites always derive their slug from the real hostname.
+  if (host.endsWith(suffix)) {
+    const slug = host.slice(0, -suffix.length);
+    return isValidSchoolSlug(slug) ? slug : null;
   }
 
-  if (["www", "admin", "api", "mail", "ftp"].includes(slug)) return null;
+  // Preview-only override: lets us test a tenant on the Cloudflare Workers
+  // preview hostname without changing production hostname routing.
+  if (host.endsWith(".workers.dev")) {
+    const previewSlug = (searchParams.get("school") || "").toLowerCase();
+    return isValidSchoolSlug(previewSlug) ? previewSlug : null;
+  }
 
-  return slug;
+  return null;
 }
 
 export default {
   async fetch(request) {
     const incoming = new URL(request.url);
-    const slug = getSchoolSlug(incoming.hostname);
+    const slug = getSchoolSlug(incoming.hostname, incoming.searchParams);
 
     if (!slug) {
       return new Response("School website not found.", {
