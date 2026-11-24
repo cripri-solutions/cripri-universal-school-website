@@ -2,10 +2,10 @@
 <html lang="en">
 <head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<meta name="description" content="CRIPRI school administrator content recovery portal">
-<title>CRIPRI Content Recovery</title>
+<meta name="description" content="CRIPRI school administrator content management portal">
+<title>CRIPRI Content Administration</title>
 <style>
-:root{font-family:Inter,Arial,sans-serif;color:#183247;background:#f3f6f8}*{box-sizing:border-box}body{margin:0}.top{background:#123b5d;color:#fff;padding:18px max(20px,calc((100% - 1100px)/2));display:flex;justify-content:space-between;align-items:center;gap:15px}.top a{color:#fff}.wrap{max-width:1100px;margin:28px auto;padding:0 18px}.panel{background:#fff;border:1px solid #dfe7ec;border-radius:13px;padding:22px;margin-bottom:18px}.muted{color:#657785}.field{display:grid;gap:6px;margin:10px 0}.field label{font-weight:700;font-size:.9rem}.field input,.field select{font:inherit;border:1px solid #cbd7df;border-radius:7px;padding:11px;width:100%}.btn{border:0;border-radius:7px;padding:10px 14px;font-weight:700;cursor:pointer;background:#145b3b;color:white}.btn.alt{background:#eaf0f4;color:#173d56}.btn.danger{background:#9d3030;color:#fff}.btn:disabled{opacity:.5;cursor:not--allowed}.actions{display:flex;gap:8px;flex-wrap:wrap}.status{min-height:24px;margin-top:10px;color:#145b3b}.item{border:1px solid #e0e7ec;border-radius:9px;padding:14px;margin:10px 0;display:flex;justify-content:space-between;gap:14px;align-items:center}.pill{font-size:.75rem;font-weight:700;background:#eaf0f4;border-radius:30px;padding:4px 9px}.hidden{display:none!important}.small{font-size:.83rem}.tabs{display:flex;gap:8px;flex-wrap:wrap;margin:15px 0}.audit{padding-left:20px;color:#536674}.audit li{margin:7px 0}@media(max-width:700px){.item{display:block}.item .actions{margin-top:12px}}
+:root{font-family:Inter,Arial,sans-serif;color:#183247;background:#f3f6f8}*{box-sizing:border-box}body{margin:0}.top{background:#123b5d;color:#fff;padding:18px max(20px,calc((100% - 1100px)/2));display:flex;justify-content:space-between;align-items:center;gap:15px}.wrap{max-width:1100px;margin:28px auto;padding:0 18px}.panel{background:#fff;border:1px solid #dfe7ec;border-radius:13px;padding:22px;margin-bottom:18px}.muted{color:#657785}.grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}.field{display:grid;gap:6px;margin:10px 0}.field label{font-weight:700;font-size:.9rem}.field input,.field textarea,.field select{font:inherit;border:1px solid #cbd7df;border-radius:7px;padding:11px;width:100%}.field textarea{min-height:100px}.btn{border:0;border-radius:7px;padding:10px 14px;font-weight:700;cursor:pointer;background:#145b3b;color:white}.btn.alt{background:#eaf0f4;color:#173d56}.btn.danger{background:#9d3030}.btn:disabled{opacity:.5;cursor:not-allowed}.actions{display:flex;gap:8px;flex-wrap:wrap}.status{min-height:24px;margin-top:10px;color:#145b3b}.item{border:1px solid #e0e7ec;border-radius:9px;padding:14px;margin:10px 0;display:flex;justify-content:space-between;gap:14px;align-items:center}.pill{font-size:.75rem;font-weight:700;background:#eaf0f4;border-radius:30px;padding:4px 9px}.hidden{display:none!important}.small{font-size:.83rem}.tabs{display:flex;gap:8px;flex-wrap:wrap;margin:15px 0}.audit{padding-left:20px;color:#536674}.audit li{margin:7px 0}.top a{color:white}@media(max-width:700px){.grid{grid-template-columns:1fr}.item{display:block}.item .actions{margin-top:12px}}
 </style>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
@@ -13,115 +13,65 @@
 <header class="top"><strong>CRIPRI · SCHOOL CONTENT ADMIN</strong><a href="index.html">Public website</a></header>
 <main class="wrap">
 <section class="panel" id="loginPanel">
-<h1>Administrator sign in</h1><p class="muted">Sign in with your provisioned school administrator account. The database independently verifies your school-admin permissions for every recovery action.</p>
-<div class="field"><label for="email">Email</label><input id="email" type="email" autocomplete="username"></div>
-<div class="field"><label for="password">Password</label><input id="password" type="password" autocomplete="current-password"></div>
+<h1>Administrator sign in</h1><p class="muted">Use the Supabase Auth account provisioned for your school. Access is checked again by the database for every content action.</p>
+<div class="grid"><div class="field"><label for="email">Email</label><input id="email" type="email" autocomplete="username"></div><div class="field"><label for="password">Password</label><input id="password" type="password" autocomplete="current-password"></div></div>
 <div class="actions"><button class="btn" id="signIn">Sign in</button></div><p class="status" id="loginStatus" role="status"></p>
 </section>
 <section class="panel hidden" id="appPanel">
-<div class="actions" style="justify-content:space-between;align-items:center"><div><h1 style="margin:0">Content removal & recovery</h1><p class="muted small" id="signedInAs"></p></div><button class="btn alt" id="signOut">Sign out</button></div>
+<div class="actions" style="justify-content:space-between;align-items:center"><div><h1 style="margin:0">Content management</h1><p class="muted small" id="signedInAs"></p></div><button class="btn alt" id="signOut">Sign out</button></div>
 <div class="field"><label for="schoolSelect">School workspace</label><select id="schoolSelect"></select></div>
-<p class="muted small">Pull Down moves an item out of public view into the Recovery Bin. Restore returns it as a draft. Permanent deletion is available only from the Recovery Bin and requires confirmation.</p>
-<div class="tabs"><button class="btn alt" data-filter="active">Current content</button><button class="btn alt" data-filter="recovery">Recovery Bin</button></div>
-<div id="contentList" aria-live="polite"></div>
+<p class="muted small">New and amended items are saved as drafts. Publishing makes approved content public. Pull Down hides published items immediately. Recovery Bin retains items for restoration.</p>
+<div class="panel">
+<h2 id="formHeading">Add content</h2>
+<div class="grid"><div class="field"><label for="contentType">Type</label><select id="contentType"><option value="COMMUNICATION">Communication</option><option value="PHOTOGRAPH">Photograph</option></select></div><div class="field"><label for="contentTitle">Title</label><input id="contentTitle" maxlength="160"></div></div>
+<div class="field"><label for="contentBody">Description / message</label><textarea id="contentBody" maxlength="12000"></textarea></div>
+<div class="grid"><div class="field"><label for="mediaUrl">Photo HTTPS URL (photographs only)</label><input id="mediaUrl" type="url" placeholder="https://..."></div><div class="field"><label for="altText">Photo alternative text</label><input id="altText" maxlength="300"></div></div>
+<label class="small"><input id="consent" type="checkbox"> I confirm the school has the required permission to publish this photograph.</label>
+<div class="actions" style="margin-top:14px"><button class="btn" id="save">Save draft</button><button class="btn alt hidden" id="cancelEdit">Cancel edit</button></div><p class="status" id="formStatus" role="status"></p>
+</div>
+<div class="tabs"><button class="btn alt" data-filter="ALL">All content</button><button class="btn alt" data-filter="DRAFT">Drafts</button><button class="btn alt" data-filter="PUBLISHED">Published</button><button class="btn alt" data-filter="WITHDRAWN">Pulled down</button><button class="btn alt" data-filter="RECOVERY">Recovery Bin</button></div>
+<div id="contentList"></div>
 <section class="panel"><h2>Activity history</h2><ol id="auditList" class="audit"></ol></section>
-<p class="status" id="appStatus" role="status"></p>
 </section>
 </main>
 <script>
 (() => {
   const SUPABASE_URL = "https://dudrolmymjwphwivrlko.supabase.co";
-  // Public publishable key only. Never place a service-role/secret key in browser code.
+  // Public publishable key only. Never put a service-role/secret key in this page.
   const SUPABASE_PUBLISHABLE_KEY = "sb_publishable_PLYgkSvgd79KTEHKh21o-g_CKgUTRTY";
   const $ = id => document.getElementById(id);
   const client = window.supabase.createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY);
-  let schoolId = null, filter = "active", rows = [];
+  let schoolId = null, editingId = null, filter = "ALL", rows = [];
   const say = (id,msg) => $(id).textContent = msg;
-  const load = async () => {
-    const {data,error}=await client.from("school_content_items")
-      .select("id,school_id,title,status,updated_at")
-      .eq("school_id",schoolId).order("updated_at",{ascending:false});
+  const invoke = async (action,payload={}) => {
+    const {data,error} = await client.functions.invoke("manage-site-content",{body:{school_id:schoolId,action,payload}});
     if(error) throw error;
-    rows=data||[]; render();
-    const {data:auditData,error:auditError}=await client.from("school_content_item_audit")
-      .select("*").eq("school_id",schoolId).limit(50);
+    if(data?.error) throw new Error(data.error);
+    return data?.data ?? data;
+  };
+  const resetForm = () => {editingId=null;$("contentTitle").value="";$("contentBody").value="";$("contentType").value="COMMUNICATION";$("mediaUrl").value="";$("altText").value="";$("consent").checked=false;$("save").textContent="Save draft";$("cancelEdit").classList.add("hidden");$("formHeading").textContent="Add content";};
+  const load = async () => {
+    const {data,error}=await client.from("school_site_content").select("id,content_type,title,body,media_url,alt_text,consent_confirmed,status,updated_at").eq("school_id",schoolId).order("updated_at",{ascending:false});
+    if(error) throw error; rows=data||[]; render();
+    const {data:auditData,error:auditError}=await client.from("school_content_audit").select("action,content_title,occurred_at").eq("school_id",schoolId).order("occurred_at",{ascending:false}).limit(50);
     if(auditError) throw auditError;
-    const audit=$("auditList"); audit.replaceChildren();
-    (auditData||[]).forEach(x=>{
-      const li=document.createElement("li");
-      const when=x.created_at||x.occurred_at||x.updated_at;
-      li.textContent=(when?new Date(when).toLocaleString()+" — ":"")+
-        (x.action||"Activity")+" · "+(x.content_title||"Content item")+
-        (x.previous_status||x.new_status?" ("+(x.previous_status||"")+" → "+(x.new_status||"")+")":"");
-      audit.append(li);
-    });
-    if(!auditData?.length){const li=document.createElement("li");li.textContent="No activity recorded.";audit.append(li);}
+    $("auditList").replaceChildren();
+    (auditData||[]).forEach(x=>{const li=document.createElement("li");li.textContent=new Date(x.occurred_at).toLocaleString()+" — "+x.action+" · "+x.content_title;$("auditList").append(li);});
+    if(!auditData?.length){const li=document.createElement("li");li.textContent="No activity recorded."; $("auditList").append(li);}
   };
-  const runAction = async (item,action,confirmPermanent=false) => {
-    if(action==="permanent_delete" && !window.confirm("Permanently erase this item? This cannot be undone.")) return;
-    try {
-      say("appStatus","Processing…");
-      const {data,error}=await client.rpc("manage_school_content_item",{
-        p_content_id:item.id,
-        p_action:action,
-        p_confirm_permanent_delete:confirmPermanent
-      });
-      if(error) throw error;
-      if(data?.status==="permanently_deleted") say("appStatus","Content permanently deleted.");
-      else say("appStatus","Content moved to "+data.status+".");
-      await load();
-    } catch(e) { say("appStatus",e.message||"The content action could not be completed."); }
-  };
-  const render = () => {
-    const root=$("contentList"); root.replaceChildren();
-    const shown=rows.filter(x=>filter==="recovery"?x.status==="recovery":x.status!=="recovery");
-    if(!shown.length){root.textContent=filter==="recovery"?"The Recovery Bin is empty.":"No current content items.";return;}
-    shown.forEach(item=>{
-      const card=document.createElement("article");card.className="item";
-      const left=document.createElement("div"),title=document.createElement("strong"),meta=document.createElement("p"),pill=document.createElement("span");
-      title.textContent=item.title||"Untitled content";
-      meta.className="muted small";meta.textContent="Updated "+(item.updated_at?new Date(item.updated_at).toLocaleString():"date unavailable");
-      pill.className="pill";pill.textContent=item.status;
-      left.append(title,meta,pill);
-      const buttons=document.createElement("div");buttons.className="actions";
-      const addButton=(label,action,danger=false,confirmed=false)=>{
-        const b=document.createElement("button");b.className="btn "+(danger?"danger":"alt");b.textContent=label;
-        b.addEventListener("click",()=>runAction(item,action,confirmed));buttons.append(b);
-      };
-      if(filter==="recovery"){
-        addButton("Restore as draft","restore");
-        addButton("Delete permanently","permanent_delete",true,true);
-      } else {
-        addButton("Pull Down / Move to Recovery","recover",true);
-      }
-      card.append(left,buttons);root.append(card);
-    });
-  };
-  const start = async user => {
-    try {
-      const {data:members,error:memberError}=await client.from("school_memberships")
-        .select("school_id").eq("user_id",user.id).eq("role","school_admin");
-      if(memberError) throw memberError;
-      const ids=[...new Set((members||[]).map(x=>x.school_id).filter(Boolean))];
-      if(!ids.length) throw new Error("No school administrator membership is assigned to this account.");
-      const {data:schools,error:schoolError}=await client.from("schools")
-        .select("id,name,status").in("id",ids).eq("status","active");
-      if(schoolError) throw schoolError;
-      if(!schools?.length) throw new Error("No active school administrator workspace is available.");
-      $("schoolSelect").replaceChildren();
-      schools.forEach(s=>{const o=document.createElement("option");o.value=s.id;o.textContent=s.name||"School "+s.id;$("schoolSelect").append(o);});
-      schoolId=schools[0].id;$("signedInAs").textContent=user.email||"Signed in";
-      $("loginPanel").classList.add("hidden");$("appPanel").classList.remove("hidden");
-      await load();
-    } catch(e) {say("loginStatus",e.message||"Unable to load administrator access.");await client.auth.signOut();}
-  };
-  $("signIn").addEventListener("click",async()=>{
-    say("loginStatus","Signing in…");
-    const {data,error}=await client.auth.signInWithPassword({email:$("email").value.trim(),password:$("password").value});
-    if(error){say("loginStatus",error.message);return;} await start(data.user);
-  });
-  $("schoolSelect").addEventListener("change",async e=>{schoolId=e.target.value;try{await load();}catch(err){say("appStatus",err.message);}});
-  $("signOut").addEventListener("click",async()=>{await client.auth.signOut();$("appPanel").classList.add("hidden");$("loginPanel").classList.remove("hidden");schoolId=null;});
+  const actionButton=(label,action,payload,danger=false)=>{const b=document.createElement("button");b.className="btn "+(danger?"danger":"alt");b.textContent=label;b.addEventListener("click",async()=>{if(action==="permanent_delete"&&!confirm("Permanently delete this item? This cannot be undone."))return;try{await invoke(action,payload);await load();say("formStatus","Content updated.");}catch(e){say("formStatus",e.message||"Action failed.");}});return b;};
+  const render=()=>{const root=$("contentList");root.replaceChildren();const shown=rows.filter(x=>filter==="ALL"||x.status===filter);if(!shown.length){root.textContent="No content in this view.";return;}shown.forEach(item=>{const card=document.createElement("article");card.className="item";const left=document.createElement("div"),title=document.createElement("strong"),meta=document.createElement("p"),pill=document.createElement("span");title.textContent=item.title;meta.className="muted small";meta.textContent=item.content_type+" · "+item.body.slice(0,180);pill.className="pill";pill.textContent=item.status;left.append(title,meta,pill);const buttons=document.createElement("div");buttons.className="actions";
+    if(item.status!=="RECOVERY"){const editButton=document.createElement("button");editButton.className="btn alt";editButton.textContent="Edit";editButton.addEventListener("click",()=>edit(item));buttons.append(editButton);if(item.status==="PUBLISHED"){buttons.append(actionButton("Pull Down","withdraw",{content_id:item.id}));}else if(item.status==="WITHDRAWN"){buttons.append(actionButton("Restore as draft","restore",{content_id:item.id}));}else{buttons.append(actionButton("Publish","publish",{content_id:item.id}));}buttons.append(actionButton("Move to Recovery","recover",{content_id:item.id},true));}
+    else{buttons.append(actionButton("Restore as draft","restore",{content_id:item.id}));buttons.append(actionButton("Delete permanently","permanent_delete",{content_id:item.id,confirm_permanent_delete:true},true));}
+    card.append(left,buttons);root.append(card);});};
+  const edit=item=>{editingId=item.id;$("contentType").value=item.content_type;$("contentTitle").value=item.title;$("contentBody").value=item.body;$("mediaUrl").value=item.media_url||"";$("altText").value=item.alt_text||"";$("consent").checked=!!item.consent_confirmed;$("save").textContent="Save amendments";$("cancelEdit").classList.remove("hidden");$("formHeading").textContent="Amend content (published items become drafts)";window.scrollTo({top:0,behavior:"smooth"});};
+  const doAction=async(action,payload)=>{try{await invoke(action,payload);await load();}catch(e){say("formStatus",e.message||"Unable to complete action.");}};
+  $("signIn").addEventListener("click",async()=>{say("loginStatus","Signing in…");const {data,error}=await client.auth.signInWithPassword({email:$("email").value.trim(),password:$("password").value});if(error){say("loginStatus",error.message);return;}await start(data.user);});
+  const start=async user=>{try{const {data,error}=await client.rpc("get_my_cripri_schools");if(error)throw error;if(!data?.length)throw new Error("No active school administrator access is assigned to this account. Contact CRIPRI.");$("schoolSelect").replaceChildren();data.forEach(x=>{const o=document.createElement("option");o.value=x.school_id;o.textContent="School "+x.school_id;$("schoolSelect").append(o);});schoolId=data[0].school_id;$("signedInAs").textContent=user.email||"Signed in";$("loginPanel").classList.add("hidden");$("appPanel").classList.remove("hidden");await load();}catch(e){say("loginStatus",e.message||"Unable to load administrator access.");await client.auth.signOut();}};
+  $("schoolSelect").addEventListener("change",async e=>{schoolId=e.target.value;try{await load();}catch(err){say("formStatus",err.message);}});
+  $("signOut").addEventListener("click",async()=>{await client.auth.signOut();$("appPanel").classList.add("hidden");$("loginPanel").classList.remove("hidden");schoolId=null;resetForm();});
+  $("save").addEventListener("click",async()=>{const payload={content_id:editingId,title:$("contentTitle").value.trim(),body:$("contentBody").value.trim(),content_type:$("contentType").value,media_url:$("mediaUrl").value.trim(),alt_text:$("altText").value.trim(),consent_confirmed:$("consent").checked};try{await invoke("save",payload);resetForm();await load();say("formStatus","Saved as draft. Publish it when it is ready.");}catch(e){say("formStatus",e.message||"Could not save content.");}});
+  $("cancelEdit").addEventListener("click",resetForm);
   document.querySelectorAll("[data-filter]").forEach(b=>b.addEventListener("click",()=>{filter=b.dataset.filter;render();}));
   client.auth.getSession().then(({data})=>{if(data.session?.user)start(data.session.user);});
 })();
