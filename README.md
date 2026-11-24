@@ -11,7 +11,8 @@ https://cripri-solutions.github.io/cripri-universal-school-website/
 - `index.html` — CRIPRI platform landing page explaining the service and school onboarding approach.
 - `style.css` — responsive visual design shared by the public pages.
 - `school-registration-preview.html` — demonstration of the proposed school application form; it is disabled and does not submit or store data.
-- `portal-preview.html` — sample school administrator workspace; it has no login or database.
+- `portal-preview.html` — sample school administrator workspace.
+- `admin-content.html` — Supabase Auth-connected school content administration portal (database migration and Edge Function deployment still required).
 - `registration-review-preview.html` — fictional sample of CRIPRI's manual application review process; it is not a live staff console.
 - `script.js` — reusable settings-driven school homepage script retained as a starter for future individual school sites.
 - `supabase/migrations/` — Supabase database migrations, including school content management, RLS and audit controls.
@@ -20,7 +21,7 @@ https://cripri-solutions.github.io/cripri-universal-school-website/
 
 ## Current hosting
 
-The public static pages are hosted on GitHub Pages. The public website is hosted on GitHub Pages. The intended backend is Supabase; project connection and deployment are pending confirmation.
+The public static pages are hosted on GitHub Pages. The public website is hosted on GitHub Pages. The admin portal is configured to use the confirmed Supabase project URL and its public publishable key. The database migration and Edge Function have not yet been deployed.
 
 ## Important functionality boundary
 
