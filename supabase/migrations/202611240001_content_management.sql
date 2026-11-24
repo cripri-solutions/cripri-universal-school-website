@@ -63,7 +63,7 @@ language sql
 stable
 security definer
 set search_path = ''
-as $
+as $$
   select exists (
     select 1
     from public.cripri_content_admins a
@@ -74,7 +74,7 @@ as $
       and a.active = true
       and s.status = 'ACTIVE'
   );
-$;
+$$;
 revoke all on function public.is_active_cripri_school_admin(uuid) from public, anon;
 grant execute on function public.is_active_cripri_school_admin(uuid) to authenticated;
 
