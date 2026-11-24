@@ -55,6 +55,29 @@ create table if not exists public.school_content_audit (
   occurred_at timestamptz not null default now()
 );
 
+-- Narrow SECURITY DEFINER helper lets RLS evaluate the trusted membership registry
+-- without granting browser clients direct access to that registry.
+create or replace function public.is_active_cripri_school_admin(p_school_id uuid)
+returns boolean
+language sql
+stable
+security definer
+set search_path = ''
+as $
+  select exists (
+    select 1
+    from public.cripri_content_admins a
+    join public.cripri_content_schools s on s.school_id = a.school_id
+    where a.school_id = p_school_id
+      and a.user_id = (select auth.uid())
+      and a.role = 'SCHOOL_ADMIN'
+      and a.active = true
+      and s.status = 'ACTIVE'
+  );
+$;
+revoke all on function public.is_active_cripri_school_admin(uuid) from public, anon;
+grant execute on function public.is_active_cripri_school_admin(uuid) to authenticated;
+
 create index if not exists school_content_audit_school_time_idx
   on public.school_content_audit (school_id, occurred_at desc);
 
@@ -83,17 +106,7 @@ using (
 drop policy if exists "school admins read own school content" on public.school_site_content;
 create policy "school admins read own school content"
 on public.school_site_content for select to authenticated
-using (
-  exists (
-    select 1 from public.cripri_content_admins a
-    join public.cripri_content_schools s on s.school_id = a.school_id
-    where a.school_id = school_site_content.school_id
-      and a.user_id = (select auth.uid())
-      and a.role = 'SCHOOL_ADMIN'
-      and a.active = true
-      and s.status = 'ACTIVE'
-  )
-);
+using (public.is_active_cripri_school_admin(school_id));
 
 -- All changes go through the checked RPC below; no direct client writes.
 revoke insert, update, delete on public.school_site_content from anon, authenticated;
@@ -102,17 +115,7 @@ grant select on public.school_site_content to anon, authenticated;
 drop policy if exists "school admins read own content audit" on public.school_content_audit;
 create policy "school admins read own content audit"
 on public.school_content_audit for select to authenticated
-using (
-  exists (
-    select 1 from public.cripri_content_admins a
-    join public.cripri_content_schools s on s.school_id = a.school_id
-    where a.school_id = school_content_audit.school_id
-      and a.user_id = (select auth.uid())
-      and a.role = 'SCHOOL_ADMIN'
-      and a.active = true
-      and s.status = 'ACTIVE'
-  )
-);
+using (public.is_active_cripri_school_admin(school_id));
 revoke insert, update, delete on public.school_content_audit from anon, authenticated;
 grant select on public.school_content_audit to authenticated;
 
@@ -137,6 +140,7 @@ declare
   v_alt text;
   v_consent boolean;
   v_next_status text;
+  v_previous_status text;
   v_action_label text;
 begin
   if v_actor is null then
@@ -190,6 +194,7 @@ begin
       select * into v_item from public.school_site_content
         where id=v_id and school_id=p_school_id for update;
       if not found then raise exception 'Content not found' using errcode='P0002'; end if;
+      v_previous_status := v_item.status;
       v_next_status := case when v_item.status='PUBLISHED' then 'DRAFT' else v_item.status end;
       if v_next_status='RECOVERY' then
         raise exception 'Restore this item before editing it' using errcode='22023';
@@ -205,7 +210,7 @@ begin
     insert into public.school_content_audit
       (school_id,content_id,actor_user_id,action,content_title,previous_status,new_status)
     values (p_school_id,v_item.id,v_actor,v_action_label,v_item.title,
-      case when v_action_label='CONTENT_CREATED' then null else 'PREVIOUS_STATE' end,
+      case when v_action_label='CONTENT_CREATED' then null else v_previous_status end,
       v_item.status);
     return jsonb_build_object('content_id',v_item.id,'status',v_item.status);
   end if;
@@ -215,6 +220,7 @@ begin
     where id=v_id and school_id=p_school_id for update;
   if not found then raise exception 'Content not found' using errcode='P0002'; end if;
 
+  v_previous_status := v_item.status;
   if p_action='publish' then
     if v_item.status in ('RECOVERY','WITHDRAWN') then
       raise exception 'Restore this item before publishing' using errcode='22023';
@@ -252,7 +258,7 @@ begin
   insert into public.school_content_audit
     (school_id,content_id,actor_user_id,action,content_title,previous_status,new_status)
   values (p_school_id,v_item.id,v_actor,v_action_label,v_item.title,
-    case when p_action='publish' then 'PREVIOUS_STATE' else v_item.status end,v_next_status);
+    v_previous_status,v_next_status);
 
   return jsonb_build_object('content_id',v_item.id,'status',v_next_status);
 end;
