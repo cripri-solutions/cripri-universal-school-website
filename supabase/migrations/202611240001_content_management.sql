@@ -93,6 +93,26 @@ $$;
 revoke all on function public.is_active_cripri_school(uuid) from public;
 grant execute on function public.is_active_cripri_school(uuid) to anon, authenticated;
 
+-- Return only the authenticated caller's active school memberships to the admin UI.
+create or replace function public.get_my_cripri_schools()
+returns table (school_id uuid, school_status text)
+language sql
+stable
+security definer
+set search_path = ''
+as $
+  select s.school_id, s.status
+  from public.cripri_content_admins a
+  join public.cripri_content_schools s on s.school_id = a.school_id
+  where a.user_id = (select auth.uid())
+    and a.role = 'SCHOOL_ADMIN'
+    and a.active = true
+    and s.status = 'ACTIVE'
+  order by s.created_at;
+$;
+revoke all on function public.get_my_cripri_schools() from public, anon;
+grant execute on function public.get_my_cripri_schools() to authenticated;
+
 create index if not exists school_content_audit_school_time_idx
   on public.school_content_audit (school_id, occurred_at desc);
 
