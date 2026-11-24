@@ -21,13 +21,13 @@ service cloud.firestore {
         && schoolIsActive(schoolId);
     }
 
-    function hasSchoolRole(schoolId, allowedRoles) {
+    function isSchoolAdmin(schoolId) {
       return belongsToActiveSchool(schoolId)
-        && request.auth.token.role in allowedRoles;
+        && request.auth.token.role == 'SCHOOL_ADMIN';
     }
 
-    // School applications are private. Applicants may submit only their own
-    // pending application. Only trusted CRIPRI reviewers can read or decide it.
+    // Applicants may submit only their own pending application.
+    // Only trusted CRIPRI reviewers may read or decide applications.
     match /schoolApplications/{applicationId} {
       allow create: if signedIn()
         && request.resource.data.applicantUid == request.auth.uid
@@ -40,8 +40,7 @@ service cloud.firestore {
       allow read, update, delete: if isPlatformReviewer();
     }
 
-    // School records are created and activated only by trusted CRIPRI
-    // administrative processes, never by a school user from the client.
+    // School records and membership roles are provisioned by trusted processes.
     match /schools/{schoolId} {
       allow read: if isPlatformReviewer()
         || (resource.data.status == 'ACTIVE'
@@ -49,21 +48,29 @@ service cloud.firestore {
                 || belongsToActiveSchool(schoolId)));
       allow create, update, delete: if isPlatformReviewer();
 
-      // Public website content contains only approved public information.
+      // Visitors can read only published content from an active school.
+      // A school administrator can read drafts, withdrawn and recovered items.
+      // All client writes are denied: callable backend functions validate roles,
+      // enforce lifecycle transitions and write the audit record atomically.
       match /siteContent/{contentId} {
-        allow read: if schoolIsActive(schoolId);
-        allow create, update, delete: if hasSchoolRole(
-          schoolId, ['SCHOOL_ADMIN', 'WEBSITE_EDITOR']
-        );
+        allow read: if isPlatformReviewer()
+          || (schoolIsActive(schoolId) && resource.data.status == 'PUBLISHED')
+          || isSchoolAdmin(schoolId);
+        allow create, update, delete: if false;
       }
 
-      // Private school data remains closed until its dedicated roles and
-      // data validation are deliberately implemented and reviewed.
+      // Immutable audit history: school admins and platform reviewers may read.
+      // Only trusted server-side functions may create audit entries.
+      match /contentAudit/{auditId} {
+        allow read: if isPlatformReviewer() || isSchoolAdmin(schoolId);
+        allow create, update, delete: if false;
+      }
+
+      // Private school data remains closed until separately designed and tested.
       match /privateData/{document=**} {
         allow read, write: if false;
       }
 
-      // School membership records cannot be created or elevated by clients.
       match /members/{uid} {
         allow read: if isPlatformReviewer()
           || (signedIn() && request.auth.uid == uid
@@ -72,15 +79,12 @@ service cloud.firestore {
       }
     }
 
-    // Users can read only their own basic account record. Account roles and
-    // school assignments are provisioned by trusted server-side processes.
     match /users/{uid} {
       allow read: if isPlatformReviewer()
         || (signedIn() && request.auth.uid == uid);
       allow create, update, delete: if isPlatformReviewer();
     }
 
-    // No other collection is accessible unless explicitly added above.
     match /{document=**} {
       allow read, write: if false;
     }
