@@ -881,6 +881,8 @@ async function initialiseWorkspace() {
   $('schoolNameDisplay').textContent = school.name;
   $('schoolSlugDisplay').textContent = school.slug;
   $('managerRole').textContent = currentRole.replace('_',' ');
+  const recoveryNav = document.querySelector('.nav[data-page="recovery"]');
+  if(recoveryNav) recoveryNav.classList.toggle('hidden', currentRole !== 'school_admin');
   $('schoolStatus').textContent = school.status;
 
   await loadContent();
