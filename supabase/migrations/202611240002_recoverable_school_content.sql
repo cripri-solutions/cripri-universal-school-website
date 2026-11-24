@@ -89,7 +89,7 @@ begin
     raise exception 'Authentication required' using errcode = '28000';
   end if;
 
-  if p_action not in ('recover','restore','permanent_delete') then
+  if p_action is null or p_action not in ('recover','restore','permanent_delete') then
     raise exception 'Unsupported content action' using errcode = '22023';
   end if;
 
