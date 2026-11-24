@@ -53,3 +53,24 @@ Apply the migration to a dedicated Supabase project only after reviewing its exi
 - photograph publishing requires HTTPS media and permission attestation.
 
 The frontend is configured with the supplied Supabase project URL and publishable key. This does not apply the database migration or deploy the Edge Function. The migration still requires review and application to the confirmed project; the Edge Function still requires deployment. Provision verified school/admin memberships before allowing real administrators to sign in. Do not treat this branch as production-ready until the tests above pass.
+
+## Deployment runbook for project `dudrolmymjwphwivrlko`
+
+These steps are intentionally manual because the repository connection does not grant access to apply SQL or deploy functions in the Supabase dashboard. Do not paste a service-role key into GitHub or the browser.
+
+1. In the Supabase dashboard, open project `dudrolmymjwphwivrlko` and confirm it is the CRIPRI Universal Website project.
+2. Review the existing database objects for naming conflicts, especially `public.school_site_content` and `public.school_content_audit`. The migration uses `create table if not exists`; an existing table with a different schema will not be altered to match.
+3. Open SQL Editor and run `supabase/migrations/202611240001_content_management.sql`. Inspect the result for errors before proceeding.
+4. From a trusted terminal with Supabase CLI installed, run:
+   ```sh
+   supabase login
+   supabase link --project-ref dudrolmymjwphwivrlko
+   supabase functions deploy manage-site-content
+   ```
+   The function config keeps JWT verification enabled. The deployed function uses the platform-provided `SUPABASE_URL` and `SUPABASE_ANON_KEY` environment variables and forwards the caller's bearer token to Postgres.
+5. In Supabase Authentication, configure the site's allowed redirect URLs and create/verify the intended administrator accounts. Do not enable public sign-up unless the platform has an approved onboarding process.
+6. A trusted CRIPRI provisioning operator must insert the confirmed school UUID into `cripri_content_schools` with status `ACTIVE`, then add the administrator's verified Auth user UUID to `cripri_content_admins` with role `SCHOOL_ADMIN` and `active=true`. Perform this through a trusted server-side process or SQL Editor using verified identifiers, never through browser code.
+7. Host `admin-content.html` on the intended HTTPS website and test the full checklist above with two schools, an admin, a non-admin and an anonymous visitor. Also verify the public website only renders published items.
+8. Before real learner photographs are used, implement Supabase Storage upload restrictions and a consent evidence retention workflow. The current URL/checkbox fields are not a complete photo-consent system.
+
+The repository key is a publishable client key. It is expected to be visible in browser code and is not a secret. Rotate it in Supabase if it is ever replaced or exposed outside its intended public use. Never expose the service-role/secret key.
