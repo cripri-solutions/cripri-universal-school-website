@@ -61,7 +61,7 @@
   };
   const actionButton=(label,action,payload,danger=false)=>{const b=document.createElement("button");b.className="btn "+(danger?"danger":"alt");b.textContent=label;b.addEventListener("click",async()=>{if(action==="permanent_delete"&&!confirm("Permanently delete this item? This cannot be undone."))return;try{await invoke(action,payload);await load();say("formStatus","Content updated.");}catch(e){say("formStatus",e.message||"Action failed.");}});return b;};
   const render=()=>{const root=$("contentList");root.replaceChildren();const shown=rows.filter(x=>filter==="ALL"||x.status===filter);if(!shown.length){root.textContent="No content in this view.";return;}shown.forEach(item=>{const card=document.createElement("article");card.className="item";const left=document.createElement("div"),title=document.createElement("strong"),meta=document.createElement("p"),pill=document.createElement("span");title.textContent=item.title;meta.className="muted small";meta.textContent=item.content_type+" · "+item.body.slice(0,180);pill.className="pill";pill.textContent=item.status;left.append(title,meta,pill);const buttons=document.createElement("div");buttons.className="actions";
-    if(item.status!=="RECOVERY"){if(item.status!=="PUBLISHED"){buttons.append(actionButton("Edit","edit",item));buttons.append(actionButton("Publish","publish",{content_id:item.id}));}else{buttons.append(actionButton("Pull Down","withdraw",{content_id:item.id}));}buttons.append(actionButton("Move to Recovery","recover",{content_id:item.id},true));}
+    if(item.status!=="RECOVERY"){if(item.status!=="PUBLISHED"){const editButton=document.createElement("button");editButton.className="btn alt";editButton.textContent="Edit";editButton.addEventListener("click",()=>edit(item));buttons.append(editButton);buttons.append(actionButton("Publish","publish",{content_id:item.id}));}else{buttons.append(actionButton("Pull Down","withdraw",{content_id:item.id}));}buttons.append(actionButton("Move to Recovery","recover",{content_id:item.id},true));}
     else{buttons.append(actionButton("Restore as draft","restore",{content_id:item.id}));buttons.append(actionButton("Delete permanently","permanent_delete",{content_id:item.id,confirm_permanent_delete:true},true));}
     card.append(left,buttons);root.append(card);});};
   const edit=item=>{editingId=item.id;$("contentType").value=item.content_type;$("contentTitle").value=item.title;$("contentBody").value=item.body;$("mediaUrl").value=item.media_url||"";$("altText").value=item.alt_text||"";$("consent").checked=!!item.consent_confirmed;$("save").textContent="Save amendments";$("cancelEdit").classList.remove("hidden");$("formHeading").textContent="Amend content (published items become drafts)";window.scrollTo({top:0,behavior:"smooth"});};
@@ -74,10 +74,6 @@
   $("cancelEdit").addEventListener("click",resetForm);
   document.querySelectorAll("[data-filter]").forEach(b=>b.addEventListener("click",()=>{filter=b.dataset.filter;render();}));
   client.auth.getSession().then(({data})=>{if(data.session?.user)start(data.session.user);});
-  // Delegate edit action separately to keep item rendering safe from HTML injection.
-  $("contentList").addEventListener("click",e=>{const btn=e.target.closest("button");if(!btn)return;});
-  const originalRender=render;
-  render=()=>{originalRender();$("contentList").querySelectorAll(".item").forEach((card,i)=>{const item=rows.filter(x=>filter==="ALL"||x.status===filter)[i];if(item&&item.status!=="RECOVERY"&&item.status!=="PUBLISHED"){const b=[...card.querySelectorAll("button")].find(x=>x.textContent==="Edit");if(b)b.onclick=()=>edit(item);}});};
 })();
 </script>
 </body></html>
