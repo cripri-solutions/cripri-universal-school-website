@@ -6,6 +6,9 @@
 <title>School Content Manager Preview | CRIPRI</title>
 <style>
 :root{--green:#145b3b;--deep:#103e2d;--gold:#e6bd55;--ink:#203128;--muted:#68776e;--line:#e1e8e2;--bg:#f4f7f4}*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.5 Arial,sans-serif}.top{background:var(--deep);color:#fff;padding:16px 4%;display:flex;justify-content:space-between;gap:15px;align-items:center}.top a{color:#fff}.layout{width:min(1180px,94%);margin:28px auto;display:grid;grid-template-columns:230px 1fr;gap:22px}.side,.panel{background:#fff;border:1px solid var(--line);border-radius:12px}.side{padding:20px;height:max-content}.side h3{margin:0 0 14px;color:var(--deep)}.side a{display:block;padding:10px 9px;text-decoration:none;color:#425449;border-radius:6px}.side a.active,.side a:hover{background:#edf5ef;color:var(--green);font-weight:700}.main h1{margin:0;color:var(--deep);font-size:1.8rem}.intro{color:var(--muted);margin:5px 0 20px}.notice{padding:14px 16px;border-left:4px solid var(--gold);background:#fff8e7;border-radius:5px;margin-bottom:20px}.panel{padding:22px;margin-bottom:18px}.panel h2{font-size:1.15rem;margin:0 0 5px;color:var(--green)}.hint{margin:0 0 16px;color:var(--muted);font-size:.9rem}.grid,.upload-list{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:15px}.field{display:flex;flex-direction:column;gap:6px}.field label{font-weight:700;font-size:.9rem}.field input[type=text],.field textarea{width:100%;border:1px solid #ccd8ce;border-radius:6px;padding:10px;font:inherit}.field textarea{min-height:90px;resize:vertical}.upload{border:1px dashed #9bb39f;border-radius:9px;padding:14px;background:#fafcf9}.upload strong{display:block;margin-bottom:7px;color:var(--deep)}.upload input{max-width:100%;font-size:.82rem}.preview{margin-top:10px;min-height:105px;background:#eff4ef;border-radius:6px;display:grid;place-items:center;overflow:hidden;color:#718175;font-size:.85rem;text-align:center;padding:10px}.preview img{display:block;width:100%;height:155px;object-fit:cover}.actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:15px}.btn{border:0;border-radius:6px;padding:11px 16px;font-weight:700;cursor:pointer}.primary{background:var(--green);color:white}.secondary{background:#edf2ed;color:var(--deep)}.status{font-size:.88rem;color:var(--green);min-height:22px;margin-top:10px}.foot{font-size:.8rem;color:var(--muted);text-align:center;padding:10px 0 30px}@media(max-width:760px){.layout{grid-template-columns:1fr}.side{display:none}.grid,.upload-list{grid-template-columns:1fr}.top{align-items:flex-start;flex-direction:column}}
+
+/* Content moderation prototype */
+.moderation-list{display:grid;gap:12px}.moderation-item{display:grid;grid-template-columns:1fr auto;gap:12px;align-items:center;padding:14px;border:1px solid var(--line);border-radius:9px;background:#fff}.moderation-item h3{margin:0 0 4px;color:var(--deep);font-size:1rem}.moderation-item p{margin:0;color:var(--muted);font-size:.88rem}.moderation-actions{display:flex;gap:7px;flex-wrap:wrap;justify-content:flex-end}.mini-btn{border:1px solid #ccd8ce;border-radius:6px;padding:7px 10px;background:#f6f8f6;color:#244b36;font-weight:700;cursor:pointer}.mini-btn.danger{border-color:#e5b7b7;color:#9b2525;background:#fff5f5}.state-pill{display:inline-block;margin-top:7px;padding:3px 8px;border-radius:20px;background:#e9f4eb;color:#145b3b;font-size:.72rem;font-weight:700}.state-pill.withdrawn{background:#fff0d7;color:#80550d}.audit-list{padding-left:20px;color:#58675e;font-size:.85rem}.audit-list li{padding:5px 0}.empty-state{padding:18px;text-align:center;color:var(--muted);background:#f7faf7;border-radius:8px}@media(max-width:650px){.moderation-item{grid-template-columns:1fr}.moderation-actions{justify-content:flex-start}}
 </style>
 </head>
 <body>
@@ -24,9 +27,79 @@
 <div class="upload"><strong>School event image</strong><input type="file" accept="image/*" data-preview="eventPreview"><div class="preview" id="eventPreview">Event photo preview area</div></div>
 </div></section>
 <section class="panel" id="preview"><h2>4. Preview changes</h2><p class="hint">Apply the text changes to this local preview. Nothing is saved or published.</p><div class="actions"><button class="btn primary" id="apply" type="button">Apply local preview</button><button class="btn secondary" id="reset" type="button">Reset sample text</button></div><div class="status" id="status" aria-live="polite"></div><div style="border:1px solid var(--line);padding:16px;border-radius:8px;margin-top:12px"><strong id="previewName">CRIPRI DEMO SCHOOL</strong><div id="previewMotto" style="color:#68776e;margin:4px 0 10px">Learning, Leadership and Service</div><h2 id="previewHeadline">Growing in knowledge, character and purpose.</h2><p id="previewWelcome">A welcoming learning community committed to quality education, personal growth, creativity and service.</p></div></section>
-</main></div><div class="foot">CRIPRI Universal School Website · Local content manager demonstration</div>
+
+<section class="panel" id="moderation">
+<h2>5. Public content control</h2>
+<p class="hint">Demonstration controls for public photographs and school communications. Pull Down removes an item from the public preview; Restore returns it. Permanent deletion asks for confirmation.</p>
+<div class="notice"><strong>Prototype limitation:</strong> This demonstration stores sample records and its activity log in this browser only. It is not connected to administrator sign-in, a shared database or the live public website. Do not use it to manage real school content.</div>
+<div class="grid" style="margin-bottom:16px">
+<div class="field"><label for="contentTitle">Content title</label><input id="contentTitle" type="text" placeholder="Enter a title"></div>
+<div class="field"><label for="contentType">Content type</label><select id="contentType" style="border:1px solid #ccd8ce;border-radius:6px;padding:10px;font:inherit"><option value="Communication">Communication</option><option value="Photograph">Photograph</option></select></div>
+<div class="field" style="grid-column:1/-1"><label for="contentDescription">Description / communication text</label><textarea id="contentDescription" placeholder="Describe the photograph or write the public communication"></textarea></div>
+</div>
+<div class="actions"><button class="btn primary" id="saveContent" type="button">Add public content</button><button class="btn secondary" id="cancelEdit" type="button" hidden>Cancel edit</button></div>
+<div class="status" id="moderationStatus" aria-live="polite"></div>
+<h3 style="margin-top:20px">Published and withdrawn content</h3>
+<div class="moderation-list" id="activeContentList"></div>
+<h3 style="margin-top:22px">Recovery Bin</h3>
+<div class="moderation-list" id="recoveryContentList"></div>
+<h3 style="margin-top:22px">Activity log</h3>
+<p class="hint">Records the action, content item and time in this browser demonstration.</p>
+<ol class="audit-list" id="activityLog"></ol>
+</section></main></div><div class="foot">CRIPRI Universal School Website · Local content manager demonstration</div>
 <script>
 document.querySelectorAll('input[type=file][data-preview]').forEach(input=>input.addEventListener('change',()=>{const target=document.getElementById(input.dataset.preview),file=input.files&&input.files[0];if(!file)return;if(!file.type.startsWith('image/')){target.textContent='Please choose an image file.';return;}const reader=new FileReader();reader.onload=()=>{target.replaceChildren();const img=document.createElement('img');img.src=reader.result;img.alt='Selected local image preview';target.appendChild(img);};reader.readAsDataURL(file);}));
 document.getElementById('apply').addEventListener('click',()=>{document.getElementById('previewName').textContent=document.getElementById('schoolName').value;document.getElementById('previewMotto').textContent=document.getElementById('motto').value;document.getElementById('previewHeadline').textContent=document.getElementById('headline').value;document.getElementById('previewWelcome').textContent=document.getElementById('welcome').value;document.getElementById('status').textContent='Local preview updated. Changes have not been saved or published.';});
 document.getElementById('reset').addEventListener('click',()=>location.reload());
+</script>
+<script>
+(() => {
+  const storageKey = "cripri-content-control-demo-v1";
+  const auditKey = "cripri-content-control-audit-v1";
+  const seed = [
+    {id:"demo-photo-1",title:"School campus photograph",type:"Photograph",description:"Sample public photograph of the school campus.",status:"PUBLISHED"},
+    {id:"demo-notice-1",title:"Term opening announcement",type:"Communication",description:"Sample notice informing families about the start of term.",status:"PUBLISHED"},
+    {id:"demo-photo-2",title:"Sports day photograph",type:"Photograph",description:"Sample photograph from a school sports activity.",status:"PUBLISHED"}
+  ];
+  let items, audit, editingId = null;
+  try { items = JSON.parse(localStorage.getItem(storageKey)) || seed; } catch (_) { items = seed; }
+  try { audit = JSON.parse(localStorage.getItem(auditKey)) || []; } catch (_) { audit = []; }
+  const $ = (id) => document.getElementById(id);
+  const save = () => { localStorage.setItem(storageKey, JSON.stringify(items)); localStorage.setItem(auditKey, JSON.stringify(audit)); };
+  const log = (action, item) => { audit.unshift({action, title:item.title, at:new Date().toLocaleString()}); audit=audit.slice(0,50); };
+  const makeButton = (label, action, danger=false) => { const b=document.createElement("button"); b.type="button"; b.className="mini-btn"+(danger?" danger":""); b.textContent=label; b.addEventListener("click",action); return b; };
+  const render = () => {
+    const active=$("activeContentList"), bin=$("recoveryContentList"), logList=$("activityLog");
+    active.replaceChildren(); bin.replaceChildren(); logList.replaceChildren();
+    const addEmpty=(node,message)=>{const p=document.createElement("p");p.className="empty-state";p.textContent=message;node.appendChild(p);};
+    const draw=(item,target)=>{
+      const card=document.createElement("article");card.className="moderation-item";
+      const details=document.createElement("div"), heading=document.createElement("h3"), desc=document.createElement("p"), pill=document.createElement("span");
+      heading.textContent=item.title;desc.textContent=item.type+" · "+item.description;pill.className="state-pill"+(item.status==="WITHDRAWN"?" withdrawn":"");pill.textContent=item.status==="PUBLISHED"?"Publicly visible":"Pulled down";
+      details.append(heading,desc,pill);
+      const actions=document.createElement("div");actions.className="moderation-actions";
+      if(target===active){
+        actions.append(makeButton("Edit",()=>startEdit(item)));
+        if(item.status==="PUBLISHED") actions.append(makeButton("Pull Down",()=>changeStatus(item.id,"WITHDRAWN")));
+        else actions.append(makeButton("Restore to public",()=>changeStatus(item.id,"PUBLISHED")));
+        actions.append(makeButton("Move to Recovery Bin",()=>changeStatus(item.id,"RECOVERY"),true));
+      } else {
+        actions.append(makeButton("Restore",()=>changeStatus(item.id,"PUBLISHED")));
+        actions.append(makeButton("Delete permanently",()=>permanentDelete(item.id),true));
+      }
+      card.append(details,actions);target.appendChild(card);
+    };
+    const visible=items.filter(x=>x.status!=="RECOVERY"), recovered=items.filter(x=>x.status==="RECOVERY");
+    visible.length?visible.forEach(x=>draw(x,active)):addEmpty(active,"No active content items.");
+    recovered.length?recovered.forEach(x=>draw(x,bin)):addEmpty(bin,"The Recovery Bin is empty.");
+    audit.length?audit.forEach(entry=>{const li=document.createElement("li");li.textContent=entry.at+" — "+entry.action+": "+entry.title;logList.appendChild(li);}):addEmpty(logList,"No activity recorded yet.");
+  };
+  const clearEditor=()=>{editingId=null;$("contentTitle").value="";$("contentDescription").value="";$("contentType").value="Communication";$("saveContent").textContent="Add public content";$("cancelEdit").hidden=true;};
+  const startEdit=(item)=>{editingId=item.id;$("contentTitle").value=item.title;$("contentDescription").value=item.description;$("contentType").value=item.type;$("saveContent").textContent="Save amendments";$("cancelEdit").hidden=false;$("moderationStatus").textContent="Editing: "+item.title;document.getElementById("moderation").scrollIntoView({behavior:"smooth"});};
+  const changeStatus=(id,status)=>{const item=items.find(x=>x.id===id);if(!item)return;item.status=status;log(status==="WITHDRAWN"?"Pulled down from public view":status==="RECOVERY"?"Moved to Recovery Bin":"Restored to public view",item);save();render();$("moderationStatus").textContent="Demo record updated locally. The live website has not changed.";if(editingId===id)clearEditor();};
+  const permanentDelete=(id)=>{const item=items.find(x=>x.id===id);if(!item)return;if(!window.confirm('Permanently delete "'+item.title+'" from this browser demonstration? This cannot be undone.'))return;items=items.filter(x=>x.id!==id);log("Permanently deleted",item);save();render();$("moderationStatus").textContent="Demo record permanently deleted from this browser only.";};
+  $("saveContent").addEventListener("click",()=>{const title=$("contentTitle").value.trim(),description=$("contentDescription").value.trim(),type=$("contentType").value;if(!title||!description){$("moderationStatus").textContent="Please enter both a title and a description.";return;}if(editingId){const item=items.find(x=>x.id===editingId);if(!item)return;item.title=title;item.description=description;item.type=type;log("Amended content",item);$("moderationStatus").textContent="Amendments saved in this browser demonstration only.";}else{const item={id:"local-"+Date.now(),title,type,description,status:"PUBLISHED"};items.unshift(item);log("Added public content (demo)",item);$("moderationStatus").textContent="Sample content added locally. It has not been published online.";}save();clearEditor();render();});
+  $("cancelEdit").addEventListener("click",clearEditor);
+  render();
+})();
 </script></body></html>
