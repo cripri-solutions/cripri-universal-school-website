@@ -1,0 +1,17 @@
+{
+  "name": "cripri-school-content-functions",
+  "description": "Trusted server-side content lifecycle and audit functions for CRIPRI Universal School Website",
+  "private": true,
+  "main": "index.js",
+  "engines": {
+    "node": "20"
+  },
+  "scripts": {
+    "emulate": "firebase emulators:start --only functions,firestore",
+    "deploy": "firebase deploy --only functions,firestore:rules"
+  },
+  "dependencies": {
+    "firebase-admin": "^13.0.0",
+    "firebase-functions": "^6.0.0"
+  }
+}
