@@ -14,12 +14,13 @@ https://cripri-solutions.github.io/cripri-universal-school-website/
 - `portal-preview.html` — sample school administrator workspace; it has no login or database.
 - `registration-review-preview.html` — fictional sample of CRIPRI's manual application review process; it is not a live staff console.
 - `script.js` — reusable settings-driven school homepage script retained as a starter for future individual school sites.
-- `firestore.rules` and `firebase.json` — an initial security-rules draft and Firebase configuration; not deployed.
-- `docs/backend-security-plan.md` — proposed backend structure and security boundaries.
+- `supabase/migrations/` — Supabase database migrations, including school content management, RLS and audit controls.
+- `supabase/functions/` — authenticated Supabase Edge Functions.
+- `docs/content-management-backend.md` — Supabase backend design, role provisioning and test requirements.
 
 ## Current hosting
 
-The public static pages are hosted on GitHub Pages. Firebase is not currently connected. No existing CRIPRI Firebase project is used or modified.
+The public static pages are hosted on GitHub Pages. The public website is hosted on GitHub Pages. The intended backend is Supabase; project connection and deployment are pending confirmation.
 
 ## Important functionality boundary
 
@@ -46,8 +47,8 @@ No school should be automatically activated simply because it submits an applica
 ## Hosting and cost approach
 
 - Keep public static website hosting on GitHub Pages.
-- Evaluate a separate Firebase project for the platform backend, starting with the no-cost Spark plan where supported.
-- Do not enable billing, upgrade to Blaze, enable Cloud Build or deploy paid services without explicit approval.
+- Use the approved Supabase project for the platform backend and review its plan limits before deployment.
+- Do not upgrade plans, enable paid services or deploy production changes without explicit approval.
 - Secure role assignment and school activation must not be implemented in untrusted browser code. Any backend design must be tested before real applications are accepted.
 
 ## Individual school websites
