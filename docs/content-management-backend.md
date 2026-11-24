@@ -25,9 +25,11 @@ The Edge Function validates the caller's Supabase Auth session. The Postgres RPC
 - `supabase/functions/manage-site-content/index.ts`: authenticated Edge Function entry point.
 - `docs/content-management-backend.md`: this guide.
 
-## Frontend integration still required
+## Admin portal integration
 
-The current public pages and dashboard preview are static. They do not yet sign in to Supabase or call this function. A future authenticated admin portal must:
+`admin-content.html` is the first Supabase-connected administrator interface. It uses the public publishable key in the browser, signs in through Supabase Auth, discovers only the caller's active school memberships through `get_my_cripri_schools()`, reads records under RLS, and sends lifecycle changes through the authenticated `manage-site-content` Edge Function. The administrator interface must be served over HTTPS. The older `school-content-manager-preview.html` remains a browser-only demonstration and must not be used for real school data.
+
+The admin portal must:
 1. use the Supabase project URL and publishable/anon key (never service role);
 2. sign in through Supabase Auth;
 3. invoke `manage-site-content` with the selected school UUID and action;
@@ -50,4 +52,4 @@ Apply the migration to a dedicated Supabase project only after reviewing its exi
 - restore returns content to draft;
 - photograph publishing requires HTTPS media and permission attestation.
 
-No Supabase project has been connected, migrated, or deployed by committing these files. Confirm the correct project and test the migration before applying it to production.
+The frontend is configured with the supplied Supabase project URL and publishable key. This does not apply the database migration or deploy the Edge Function. The migration still requires review and application to the confirmed project; the Edge Function still requires deployment. Provision verified school/admin memberships before allowing real administrators to sign in. Do not treat this branch as production-ready until the tests above pass.
