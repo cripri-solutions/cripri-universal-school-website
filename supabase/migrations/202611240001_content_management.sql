@@ -100,7 +100,7 @@ language sql
 stable
 security definer
 set search_path = ''
-as $
+as $$
   select s.school_id, s.status
   from public.cripri_content_admins a
   join public.cripri_content_schools s on s.school_id = a.school_id
@@ -109,7 +109,7 @@ as $
     and a.active = true
     and s.status = 'ACTIVE'
   order by s.created_at;
-$;
+$$;
 revoke all on function public.get_my_cripri_schools() from public, anon;
 grant execute on function public.get_my_cripri_schools() to authenticated;
 
