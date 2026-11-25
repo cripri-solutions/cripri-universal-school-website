@@ -4,8 +4,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="robots" content="noindex,nofollow">
-<title>CRIPRI | School Registration</title>
+<meta name="description" content="Register your school, college, university, TVET or training institution on the CRIPRI Universal Institution Platform.">
+<title>Register an Institution | CRIPRI</title>
 <link rel="stylesheet" href="style.css">
 
 <style>
@@ -108,26 +108,28 @@ button:disabled {
 
 <p><strong>CRIPRI TECHNOLOGIES</strong></p>
 
-<h1>Register Your School</h1>
+<h1>Register Your Institution</h1>
 
 <p class="intro">
-Submit your school's details to begin the CRIPRI school
-website and workspace onboarding process.
-Applications are reviewed by an authorised administrator.
+Submit your institution’s official details to apply for a dedicated CRIPRI website and secure management workspace. Applications are reviewed by an authorised administrator before activation.
 </p>
 
 <form id="schoolRegistrationForm">
 
 <div class="form-grid">
+<div class="field full"><label for="institution_type">Institution Type *</label><select id="institution_type" name="institution_type" required><option value="">Choose institution type</option><option value="school">School</option><option value="college">College</option><option value="university">University</option><option value="tvet">TVET / Technical Institute</option><option value="training_centre">Training Centre</option><option value="other">Other Institution</option></select></div>
+</div>
+
+<div class="form-grid">
 
 <div class="field">
-<label for="school_name">Official School Name *</label>
+<label for="school_name">Official Institution Name *</label>
 <input id="school_name" name="school_name"
 required minlength="2" maxlength="180">
 </div>
 
 <div class="field">
-<label for="school_category">School Category *</label>
+<label for="school_category">Institution Category / Level *</label>
 <select id="school_category" name="school_category" required>
 <option value="">Select category</option>
 <option>Primary</option>
@@ -189,7 +191,7 @@ name="physical_address"></textarea>
 
 <div class="actions">
 <button type="submit" id="submitRegistration">
-Submit School Application
+Submit Institution Application
 </button>
 </div>
 
@@ -233,7 +235,8 @@ form.addEventListener('submit', async function(event) {
 
   const application = {
     school_name: schoolName,
-    school_category: document.getElementById('school_category').value,
+    institution_type: document.getElementById('institution_type').value,
+    school_category: document.getElementById('institution_type').value === 'school' ? document.getElementById('school_category').value : 'College or other',
     country: document.getElementById('country').value.trim(),
     region: document.getElementById('region').value.trim(),
     contact_email: document.getElementById('contact_email').value.trim(),
@@ -262,7 +265,7 @@ form.addEventListener('submit', async function(event) {
     if (error) throw error;
 
     message.textContent =
-      'Your school application has been submitted successfully. It is now awaiting administrator review.';
+      'Your institution application has been submitted successfully and is awaiting CRIPRI administrator review.';
 
     message.className = 'success';
     form.reset();
