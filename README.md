@@ -51,7 +51,7 @@ A GitHub feature-branch commit does not itself prove that a Cloudflare preview i
 - Current development branch: `feature/universal-institution-manager`.
 - Keep implementation and testing on the feature branch until reviewed.
 - Do not merge to `main`, change production Worker routes, or deploy production without explicit approval.
-- A SQL migration committed to GitHub is not automatically applied to the live Supabase project. Apply migrations through the intended Supabase release process and verify the result, including anonymous `INSERT` grants and the `public may submit applications` row-level security policy on `school_applications`.
+- The initial schema migration creates the `public may submit applications` row-level security policy on `school_applications`, restricting public submissions to pending applications with no review timestamp. Migration `202611250003` grants anonymous and authenticated users `INSERT` access to the six added institution fields. A SQL migration committed to GitHub is not automatically applied to the live Supabase project: apply migrations through the intended Supabase release process, then verify that both the column grants and the original RLS policy are present on the target database.
 - Test with a dedicated institution account and non-sensitive sample content before demonstrating the manager to a client.
 - Never commit Supabase secret/service-role keys, passwords, access tokens, or client data. The browser may use only the project's publishable/anon key with appropriate RLS protection.
 - Do not publish identifiable learner photographs or personal information without the institution's appropriate permissions and consent.
