@@ -214,7 +214,11 @@ h2{font-size:clamp(29px,4vw,42px);color:var(--navy);margin:8px 0 12px}.section-l
     };
     terminology=institutionNames[institutionType]||institutionNames.other;
     const name=school.name||terminology.singular,motto=school.motto||"Welcome • Service • Community";
-    if(institutionType!=="school" && facilitiesSection) facilitiesSection.remove();
+    if(institutionType!=="school") {
+      if(facilitiesSection) facilitiesSection.remove();
+      const facilitiesLink=document.querySelector('#nav a[href="#facilities"]');
+      if(facilitiesLink) facilitiesLink.remove();
+    }
     if(institutionType!=="school") {
       const walker=document.createTreeWalker(document.body,NodeFilter.SHOW_TEXT);
       let node;
