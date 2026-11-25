@@ -934,6 +934,15 @@ async function initialiseWorkspace(selectedMembershipId = null) {
 
   currentRole = membership.role;
 
+  // Content editors can create and maintain drafts only. Publication remains
+  // an administrator action, enforced again by database row-level security.
+  if(currentRole === 'content_editor') {
+    $('contentStatus').value = 'draft';
+    $('contentStatus').querySelectorAll('option').forEach(option => {
+      option.disabled = option.value !== 'draft';
+    });
+  }
+
   if(!['school_admin','institution_admin','content_editor'].includes(currentRole)) {
 
     await supabase.auth.signOut();
@@ -1301,6 +1310,10 @@ function renderContent() {
 
     edit.className = 'secondary';
     edit.textContent = 'View / Edit';
+    if(currentRole === 'content_editor' && record.status !== 'draft') {
+      edit.disabled = true;
+      edit.textContent = 'Administrator edit required';
+    }
 
     edit.addEventListener('click',() => editContent(record));
 
@@ -1370,6 +1383,10 @@ function renderItems(records,elementId) {
     const edit = document.createElement('button');
     edit.className = 'secondary';
     edit.textContent = 'View / Edit';
+    if(currentRole === 'content_editor' && record.status !== 'draft') {
+      edit.disabled = true;
+      edit.textContent = 'Administrator edit required';
+    }
 
     edit.addEventListener('click',() => editContent(record));
 
@@ -1426,6 +1443,11 @@ function newContent(type='announcement') {
 // ======================================================
 
 function editContent(record) {
+
+  if(currentRole === 'content_editor' && record.status !== 'draft') {
+    message('contentMessage','Content editors may edit draft items only.');
+    return;
+  }
 
   clearForm();
 
@@ -1571,6 +1593,10 @@ $('contentForm').addEventListener('submit',async event => {
     }
 
     const status = $('contentStatus').value;
+
+    if(currentRole === 'content_editor' && status !== 'draft') {
+      throw new Error('Content editors may save drafts only. An institution administrator must publish content.');
+    }
 
     let publishAt = null;
 
