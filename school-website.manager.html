@@ -722,11 +722,19 @@ const institutionTypeNames = {
 
 function applyInstitutionTerminology(type) {
   const name = institutionTypeNames[type] || 'Institution';
+  const pluralNames = {
+    school:'Schools', college:'Colleges', university:'Universities',
+    church:'Churches', mosque:'Mosques', union:'Unions',
+    association:'Associations', ngo:'NGOs', cooperative:'Cooperatives',
+    company:'Companies', government:'Government Institutions',
+    other:'Institutions'
+  };
+  const plural = pluralNames[type] || 'Institutions';
   const replacements = [
-    [/\\bSchools\\b/g, name + 's'],
-    [/\\bschools\\b/g, name.toLowerCase() + 's'],
-    [/\\bSchool\\b/g, name],
-    [/\\bschool\\b/g, name.toLowerCase()]
+    [/\bSchools\b/g, plural],
+    [/\bschools\b/g, plural.toLowerCase()],
+    [/\bSchool\b/g, name],
+    [/\bschool\b/g, name.toLowerCase()]
   ];
   const walker = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT);
   let node;
@@ -738,7 +746,6 @@ function applyInstitutionTerminology(type) {
   }
   document.title = 'CRIPRI | ' + name + ' Website Manager';
 }
-
 const categoryNames = {
   announcement:'Announcement',
   event:'Event',
