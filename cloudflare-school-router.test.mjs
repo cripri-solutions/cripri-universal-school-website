@@ -94,7 +94,7 @@ test("rejects URL-encoded path traversal before contacting the origin", async ()
   globalThis.fetch = async () => { called = true; return new Response("unexpected"); };
 
   const response = await worker.fetch(new Request(
-    "https://green-valley.criprisolutions.co.ke/%2e%2e/private.txt"
+    "https://green-valley.criprisolutions.co.ke/%2e%2e%2fprivate.txt"
   ));
 
   assert.equal(response.status, 400);
