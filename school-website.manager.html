@@ -935,7 +935,7 @@ async function initialiseWorkspace(selectedMembershipId = null) {
 
   currentRole = membership.role;
 
-  if(!['school_admin','content_editor'].includes(currentRole)) {
+  if(!['school_admin','institution_admin','content_editor'].includes(currentRole)) {
 
     await supabase.auth.signOut();
 
@@ -966,7 +966,7 @@ async function initialiseWorkspace(selectedMembershipId = null) {
   applyInstitutionTerminology(school.institution_type || 'school');
   populateSchoolProfile();
 
-  if(currentRole !== 'school_admin') {
+  if(!['school_admin','institution_admin'].includes(currentRole)) {
     $('profileForm').querySelectorAll('input,textarea,button')
       .forEach(control => control.disabled = true);
 
@@ -1062,7 +1062,7 @@ $('profileForm').addEventListener('submit',async event => {
 
   event.preventDefault();
 
-  if(currentRole !== 'school_admin') {
+  if(!['school_admin','institution_admin'].includes(currentRole)) {
     message('profileMessage','Only the Institution Administrator can update the institution profile.');
     return;
   }
@@ -1102,10 +1102,10 @@ $('profileForm').addEventListener('submit',async event => {
     };
 
     const {data,error} = await supabase
-      .from('schools')
+      .from('institutions')
       .update(payload)
-      .eq('id',currentSchool.id)
-      .select('id,name,slug,status,institution_type,motto,description,welcome_message,physical_address,county,country,contact_phone,contact_email,logo_path,banner_path')
+      .eq('institution_id',currentSchool.id)
+      .select('institution_id,name,slug,status,institution_type,motto,description,welcome_message,physical_address,county,country,contact_phone,contact_email,logo_path,banner_path')
       .single();
 
     if(error) throw error;
@@ -1114,7 +1114,7 @@ $('profileForm').addEventListener('submit',async event => {
       throw new Error('No profile was returned. Check Institution Administrator permissions.');
     }
 
-    currentSchool = data;
+    currentSchool = {...data,id:data.institution_id};
         $('profileLogo').value = '';
     $('profileBanner').value = '';
 
@@ -1165,7 +1165,7 @@ async function loadContent() {
   renderRecoveryBin();
 
   const recoveryToggle = $('toggleRecoveryBin');
-  if (recoveryToggle) recoveryToggle.hidden = currentRole !== 'school_admin';
+  if (recoveryToggle) recoveryToggle.hidden = !['school_admin','institution_admin'].includes(currentRole);
 
   message(
     'contentMessage',
@@ -1308,7 +1308,7 @@ function renderContent() {
 
     actions.appendChild(edit);
 
-    if(currentRole === 'school_admin') {
+    if(['school_admin','institution_admin'].includes(currentRole)) {
       const remove = document.createElement('button');
       remove.className = 'danger';
       remove.textContent = 'Delete';
@@ -1377,7 +1377,7 @@ function renderItems(records,elementId) {
 
     article.append(heading,description,status,edit);
 
-    if(currentRole === 'school_admin') {
+    if(['school_admin','institution_admin'].includes(currentRole)) {
       const remove = document.createElement('button');
       remove.className = 'danger';
       remove.textContent = 'Delete';
@@ -1604,7 +1604,7 @@ $('contentForm').addEventListener('submit',async event => {
 
     const payload = {
 
-      school_id:currentSchool.id,
+      institution_id:currentSchool.id,
       content_type:type,
       title:title,
       summary:$('summary').value.trim() || null,
@@ -1635,17 +1635,17 @@ $('contentForm').addEventListener('submit',async event => {
     if(id) {
 
       result = await supabase
-        .from('school_content_items')
+        .from('institution_content_items')
         .update(payload)
-        .eq('id',id)
-        .eq('school_id',currentSchool.id);
+        .eq('content_id',id)
+        .eq('institution_id',currentSchool.id);
 
     } else {
 
       payload.created_by = currentUser.id;
 
       result = await supabase
-        .from('school_content_items')
+        .from('institution_content_items')
         .insert(payload);
 
     }
@@ -1682,14 +1682,14 @@ async function archiveContent(id) {
   if(!confirm('Archive this content?')) return;
 
   const {error} = await supabase
-    .from('school_content_items')
+    .from('institution_content_items')
     .update({
       status:'archived',
       publish_at:null,
       updated_by:currentUser.id
     })
-    .eq('id',id)
-    .eq('school_id',currentSchool.id);
+    .eq('content_id',id)
+    .eq('institution_id',currentSchool.id);
 
   if(error) {
     alert('Archive failed: ' + error.message);
@@ -1705,7 +1705,7 @@ async function archiveContent(id) {
 // ======================================================
 
 async function deleteContent(record) {
-  if(currentRole !== 'school_admin') {
+  if(!['school_admin','institution_admin'].includes(currentRole)) {
     alert('Only the Institution Administrator can move content to the Recovery Bin.');
     return;
   }
@@ -1717,7 +1717,7 @@ async function deleteContent(record) {
   if(!confirm('Move "' + label + '" to the Recovery Bin? It will be removed from the public website and can be restored.')) return;
 
   try {
-    const {data,error} = await supabase.rpc('manage_school_content_item', {
+    const {data,error} = await supabase.rpc('manage_institution_content_item', {
       p_content_id: record.id,
       p_action: 'recover',
       p_confirm_permanent_delete: false
@@ -1755,7 +1755,7 @@ function renderRecoveryBin() {
     const date = document.createElement('td');
     date.textContent = formatDate(record.updated_at || record.created_at);
     const actions = document.createElement('td');
-    if(currentRole === 'school_admin') {
+    if(['school_admin','institution_admin'].includes(currentRole)) {
       const restore = document.createElement('button');
       restore.className = 'secondary';
       restore.textContent = 'Restore as Draft';
@@ -1775,13 +1775,13 @@ function renderRecoveryBin() {
 }
 
 async function restoreContent(record) {
-  if(currentRole !== 'school_admin' || !record || !record.id || !currentSchool) {
+  if(!['school_admin','institution_admin'].includes(currentRole) || !record || !record.id || !currentSchool) {
     alert('School administrator access is required.');
     return;
   }
   if(!confirm('Restore "' + (record.title || 'this content') + '" as a draft?')) return;
   try {
-    const {data,error} = await supabase.rpc('manage_school_content_item', {
+    const {data,error} = await supabase.rpc('manage_institution_content_item', {
       p_content_id: record.id,
       p_action: 'restore',
       p_confirm_permanent_delete: false
@@ -1799,14 +1799,14 @@ async function restoreContent(record) {
 }
 
 async function permanentlyDeleteContent(record) {
-  if(currentRole !== 'school_admin' || !record || !record.id || !currentSchool) {
+  if(!['school_admin','institution_admin'].includes(currentRole) || !record || !record.id || !currentSchool) {
     alert('School administrator access is required.');
     return;
   }
   const label = record.title || 'this content';
   if(!confirm('PERMANENTLY DELETE "' + label + '"? This cannot be undone. The audit record will be retained.')) return;
   try {
-    const {data,error} = await supabase.rpc('manage_school_content_item', {
+    const {data,error} = await supabase.rpc('manage_institution_content_item', {
       p_content_id: record.id,
       p_action: 'permanent_delete',
       p_confirm_permanent_delete: true
