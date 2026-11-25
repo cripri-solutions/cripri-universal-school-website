@@ -21,6 +21,9 @@ jobs:
       - name: Validate Cloudflare Worker syntax
         run: node --check cloudflare-school-router.js
 
+      - name: Test Cloudflare Worker routing behavior
+        run: node --test cloudflare-school-router.test.mjs
+
       - name: Validate inline JavaScript
         shell: bash
         run: |
