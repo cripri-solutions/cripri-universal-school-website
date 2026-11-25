@@ -567,7 +567,7 @@ footer {
       <label>Content Category</label>
       <select id="contentType" required>
         <option value="announcement">Announcement</option>
-        <option value="event">School Event</option>
+        <option value="event">Institution Event</option>
         <option value="vacancy">Vacancy</option>
         <option value="gallery">Gallery</option>
         <option value="live_update">Live Update</option>
@@ -890,7 +890,7 @@ async function initialiseWorkspace(selectedMembershipId = null) {
     await supabase.auth.signOut();
 
     throw new Error(
-      'No school manager membership is assigned to this account. Contact CRIPRI.'
+      'No institution manager membership is assigned to this account. Contact CRIPRI.'
     );
 
   }
@@ -955,7 +955,7 @@ async function initialiseWorkspace(selectedMembershipId = null) {
 
     await supabase.auth.signOut();
 
-    throw new Error('This school account is not currently active.');
+    throw new Error('This institution account is not currently active.');
 
   }
 
@@ -1070,7 +1070,7 @@ $('profileForm').addEventListener('submit',async event => {
   button.disabled = true;
   button.textContent = 'Saving profile...';
 
-  message('profileMessage','Saving school profile...');
+  message('profileMessage','Saving institution profile...');
 
   try {
 
@@ -1118,7 +1118,7 @@ $('profileForm').addEventListener('submit',async event => {
 
     populateSchoolProfile();
 
-    message('profileMessage','School profile saved successfully.');
+    message('profileMessage','Institution profile saved successfully.');
 
   } catch(error) {
 
@@ -1139,7 +1139,7 @@ $('profileForm').addEventListener('submit',async event => {
 
 async function loadContent() {
 
-  message('contentMessage','Loading school content...');
+  message('contentMessage','Loading institution content...');
 
   const {data,error} = await supabase
     .from('institution_content_items')
@@ -1149,7 +1149,7 @@ async function loadContent() {
 
   if(error) {
 
-    message('contentMessage','Could not load content: ' + error.message);
+    message('contentMessage','Could not load institution content: ' + error.message);
 
     throw error;
 
@@ -1167,7 +1167,7 @@ async function loadContent() {
 
   message(
     'contentMessage',
-    contentRecords.length + ' school content record(s) loaded.'
+    contentRecords.length + ' institution content record(s) loaded.'
   );
 
 }
@@ -1708,7 +1708,7 @@ async function deleteContent(record) {
     return;
   }
   if(!record || !record.id || !currentSchool) {
-    alert('Unable to identify this school content record.');
+    alert('Unable to identify this institution content record.');
     return;
   }
   const label = record.title || 'this content';
@@ -1774,7 +1774,7 @@ function renderRecoveryBin() {
 
 async function restoreContent(record) {
   if(!['school_admin','institution_admin'].includes(currentRole) || !record || !record.id || !currentSchool) {
-    alert('School administrator access is required.');
+    alert('Institution administrator access is required.');
     return;
   }
   if(!confirm('Restore "' + (record.title || 'this content') + '" as a draft?')) return;
@@ -1798,7 +1798,7 @@ async function restoreContent(record) {
 
 async function permanentlyDeleteContent(record) {
   if(!['school_admin','institution_admin'].includes(currentRole) || !record || !record.id || !currentSchool) {
-    alert('School administrator access is required.');
+    alert('Institution administrator access is required.');
     return;
   }
   const label = record.title || 'this content';
