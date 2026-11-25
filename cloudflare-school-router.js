@@ -64,15 +64,25 @@ export default {
     const assetPath = requestedPath || "school.html";
 
     // Reject malformed encoding and decoded path traversal attempts.
-    let decodedPath;
+    let decodedPath = assetPath;
 
+    // Decode nested percent-encoding before checking path segments. This
+    // prevents traversal strings such as %252e%252e%252f from reaching origin.
     try {
-      decodedPath = decodeURIComponent(assetPath);
+      for (let i = 0; i < 5; i += 1) {
+        if (!/%[0-9a-f]{2}/i.test(decodedPath)) break;
+        const nextPath = decodeURIComponent(decodedPath);
+        if (nextPath === decodedPath) break;
+        decodedPath = nextPath;
+        if (i === 4 && /%[0-9a-f]{2}/i.test(decodedPath)) {
+          return errorResponse("Invalid asset path.", 400);
+        }
+      }
     } catch {
       return errorResponse("Invalid asset path.", 400);
     }
 
-    if (decodedPath.split("/").some(part => part === "." || part === "..")) {
+    if (decodedPath.split(/[\\/]/).some(part => part === "." || part === "..")) {
       return errorResponse("Invalid asset path.", 400);
     }
 
