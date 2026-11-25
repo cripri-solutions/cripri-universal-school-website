@@ -316,7 +316,6 @@ footer {
       <div class="panel">
         <h2 id="schoolNameDisplay">School</h2>
         <p>Institution type: <strong id="institutionTypeDisplay">School</strong></p>
-        <p>Institution type: <strong id="institutionTypeDisplay">School</strong></p>
         <p>Website slug: <strong id="schoolSlugDisplay"></strong></p>
         <p>Account status: <strong id="schoolStatus"></strong></p>
       </div>
@@ -982,7 +981,6 @@ async function initialiseWorkspace(selectedMembershipId = null) {
   $('schoolSlugDisplay').textContent = school.slug;
   $('managerRole').textContent = currentRole.replace('_',' ');
   $('schoolStatus').textContent = school.status;
-  $('institutionTypeDisplay').textContent = institutionTypeNames[school.institution_type || 'school'] || 'Institution';
   $('institutionTypeDisplay').textContent = institutionTypeNames[school.institution_type || 'school'] || 'Institution';
 
   await loadContent();
