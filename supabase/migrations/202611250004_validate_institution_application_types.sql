@@ -1,7 +1,5 @@
 -- Keep institution applications aligned with the institution types offered
 -- by the public registration form. Existing applications default to 'school'.
--- NOT VALID avoids blocking deployment if legacy rows need review; PostgreSQL
--- still enforces the constraint for all new or updated rows immediately.
 DO $$
 BEGIN
   IF NOT EXISTS (
@@ -13,26 +11,17 @@ BEGIN
     ALTER TABLE public.school_applications
       ADD CONSTRAINT school_applications_institution_type_check
       CHECK (institution_type IN (
-        'school',
-        'college',
-        'university',
-        'tvet',
-        'training_centre',
-        'church',
-        'mosque',
-        'ngo',
-        'company',
-        'association',
-        'cooperative',
-        'government',
-        'union',
-        'other'
+        'school', 'college', 'university', 'tvet', 'training_centre',
+        'church', 'mosque', 'ngo', 'company', 'association',
+        'cooperative', 'government', 'union', 'other'
       )) NOT VALID;
   END IF;
 END
 $$;
 
--- The school category is only meaningful for school applications.
+-- Legacy school applications may have no category. New submissions are
+-- required to provide one by the registration form. Non-school applications
+-- must always store NULL for this school-specific field.
 DO $$
 BEGIN
   IF NOT EXISTS (
@@ -44,11 +33,13 @@ BEGIN
     ALTER TABLE public.school_applications
       ADD CONSTRAINT school_applications_school_category_check
       CHECK (
-        (institution_type = 'school' AND school_category IN (
-          'Primary',
-          'Secondary',
-          'Primary and secondary',
-          'College or other'
+        (institution_type = 'school' AND (
+          school_category IS NULL OR school_category IN (
+            'Primary',
+            'Secondary',
+            'Primary and secondary',
+            'College or other'
+          )
         ))
         OR
         (institution_type <> 'school' AND school_category IS NULL)
@@ -57,7 +48,6 @@ BEGIN
 END
 $$;
 
--- Validate existing rows after installing both safeguards.
 ALTER TABLE public.school_applications
   VALIDATE CONSTRAINT school_applications_institution_type_check;
 ALTER TABLE public.school_applications
