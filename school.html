@@ -162,6 +162,7 @@ h2{font-size:clamp(29px,4vw,42px);color:var(--navy);margin:8px 0 12px}.section-l
   const text=(id,value)=>$(id).textContent=value;
   function fail(title,message){$("loading").classList.add("hidden");$("site").classList.add("hidden");text("errorTitle",title);text("errorText",message);$("error").classList.remove("hidden");}
   function date(value){if(!value)return "";const d=new Date(value);return Number.isNaN(d.getTime())?"":new Intl.DateTimeFormat("en-KE",{dateStyle:"medium",timeStyle:"short"}).format(d);}
+  let terminology={singular:"Institution",plural:"Institutions"};
   function render(id,rows,label,emptyText){
     const target=$(id);target.replaceChildren();
     if(!rows.length){const e=document.createElement("div");e.className="empty";e.textContent=emptyText;target.append(e);return;}
@@ -211,7 +212,7 @@ h2{font-size:clamp(29px,4vw,42px);color:var(--navy);margin:8px 0 12px}.section-l
       government:{singular:"Government Institution",plural:"Government Institutions"},
       other:{singular:"Institution",plural:"Institutions"}
     };
-    const terminology=institutionNames[institutionType]||institutionNames.other;
+    terminology=institutionNames[institutionType]||institutionNames.other;
     const name=school.name||terminology.singular,motto=school.motto||"Welcome • Service • Community";
     if(institutionType!=="school" && facilitiesSection) facilitiesSection.remove();
     if(institutionType!=="school") {
