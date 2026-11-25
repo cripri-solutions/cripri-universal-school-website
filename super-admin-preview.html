@@ -259,7 +259,7 @@ footer{text-align:center;color:#8290a2;padding:25px;font-size:12px}
           </tr>
         </thead>
         <tbody id="approvalTableBody">
-          <tr><td colspan="7" class="empty">Loading applications...</td></tr>
+          <tr><td colspan="8" class="empty">Loading applications...</td></tr>
         </tbody>
       </table>
     </div>
@@ -1074,7 +1074,7 @@ function renderApplications() {
     const tr = document.createElement('tr');
     const td = document.createElement('td');
 
-    td.colSpan = 7;
+    td.colSpan = 8;
     td.className = 'empty';
     td.textContent = 'No applications found for this status.';
 
