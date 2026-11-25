@@ -34,5 +34,11 @@ assert not missing, f"Application payload fields missing from migrations: {sorte
 assert re.search(r"grant\s+insert\s*\(\s*other_institution_type\s*\)", extra, re.I | re.S), "Other institution type INSERT grant is missing."
 assert 'id="otherInstitutionTypeField" hidden' in registration, "Other institution type detail field is missing."
 assert "other_institution_type:" in payload.group(1), "Other institution type detail is not submitted."
+assert '<option value="college">College</option>' in select.group(0), "College must be an independent institution type."
+assert '<option value="other">Other Institution</option>' in select.group(0), "Other Institution must be an independent institution type."
+assert '<option value="hospital">Hospital / Health Facility</option>' in select.group(0), "Hospital must be available as an institution type."
+assert "otherInstitutionType.required = isOther;" in registration, "Other Institution description must be required only for Other."
+assert "schoolCategory.required = isSchool;" in registration, "School category must remain limited to schools."
+assert "other_institution_type IS NOT NULL" in extra, "Other Institution database description must not be null."
 
 print(f"Registration contract passed: {len(form_types)} institution types and {len(payload_fields)} payload fields; pending-only RLS, INSERT grants, and Other detail verified.")
