@@ -190,10 +190,10 @@ h2{font-size:clamp(29px,4vw,42px);color:var(--navy);margin:8px 0 12px}.section-l
   }
   try{
     if(!slug || !/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(slug)){fail("Institution address required","Open this page with the institution's assigned website address.");return;}
-    const {data:school,error:schoolError}=await supabase.from("schools").select("id,name,slug,status,institution_type,motto,description,welcome_message,physical_address,county,country,contact_phone,contact_email,logo_path,banner_path").eq("slug",slug).eq("status","active").maybeSingle();
+    const {data:school,error:schoolError}=await supabase.from("institutions").select("institution_id,name,slug,status,institution_type,motto,description,welcome_message,physical_address,county,country,contact_phone,contact_email,logo_path,banner_path").eq("slug",slug).eq("status","active").maybeSingle();
     if(schoolError)throw schoolError;
     if(!school){fail("Institution website not available",'No active institution was found for "'+slug+'". Check the address or contact CRIPRI Technologies.');return;}
-    const {data:subscriptionValid,error:subscriptionError}=await supabase.rpc("is_school_website_subscription_valid",{p_school_id:school.id});
+    const {data:subscriptionValid,error:subscriptionError}=await supabase.rpc("is_school_website_subscription_valid",{p_school_id:school.institution_id});
     if(subscriptionError)throw subscriptionError;
     if(subscriptionValid!==true){fail("Website subscription inactive","This institution's website subscription is not currently active. Please contact CRIPRI Technologies to arrange or renew the subscription.");return;}
     const institutionType=school.institution_type||"school";
@@ -237,7 +237,7 @@ h2{font-size:clamp(29px,4vw,42px);color:var(--navy);margin:8px 0 12px}.section-l
     if(school.logo_path){const logo=document.createElement("img");logo.src=school.logo_path;logo.alt=name+" logo";logo.className="brand-logo";$("crest").replaceChildren(logo);}
     if(school.banner_path){$("home").classList.add("has-banner");$("home").style.backgroundImage="linear-gradient(105deg,rgba(7,35,58,.90),rgba(18,59,93,.56)),url("+JSON.stringify(school.banner_path)+")";}
     text("heroTitle","Welcome to "+name);text("crest",name.charAt(0).toUpperCase());text("contactSlug",school.slug);text("year",String(new Date().getFullYear()));
-    const {data:records,error}=await supabase.from("school_content_items").select("id,content_type,title,summary,body,venue,event_start_at,application_deadline,application_email,application_url,video_url,media_path,status,publish_at,created_at").eq("school_id",school.id).in("status",["published","scheduled"]).or("publish_at.is.null,publish_at.lte."+new Date().toISOString()).order("created_at",{ascending:false});
+    const {data:records,error}=await supabase.from("institution_content_items").select("content_id,content_type,title,summary,body,venue,event_start_at,application_deadline,application_email,application_url,video_url,media_path,status,publish_at,created_at").eq("institution_id",school.institution_id).in("status",["published","scheduled"]).or("publish_at.is.null,publish_at.lte."+new Date().toISOString()).order("created_at",{ascending:false});
     if(error)throw error;
     const rows=records||[];
     render("announcementList",rows.filter(r=>["announcement","live_update","live_stream"].includes(r.content_type)),"News & announcement","No published announcements at the moment.");
