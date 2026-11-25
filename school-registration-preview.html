@@ -117,7 +117,8 @@ Submit your institution’s official details to apply for a dedicated CRIPRI web
 <form id="schoolRegistrationForm">
 
 <div class="form-grid">
-<div class="field full"><label for="institution_type">Institution Type *</label><select id="institution_type" name="institution_type" required><option value="">Choose institution type</option><option value="school">School</option><option value="college">College</option><option value="university">University</option><option value="tvet">TVET / Technical Institute</option><option value="training_centre">Training Centre</option><option value="church">Church</option><option value="mosque">Mosque</option><option value="ngo">NGO / Non-profit</option><option value="company">Company</option><option value="association">Association</option><option value="cooperative">Cooperative</option><option value="government">Government Institution</option><option value="union">Union</option><option value="other">Other Institution</option></select></div>
+<div class="field full"><label for="institution_type">Institution Type *</label><select id="institution_type" name="institution_type" required><option value="">Choose institution type</option><option value="school">School</option><option value="college">College</option><option value="university">University</option><option value="tvet">TVET / Technical Institute</option><option value="training_centre">Training Centre</option><option value="hospital">Hospital / Health Facility</option><option value="church">Church</option><option value="mosque">Mosque</option><option value="ngo">NGO / Non-profit</option><option value="company">Company</option><option value="association">Association</option><option value="cooperative">Cooperative</option><option value="government">Government Institution</option><option value="union">Union</option><option value="other">Other Institution</option></select></div>
+<div class="field full" id="otherInstitutionTypeField" hidden><label for="other_institution_type">Specify Institution Type *</label><input id="other_institution_type" name="other_institution_type" maxlength="120" placeholder="e.g. professional body, community organisation"></div>
 </div>
 
 <div class="form-grid">
@@ -135,7 +136,7 @@ required minlength="2" maxlength="180">
 <option>Primary</option>
 <option>Secondary</option>
 <option>Primary and secondary</option>
-<option>College or other</option>
+
 </select>
 </div>
 
@@ -218,11 +219,16 @@ const submitButton = document.getElementById('submitRegistration');
 const institutionType = document.getElementById('institution_type');
 const schoolCategoryField = document.getElementById('schoolCategoryField');
 const schoolCategory = document.getElementById('school_category');
+const otherInstitutionTypeField = document.getElementById('otherInstitutionTypeField');
+const otherInstitutionType = document.getElementById('other_institution_type');
 
 function updateInstitutionFields() {
   const isSchool = institutionType.value === 'school';
   schoolCategoryField.hidden = !isSchool;
   schoolCategory.required = isSchool;
+  const isOther = institutionType.value === 'other';
+  otherInstitutionTypeField.hidden = !isOther;
+  otherInstitutionType.required = isOther;
 }
 
 institutionType.addEventListener('change', updateInstitutionFields);
@@ -249,6 +255,7 @@ form.addEventListener('submit', async function(event) {
   const application = {
     school_name: schoolName,
     institution_type: document.getElementById('institution_type').value,
+    other_institution_type: document.getElementById('institution_type').value === 'other' ? otherInstitutionType.value.trim() : null,
     school_category: document.getElementById('institution_type').value === 'school' ? document.getElementById('school_category').value : null,
     country: document.getElementById('country').value.trim(),
     region: document.getElementById('region').value.trim(),
@@ -260,6 +267,13 @@ form.addEventListener('submit', async function(event) {
     message: document.getElementById('message').value.trim() || null,
     requested_slug: createSchoolSlug(schoolName)
   };
+
+  if (application.institution_type === 'other' && !application.other_institution_type) {
+    message.textContent = 'Please specify the type of institution.';
+    message.className = 'error';
+    otherInstitutionType.focus();
+    return;
+  }
 
   if (!application.requested_slug) {
     message.textContent = 'Please enter a valid institution name.';
