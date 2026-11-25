@@ -129,14 +129,15 @@ Submit your institution’s official details to apply for a dedicated CRIPRI web
 required minlength="2" maxlength="180">
 </div>
 
-<div class="field" id="schoolCategoryField" hidden>
+<div class="field" id="schoolCategoryField">
 <label for="school_category">School Category / Level *</label>
-<select id="school_category" name="school_category">
-<option value="">Select category</option>
-<option>Primary</option>
-<option>Secondary</option>
-<option>Primary and secondary</option>
-
+<select id="school_category" name="school_category" required>
+<option value="">Select category / level</option>
+<option value="Primary">Primary</option>
+<option value="Secondary">Secondary</option>
+<option value="Primary and secondary">Primary and Secondary</option>
+<option value="College">College</option>
+<option value="Other">Other</option>
 </select>
 </div>
 
@@ -223,9 +224,8 @@ const otherInstitutionTypeField = document.getElementById('otherInstitutionTypeF
 const otherInstitutionType = document.getElementById('other_institution_type');
 
 function updateInstitutionFields() {
-  const isSchool = institutionType.value === 'school';
-  schoolCategoryField.hidden = !isSchool;
-  schoolCategory.required = isSchool;
+  schoolCategoryField.hidden = false;
+  schoolCategory.required = true;
   const isOther = institutionType.value === 'other';
   otherInstitutionTypeField.hidden = !isOther;
   otherInstitutionType.required = isOther;
@@ -256,7 +256,7 @@ form.addEventListener('submit', async function(event) {
     school_name: schoolName,
     institution_type: document.getElementById('institution_type').value,
     other_institution_type: document.getElementById('institution_type').value === 'other' ? otherInstitutionType.value.trim() : null,
-    school_category: document.getElementById('institution_type').value === 'school' ? document.getElementById('school_category').value : null,
+    school_category: document.getElementById('school_category').value,
     country: document.getElementById('country').value.trim(),
     region: document.getElementById('region').value.trim(),
     contact_email: document.getElementById('contact_email').value.trim(),
