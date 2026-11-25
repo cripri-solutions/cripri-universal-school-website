@@ -60,7 +60,7 @@ jobs:
                       self.external = False
                       self.current = []
 
-          targets = ["school-website.manager.html", "school.html"]
+          targets = ["school-website.manager.html", "school.html", "school-registration-preview.html"]
           failures = []
           checked = 0
 
