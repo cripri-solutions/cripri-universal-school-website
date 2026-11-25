@@ -1662,7 +1662,9 @@ $('contentForm').addEventListener('submit',async event => {
         .from('institution_content_items')
         .update(payload)
         .eq('content_id',id)
-        .eq('institution_id',currentSchool.id);
+        .eq('institution_id',currentSchool.id)
+        .select('content_id')
+        .maybeSingle();
 
     } else {
 
@@ -1670,11 +1672,17 @@ $('contentForm').addEventListener('submit',async event => {
 
       result = await supabase
         .from('institution_content_items')
-        .insert(payload);
+        .insert(payload)
+        .select('content_id')
+        .single();
 
     }
 
     if(result.error) throw result.error;
+
+    if(!result.data || !result.data.content_id) {
+      throw new Error('No content record was saved. Check your institution membership and content permissions.');
+    }
 
     message('editorMessage','Content saved successfully.');
 
