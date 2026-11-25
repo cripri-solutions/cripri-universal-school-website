@@ -26,7 +26,7 @@ ALTER TABLE public.school_applications
 ALTER TABLE public.school_applications
   ADD CONSTRAINT school_applications_other_institution_type_check
   CHECK (
-    (institution_type = 'other' AND length(trim(other_institution_type)) BETWEEN 2 AND 120)
+    (institution_type = 'other' AND other_institution_type IS NOT NULL AND length(trim(other_institution_type)) BETWEEN 2 AND 120)
     OR
     (institution_type <> 'other' AND other_institution_type IS NULL)
   ) NOT VALID;
