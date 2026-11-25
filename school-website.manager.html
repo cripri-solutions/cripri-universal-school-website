@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>CRIPRI | School Website Manager</title>
+<title>CRIPRI | Institution Website Manager</title>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.57.4"></script>
 
@@ -248,8 +248,8 @@ footer {
 
 <header>
   <div>
-    <div class="brand">CRIPRI <span>School Website Manager</span></div>
-    <small id="schoolHeading">Secure School Management Portal</small>
+    <div class="brand">CRIPRI <span>Institution Website Manager</span></div>
+    <small id="schoolHeading">Secure Institution Management Portal</small>
   </div>
 
   <div>
@@ -261,8 +261,8 @@ footer {
 <!-- LOGIN -->
 <section id="loginSection" class="section active">
   <div class="panel" style="max-width:440px;margin:55px auto;">
-    <h1>School Manager Login</h1>
-    <p class="muted">Sign in using your registered school manager account.</p>
+    <h1>Institution Manager Login</h1>
+    <p class="muted">Sign in using your registered institution manager account.</p>
 
     <form id="loginForm">
       <label>Email Address</label>
@@ -284,7 +284,7 @@ footer {
 <div id="workspace" class="layout hidden">
 
   <aside class="sidebar">
-    <h4>SCHOOL WEBSITE</h4>
+    <h4>INSTITUTION WEBSITE</h4>
 
     <button class="nav active" data-page="dashboard">Dashboard</button>
     <button class="nav" data-page="profile">School Profile</button>
@@ -300,10 +300,11 @@ footer {
 
     <!-- DASHBOARD -->
     <section id="dashboard" class="section active">
-      <h1>School Website Dashboard</h1>
+      <h1>Institution Website Dashboard</h1>
 
       <div class="panel">
         <h2 id="schoolNameDisplay">School</h2>
+        <p>Institution type: <strong id="institutionTypeDisplay">School</strong></p>
         <p>Website slug: <strong id="schoolSlugDisplay"></strong></p>
         <p>Account status: <strong id="schoolStatus"></strong></p>
       </div>
@@ -352,9 +353,9 @@ footer {
 
     <!-- SCHOOL PROFILE -->
     <section id="profile" class="section">
-      <h1>School Profile Management</h1>
+      <h1>Institution Profile Management</h1>
       <p class="muted">
-        Update the information displayed on your school's public website.
+        Update the information displayed on your institution's public website.
       </p>
 
       <div class="panel">
@@ -362,7 +363,7 @@ footer {
 
           <div class="form-grid">
             <div>
-              <label for="profileMotto">School Motto</label>
+              <label for="profileMotto">Motto / Tagline</label>
               <input id="profileMotto" maxlength="250">
             </div>
 
@@ -396,11 +397,11 @@ footer {
           <textarea id="profileWelcome" maxlength="2000"
             placeholder="Write a welcome message for visitors"></textarea>
 
-          <label for="profileDescription">About the School</label>
+          <label for="profileDescription">About the Institution</label>
           <textarea id="profileDescription" maxlength="5000"
-            placeholder="Describe your school, its history and its values"></textarea>
+            placeholder="Describe your institution, its history and its values"></textarea>
 
-          <label for="profileLogo">School Logo</label>
+          <label for="profileLogo">Institution Logo</label>
           <input id="profileLogo" type="file"
             accept="image/jpeg,image/png,image/webp,image/gif">
           <p id="profileLogoCurrent" class="profile-image-note">No logo uploaded.</p>
@@ -411,12 +412,12 @@ footer {
           <p id="profileBannerCurrent" class="profile-image-note">No banner uploaded.</p>
 
           <div class="notice">
-            Use clear school-approved images. Maximum upload size is 50 MB per image.
+            Use clear, institution-approved images. Maximum upload size is 50 MB per image.
           </div>
 
           <div class="actions">
             <button class="primary" id="saveProfileButton" type="submit">
-              Save School Profile
+              Save Institution Profile
             </button>
           </div>
 
@@ -504,14 +505,14 @@ footer {
 <!-- CATEGORY PAGES -->
 <section id="announcements" class="section">
   <h1>Announcements</h1>
-  <p class="muted">School notices and important announcements.</p>
+  <p class="muted">Notices and important announcements.</p>
   <button class="primary" data-create="announcement">+ New Announcement</button>
   <div class="panel" id="announcementsList"></div>
 </section>
 
 <section id="events" class="section">
-  <h1>School Events</h1>
-  <p class="muted">Publish upcoming school activities and events.</p>
+  <h1>Events</h1>
+  <p class="muted">Publish upcoming activities and events.</p>
   <button class="primary" data-create="event">+ New Event</button>
   <div class="panel" id="eventsList"></div>
 </section>
@@ -524,8 +525,8 @@ footer {
 </section>
 
 <section id="gallery" class="section">
-  <h1>School Gallery</h1>
-  <p class="muted">Manage school photographs and videos.</p>
+  <h1>Media Gallery</h1>
+  <p class="muted">Manage institution photographs and videos.</p>
   <button class="primary" data-create="gallery">+ Add Gallery Item</button>
   <div class="panel" id="galleryList"></div>
 </section>
@@ -666,7 +667,7 @@ footer {
 </div>
 
 <footer>
-  CRIPRI TECHNOLOGIES © 2026 | Universal School Website Platform
+  CRIPRI TECHNOLOGIES © 2026 | Universal Institution Website Platform
 </footer>
 
 <script type="module">
@@ -700,9 +701,35 @@ const ALLOWED_TYPES = [
   'application/pdf'
 ];
 
+const institutionTypeNames = {
+  school:'School', college:'College', university:'University', church:'Church',
+  mosque:'Mosque', union:'Union', association:'Association', ngo:'NGO',
+  cooperative:'Cooperative', company:'Company', government:'Government Institution',
+  other:'Institution'
+};
+
+function applyInstitutionTerminology(type) {
+  const name = institutionTypeNames[type] || 'Institution';
+  const replacements = [
+    [/\\bSchools\\b/g, name + 's'],
+    [/\\bschools\\b/g, name.toLowerCase() + 's'],
+    [/\\bSchool\\b/g, name],
+    [/\\bschool\\b/g, name.toLowerCase()]
+  ];
+  const walker = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT);
+  let node;
+  while ((node = walker.nextNode())) {
+    if (node.parentElement && ['SCRIPT','STYLE'].includes(node.parentElement.tagName)) continue;
+    let value = node.nodeValue;
+    replacements.forEach(([pattern,replacement]) => { value = value.replace(pattern,replacement); });
+    node.nodeValue = value;
+  }
+  document.title = 'CRIPRI | ' + name + ' Website Manager';
+}
+
 const categoryNames = {
   announcement:'Announcement',
-  event:'School Event',
+  event:'Event',
   vacancy:'Vacancy',
   gallery:'Gallery',
   live_update:'Live Update',
@@ -854,7 +881,7 @@ async function initialiseWorkspace() {
 
   const {data:school,error:schoolError} = await supabase
     .from('schools')
-    .select('id,name,slug,status,motto,description,welcome_message,physical_address,county,country,contact_phone,contact_email,logo_path,banner_path')
+    .select('id,name,slug,status,institution_type,motto,description,welcome_message,physical_address,county,country,contact_phone,contact_email,logo_path,banner_path')
     .eq('id',membership.school_id)
     .single();
 
@@ -869,6 +896,7 @@ async function initialiseWorkspace() {
   }
 
   currentSchool = school;
+  applyInstitutionTerminology(school.institution_type || 'school');
   populateSchoolProfile();
 
   if(currentRole !== 'school_admin') {
@@ -876,7 +904,7 @@ async function initialiseWorkspace() {
       .forEach(control => control.disabled = true);
 
     $('profileMessage').textContent =
-      'View-only: contact your School Admin to change profile details.';
+      'View-only: contact your Institution Administrator to change profile details.';
   }
 
   $('loginSection').classList.add('hidden');
@@ -887,6 +915,7 @@ async function initialiseWorkspace() {
   $('schoolSlugDisplay').textContent = school.slug;
   $('managerRole').textContent = currentRole.replace('_',' ');
   $('schoolStatus').textContent = school.status;
+  $('institutionTypeDisplay').textContent = institutionTypeNames[school.institution_type || 'school'] || 'Institution';
 
   await loadContent();
 
@@ -966,7 +995,7 @@ $('profileForm').addEventListener('submit',async event => {
   event.preventDefault();
 
   if(currentRole !== 'school_admin') {
-    message('profileMessage','Only the School Admin can update the school profile.');
+    message('profileMessage','Only the Institution Administrator can update the institution profile.');
     return;
   }
 
@@ -1008,13 +1037,13 @@ $('profileForm').addEventListener('submit',async event => {
       .from('schools')
       .update(payload)
       .eq('id',currentSchool.id)
-      .select('id,name,slug,status,motto,description,welcome_message,physical_address,county,country,contact_phone,contact_email,logo_path,banner_path')
+      .select('id,name,slug,status,institution_type,motto,description,welcome_message,physical_address,county,country,contact_phone,contact_email,logo_path,banner_path')
       .single();
 
     if(error) throw error;
 
     if(!data) {
-      throw new Error('No profile was returned. Check School Admin permissions.');
+      throw new Error('No profile was returned. Check Institution Administrator permissions.');
     }
 
     currentSchool = data;
@@ -1032,7 +1061,7 @@ $('profileForm').addEventListener('submit',async event => {
   } finally {
 
     button.disabled = false;
-    button.textContent = 'Save School Profile';
+    button.textContent = 'Save Institution Profile';
 
   }
 
@@ -1609,7 +1638,7 @@ async function archiveContent(id) {
 
 async function deleteContent(record) {
   if(currentRole !== 'school_admin') {
-    alert('Only the School Admin can move content to the Recovery Bin.');
+    alert('Only the Institution Administrator can move content to the Recovery Bin.');
     return;
   }
   if(!record || !record.id || !currentSchool) {
