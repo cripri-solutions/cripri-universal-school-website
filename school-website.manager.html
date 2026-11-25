@@ -714,21 +714,21 @@ const ALLOWED_TYPES = [
 
 const institutionTypeNames = {
   school:'School', college:'College', university:'University',
-  tvet:'TVET / Technical Institute', training_centre:'Training Centre',
+  tvet:'TVET / Technical Institute', training_centre:'Training Centre', hospital:'Hospital / Health Facility',
   church:'Church', mosque:'Mosque', union:'Union', association:'Association',
   ngo:'NGO', cooperative:'Cooperative', company:'Company',
-  government:'Government Institution', other:'Institution'
+  government:'Government Institution', hospital:'Hospital / Health Facility', other:'Other Institution'
 };
 
 function applyInstitutionTerminology(type) {
   const name = institutionTypeNames[type] || 'Institution';
   const pluralNames = {
     school:'Schools', college:'Colleges', university:'Universities',
-    tvet:'TVET / Technical Institutes', training_centre:'Training Centres',
+    tvet:'TVET / Technical Institutes', training_centre:'Training Centres', hospital:'Hospitals / Health Facilities',
     church:'Churches', mosque:'Mosques', union:'Unions',
     association:'Associations', ngo:'NGOs', cooperative:'Cooperatives',
     company:'Companies', government:'Government Institutions',
-    other:'Institutions'
+    other:'Other Institutions'
   };
   const plural = pluralNames[type] || 'Institutions';
   const replacements = [
