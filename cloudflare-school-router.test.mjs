@@ -101,6 +101,18 @@ test("rejects URL-encoded path traversal before contacting the origin", async ()
   assert.equal(called, false);
 });
 
+test("rejects double-encoded path traversal before contacting the origin", async () => {
+  let called = false;
+  globalThis.fetch = async () => { called = true; return new Response("unexpected"); };
+
+  const response = await worker.fetch(new Request(
+    "https://green-valley.criprisolutions.co.ke/%252e%252e%252fprivate.txt"
+  ));
+
+  assert.equal(response.status, 400);
+  assert.equal(called, false);
+});
+
 test("rejects malformed percent encoding before contacting the origin", async () => {
   let called = false;
   globalThis.fetch = async () => { called = true; return new Response("unexpected"); };
