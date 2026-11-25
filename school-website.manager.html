@@ -880,8 +880,8 @@ $('loginForm').addEventListener('submit', async event => {
 async function initialiseWorkspace(selectedMembershipId = null) {
 
   const {data:memberships,error} = await supabase
-    .from('school_memberships')
-    .select('school_id,user_id,role')
+    .from('institution_memberships')
+    .select('institution_id,user_id,role')
     .eq('user_id',currentUser.id);
 
   if(error) throw error;
@@ -897,24 +897,24 @@ async function initialiseWorkspace(selectedMembershipId = null) {
   }
 
   let membership = selectedMembershipId
-    ? memberships.find(item => item.school_id === selectedMembershipId)
+    ? memberships.find(item => item.institution_id === selectedMembershipId)
     : null;
 
   if(!membership && memberships.length > 1) {
     const picker = $('institutionPicker');
     picker.replaceChildren();
-    const ids = memberships.map(item => item.school_id);
+    const ids = memberships.map(item => item.institution_id);
     const {data:institutions,error:institutionsError} = await supabase
-      .from('schools')
-      .select('id,name,institution_type,status')
-      .in('id',ids);
+      .from('institutions')
+      .select('institution_id,name,institution_type,status')
+      .in('institution_id',ids);
     if(institutionsError) throw institutionsError;
 
-    const institutionMap = new Map((institutions || []).map(item => [item.id,item]));
+    const institutionMap = new Map((institutions || []).map(item => [item.institution_id,item]));
     memberships.forEach(item => {
-      const institution = institutionMap.get(item.school_id);
+      const institution = institutionMap.get(item.institution_id);
       const option = document.createElement('option');
-      option.value = item.school_id;
+      option.value = item.institution_id;
       option.textContent = institution
         ? institution.name + ' — ' + (institutionTypeNames[institution.institution_type || 'school'] || 'Institution')
         : 'Institution unavailable';
@@ -944,12 +944,13 @@ async function initialiseWorkspace(selectedMembershipId = null) {
   }
 
   const {data:school,error:schoolError} = await supabase
-    .from('schools')
-    .select('id,name,slug,status,institution_type,motto,description,welcome_message,physical_address,county,country,contact_phone,contact_email,logo_path,banner_path')
-    .eq('id',membership.school_id)
+    .from('institutions')
+    .select('institution_id,name,slug,status,institution_type,motto,description,welcome_message,physical_address,county,country,contact_phone,contact_email,logo_path,banner_path')
+    .eq('institution_id',membership.institution_id)
     .single();
 
   if(schoolError) throw schoolError;
+  school.id = school.institution_id;
 
   if(school.status !== 'active') {
 
@@ -1143,9 +1144,9 @@ async function loadContent() {
   message('contentMessage','Loading school content...');
 
   const {data,error} = await supabase
-    .from('school_content_items')
+    .from('institution_content_items')
     .select('*')
-    .eq('school_id',currentSchool.id)
+    .eq('institution_id',currentSchool.id)
     .order('created_at',{ascending:false});
 
   if(error) {
@@ -1156,7 +1157,7 @@ async function loadContent() {
 
   }
 
-  contentRecords = data || [];
+  contentRecords = (data || []).map(item => ({...item,id:item.content_id,school_id:item.institution_id}));
 
   updateStatistics();
   renderRecent();
