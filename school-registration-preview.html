@@ -150,7 +150,7 @@ required minlength="2" maxlength="180">
 </div>
 
 <div class="field">
-<label for="contact_email">Official School Email *</label>
+<label for="contact_email">Official Institution Email *</label>
 <input id="contact_email" name="contact_email"
 type="email" required>
 </div>
@@ -177,7 +177,7 @@ name="physical_address"></textarea>
 <option value="">Select role</option>
 <option>Headteacher / Principal</option>
 <option>Director / Proprietor</option>
-<option>School administrator</option>
+<option>Institution administrator</option>
 <option>Other authorised representative</option>
 </select>
 </div>
@@ -261,7 +261,7 @@ form.addEventListener('submit', async function(event) {
   };
 
   if (!application.requested_slug) {
-    message.textContent = 'Please enter a valid school name.';
+    message.textContent = 'Please enter a valid institution name.';
     message.className = 'error';
     return;
   }
@@ -282,6 +282,7 @@ form.addEventListener('submit', async function(event) {
     message.className = 'success';
     form.reset();
     document.getElementById('country').value = 'Kenya';
+    updateInstitutionFields();
 
   } catch (error) {
     console.error('School application error:', error);
