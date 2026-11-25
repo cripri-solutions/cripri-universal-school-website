@@ -280,6 +280,17 @@ footer {
   </div>
 </section>
 
+<section id="membershipSection" class="section hidden">
+  <div class="panel" style="max-width:520px;margin:55px auto;">
+    <h1>Select an Institution</h1>
+    <p class="muted">Choose the institution website you want to manage.</p>
+    <label for="institutionPicker">Your institutions</label>
+    <select id="institutionPicker" required></select>
+    <div class="actions"><button class="primary" id="openInstitutionButton" type="button">Open Manager</button></div>
+    <p id="institutionPickerMessage" class="message"></p>
+  </div>
+</section>
+
 <!-- MANAGER WORKSPACE -->
 <div id="workspace" class="layout hidden">
 
@@ -304,6 +315,7 @@ footer {
 
       <div class="panel">
         <h2 id="schoolNameDisplay">School</h2>
+        <p>Institution type: <strong id="institutionTypeDisplay">School</strong></p>
         <p>Institution type: <strong id="institutionTypeDisplay">School</strong></p>
         <p>Website slug: <strong id="schoolSlugDisplay"></strong></p>
         <p>Account status: <strong id="schoolStatus"></strong></p>
@@ -783,6 +795,23 @@ function showPage(page) {
   }
 }
 
+$('openInstitutionButton').addEventListener('click', async () => {
+  const id = $('institutionPicker').value;
+  if(!id) {
+    message('institutionPickerMessage','Choose an institution first.');
+    return;
+  }
+  $('membershipSection').classList.remove('active');
+  $('membershipSection').classList.add('hidden');
+  try {
+    await initialiseWorkspace(id);
+  } catch(error) {
+    $('membershipSection').classList.remove('hidden');
+    $('membershipSection').classList.add('active');
+    message('institutionPickerMessage',error.message);
+  }
+});
+
 document.querySelectorAll('.nav[data-page]')
   .forEach(button => {
     button.addEventListener('click', () => {
@@ -841,7 +870,7 @@ $('loginForm').addEventListener('submit', async event => {
 // VERIFY SCHOOL MEMBERSHIP
 // ======================================================
 
-async function initialiseWorkspace() {
+async function initialiseWorkspace(selectedMembershipId = null) {
 
   const {data:memberships,error} = await supabase
     .from('school_memberships')
@@ -860,14 +889,42 @@ async function initialiseWorkspace() {
 
   }
 
-  if(memberships.length !== 1) {
-    await supabase.auth.signOut();
-    throw new Error(
-      'This account must be assigned to exactly one school. Contact CRIPRI to correct its school membership.'
-    );
+  let membership = selectedMembershipId
+    ? memberships.find(item => item.school_id === selectedMembershipId)
+    : null;
+
+  if(!membership && memberships.length > 1) {
+    const picker = $('institutionPicker');
+    picker.replaceChildren();
+    const ids = memberships.map(item => item.school_id);
+    const {data:institutions,error:institutionsError} = await supabase
+      .from('schools')
+      .select('id,name,institution_type,status')
+      .in('id',ids);
+    if(institutionsError) throw institutionsError;
+
+    const institutionMap = new Map((institutions || []).map(item => [item.id,item]));
+    memberships.forEach(item => {
+      const institution = institutionMap.get(item.school_id);
+      const option = document.createElement('option');
+      option.value = item.school_id;
+      option.textContent = institution
+        ? institution.name + ' — ' + (institutionTypeNames[institution.institution_type || 'school'] || 'Institution')
+        : 'Institution unavailable';
+      option.disabled = !institution || institution.status !== 'active';
+      picker.appendChild(option);
+    });
+
+    $('loginSection').classList.remove('active');
+    $('loginSection').classList.add('hidden');
+    $('workspace').classList.add('hidden');
+    $('membershipSection').classList.remove('hidden');
+    $('membershipSection').classList.add('active');
+    return;
   }
 
-  const membership = memberships[0];
+  if(!membership && memberships.length === 1) membership = memberships[0];
+  if(!membership) throw new Error('The selected institution is not assigned to this account.');
 
   currentRole = membership.role;
 
@@ -896,6 +953,8 @@ async function initialiseWorkspace() {
   }
 
   currentSchool = school;
+  $('membershipSection').classList.add('hidden');
+  $('membershipSection').classList.remove('active');
   applyInstitutionTerminology(school.institution_type || 'school');
   populateSchoolProfile();
 
@@ -915,6 +974,7 @@ async function initialiseWorkspace() {
   $('schoolSlugDisplay').textContent = school.slug;
   $('managerRole').textContent = currentRole.replace('_',' ');
   $('schoolStatus').textContent = school.status;
+  $('institutionTypeDisplay').textContent = institutionTypeNames[school.institution_type || 'school'] || 'Institution';
   $('institutionTypeDisplay').textContent = institutionTypeNames[school.institution_type || 'school'] || 'Institution';
 
   await loadContent();
