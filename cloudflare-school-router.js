@@ -136,12 +136,19 @@ export default {
     const headers = new Headers(upstreamResponse.headers);
 
     headers.set("X-CRIPRI-Institution-Slug", slug);
-    headers.set(
-      "Cache-Control",
-      isInstitutionPage
-        ? "public, max-age=60, s-maxage=60"
-        : "public, max-age=3600, s-maxage=3600"
-    );
+    if (upstreamResponse.status >= 200 && upstreamResponse.status < 300) {
+      headers.set(
+        "Cache-Control",
+        isInstitutionPage
+          ? "public, max-age=60, s-maxage=60"
+          : "public, max-age=3600, s-maxage=3600"
+      );
+    } else if (upstreamResponse.status === 404) {
+      headers.set("Cache-Control", "public, max-age=30, s-maxage=30");
+    } else {
+      // Never let browsers or shared caches retain upstream failures.
+      headers.set("Cache-Control", "no-store");
+    }
 
     return new Response(upstreamResponse.body, {
       status: upstreamResponse.status,
