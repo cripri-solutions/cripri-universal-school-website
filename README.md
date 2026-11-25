@@ -44,7 +44,7 @@ Illustrative facility artwork and sample copy must not be represented as verifie
 - Supabase provides authentication, database access, row-level security, and storage for the manager and public website.
 - Cloudflare Workers routes institution subdomains when the Worker is deployed and the appropriate route and DNS are configured.
 
-A GitHub feature-branch commit does not itself prove that a Cloudflare preview is deployed. Verify the Worker preview/deployment in Cloudflare before testing it with an institution account.
+The Cloudflare Pages integration reports successful branch-preview deployments for feature-branch commits. This confirms the static Pages preview build, not the separate Cloudflare Worker deployment, custom-domain routing, or a live institution workflow. Verify those separately before testing with an institution account.
 
 ## Development and release safety
 
@@ -58,6 +58,6 @@ A GitHub feature-branch commit does not itself prove that a Cloudflare preview i
 
 ## Current verification boundary
 
-The feature branch contains the universal institution manager, public institution website, Worker router, and universal-manager write-permissions migration. Supabase has confirmed the required authenticated profile and content write grants. This does not yet establish successful end-to-end browser writes or a working Cloudflare preview deployment; those must be tested separately before a client launch.
+The feature branch contains the universal institution manager, public institution website, Worker router, and universal-manager write-permissions migration. Supabase has confirmed the required authenticated profile and content write grants. The latest feature-branch commit has a successful Cloudflare Pages preview deployment and a successful registration/database contract validation. The preview has not yet completed an end-to-end browser smoke test; the live Supabase application-field migration and anonymous INSERT grants remain unverified, as do authenticated profile/content browser writes, storage uploads, and the separate Worker/custom-domain route. Complete these checks before a client launch.
 
 Built by CRIPRI Technologies.
