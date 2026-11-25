@@ -236,13 +236,13 @@ h2{font-size:clamp(29px,4vw,42px);color:var(--navy);margin:8px 0 12px}.section-l
     document.title=name+" | Official "+terminology.singular+" Website";
     ["topName","schoolName","heroName","contactName","footerName"].forEach(id=>text(id,name));
     ["schoolMotto","heroMotto"].forEach(id=>text(id,motto));
-    text("aboutLead",welcome);text("aboutCopy",school.description||welcome);text("aboutTitle","Discover "+name);text("contactLocation",location||"Contact the school for location details.");
+    text("aboutLead",welcome);text("aboutCopy",school.description||welcome);text("aboutTitle","Discover "+name);text("contactLocation",location||"Contact this institution for location details.");
     if(school.contact_phone){const phone=document.createElement("a");phone.href="tel:"+school.contact_phone;phone.textContent=school.contact_phone;$("contactPhone").replaceChildren(phone);}else $("phoneRow").classList.add("hidden");
     if(school.contact_email){const email=document.createElement("a");email.href="mailto:"+school.contact_email;email.textContent=school.contact_email;$("contactEmail").replaceChildren(email);}else $("emailRow").classList.add("hidden");
     if(school.logo_path){const logo=document.createElement("img");logo.src=school.logo_path;logo.alt=name+" logo";logo.className="brand-logo";$("crest").replaceChildren(logo);}
     if(school.banner_path){$("home").classList.add("has-banner");$("home").style.backgroundImage="linear-gradient(105deg,rgba(7,35,58,.90),rgba(18,59,93,.56)),url("+JSON.stringify(school.banner_path)+")";}
     text("heroTitle","Welcome to "+name);text("crest",name.charAt(0).toUpperCase());text("contactSlug",school.slug);text("year",String(new Date().getFullYear()));
-    const {data:records,error}=await supabase.from("institution_content_items").select("content_id,content_type,title,summary,body,venue,event_start_at,application_deadline,application_email,application_url,video_url,media_path,status,publish_at,created_at").eq("institution_id",school.institution_id).in("status",["published","scheduled"]).or("publish_at.is.null,publish_at.lte."+new Date().toISOString()).order("created_at",{ascending:false});
+    const {data:records,error}=await supabase.from("institution_content_items").select("content_id,content_type,title,summary,body,venue,event_start_at,application_deadline,application_email,application_url,video_url,media_path,status,publish_at,created_at").eq("institution_id",school.institution_id).or("and(status.eq.published,or(publish_at.is.null,publish_at.lte."+new Date().toISOString()+")),and(status.eq.scheduled,publish_at.not.is.null,publish_at.lte."+new Date().toISOString()+")").order("created_at",{ascending:false});
     if(error)throw error;
     const rows=records||[];
     render("announcementList",rows.filter(r=>["announcement","live_update","live_stream"].includes(r.content_type)),"News & updates","No published updates at the moment.");
@@ -250,7 +250,7 @@ h2{font-size:clamp(29px,4vw,42px);color:var(--navy);margin:8px 0 12px}.section-l
     render("vacancyList",rows.filter(r=>r.content_type==="vacancy"),"Opportunities","There are no current opportunities.");
     render("galleryList",rows.filter(r=>r.content_type==="gallery"),"Gallery","Gallery items will appear here when published.");
     $("loading").classList.add("hidden");$("site").classList.remove("hidden");
-  }catch(err){console.error("Public website error:",err);fail("Unable to load school website","The public website could not retrieve its information. Please try again later.");}
+  }catch(err){console.error("Public website error:",err);fail("Unable to load institution website","The public website could not retrieve its information. Please try again later.");}
   const menu=$("menuButton"),nav=$("nav");
   menu.addEventListener("click",()=>{const open=nav.classList.toggle("open");menu.setAttribute("aria-expanded",String(open));});
   nav.querySelectorAll("a").forEach(a=>a.addEventListener("click",()=>{nav.classList.remove("open");menu.setAttribute("aria-expanded","false");}));
