@@ -249,7 +249,7 @@ form.addEventListener('submit', async function(event) {
   const application = {
     school_name: schoolName,
     institution_type: document.getElementById('institution_type').value,
-    school_category: document.getElementById('institution_type').value === 'school' ? document.getElementById('school_category').value : 'College or other',
+    school_category: document.getElementById('institution_type').value === 'school' ? document.getElementById('school_category').value : null,
     country: document.getElementById('country').value.trim(),
     region: document.getElementById('region').value.trim(),
     contact_email: document.getElementById('contact_email').value.trim(),
