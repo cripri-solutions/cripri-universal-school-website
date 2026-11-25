@@ -1,57 +1,62 @@
-# CRIPRI Universal School Website
+# CRIPRI Universal Institution Website Platform
 
-The public landing page for the CRIPRI Universal School Website platform, maintained by CRIPRI Technologies.
+A multi-tenant website platform maintained by CRIPRI Technologies. The shared platform supports schools and other institution types while retaining the existing school data model for backward compatibility.
 
-## Live preview
+## Application components
 
-https://cripri-solutions.github.io/cripri-universal-school-website/
+- `index.html` — CRIPRI public platform landing page.
+- `school-website.manager.html` — authenticated institution manager for institution profiles and website content.
+- `school.html` — public institution website rendered from the institution slug.
+- `cloudflare-school-router.js` — Cloudflare Worker router for institution subdomains under `*.criprisolutions.co.ke`; serves the dynamic institution page and forwards static assets to GitHub Pages.
+- `wrangler.jsonc` — Worker configuration, including preview configuration.
+- `supabase/migrations/` — versioned SQL migrations. Review and apply database migrations deliberately; committing a migration does not execute it against Supabase.
+- `school-registration-preview.html`, `portal-preview.html`, and `registration-review-preview.html` — legacy illustrative preview pages. They are not the authenticated production manager or reviewer console.
 
-## What this repository currently contains
+## Institution model
 
-- `index.html` — CRIPRI platform landing page explaining the service and school onboarding approach.
-- `style.css` — responsive visual design shared by the public pages.
-- `school-registration-preview.html` — demonstration of the proposed school application form; it is disabled and does not submit or store data.
-- `portal-preview.html` — sample school administrator workspace; it has no login or database.
-- `registration-review-preview.html` — fictional sample of CRIPRI's manual application review process; it is not a live staff console.
-- `script.js` — reusable settings-driven school homepage script retained as a starter for future individual school sites.
-- `firestore.rules` and `firebase.json` — an initial security-rules draft and Firebase configuration; not deployed.
-- `docs/backend-security-plan.md` — proposed backend structure and security boundaries.
+The platform uses a shared institution model with an `institution_type` field. Supported types are defined by the database constraint and include schools, colleges, universities, churches, mosques, NGOs, companies, associations, cooperatives, government institutions, unions and other institutions.
 
-## Current hosting
+For compatibility, the underlying database retains legacy table names such as `schools`, `school_memberships`, and `school_content_items`. Universal views such as `institutions`, `institution_memberships`, and `institution_content_items` provide institution-oriented names to the application.
 
-The public static pages are hosted on GitHub Pages. Firebase is not currently connected. No existing CRIPRI Firebase project is used or modified.
+## Manager capabilities
 
-## Important functionality boundary
+The institution manager is connected to Supabase Auth and the universal database views. Its intended workflows include:
 
-This is currently a public website and set of interface previews. It does **not** yet:
-- collect or transmit school applications;
-- create school accounts or administrator logins;
-- approve or reject applications;
-- generate school IDs;
-- save or publish school content from a dashboard;
-- provide a private database.
+- Sign in with an institution manager account.
+- Select an institution where the user has an active membership.
+- View and update institution profile details.
+- Create, edit, publish and schedule website content according to database role policies.
+- Manage content recovery and restoration where the user's role permits it.
+- Upload institution media to the configured Supabase Storage bucket.
 
-Do not enter real school details, passwords, student information or confidential information into preview pages. The registration form is disabled and the review/dashboard pages use illustrative content only.
+Actual access is enforced by Supabase grants, row-level security policies, and trusted database functions—not by hiding controls in the browser.
 
-## Planned school onboarding
+## Public institution websites
 
-1. A school submits an application through a future secure form.
-2. The application is stored as `PENDING_REVIEW`.
-3. CRIPRI verifies the school and its authorised representative.
-4. An authorised CRIPRI reviewer records approval or rejection.
-5. Only after approval does a trusted process create the school identity and provision administrator access.
+The public website resolves an institution by its approved slug and displays public profile details and published content. The Cloudflare Worker routes institution subdomains to the shared public website engine and forwards static assets to the GitHub Pages project.
 
-No school should be automatically activated simply because it submits an application.
+Illustrative facility artwork and sample copy must not be represented as verified photographs or facilities of a real institution. Replace them with institution-approved information and media before a client launch.
 
-## Hosting and cost approach
+## Hosting and environment
 
-- Keep public static website hosting on GitHub Pages.
-- Evaluate a separate Firebase project for the platform backend, starting with the no-cost Spark plan where supported.
-- Do not enable billing, upgrade to Blaze, enable Cloud Build or deploy paid services without explicit approval.
-- Secure role assignment and school activation must not be implemented in untrusted browser code. Any backend design must be tested before real applications are accepted.
+- GitHub Pages hosts the repository's static website assets.
+- Supabase provides authentication, database access, row-level security, and storage for the manager and public website.
+- Cloudflare Workers routes institution subdomains when the Worker is deployed and the appropriate route and DNS are configured.
 
-## Individual school websites
+A GitHub feature-branch commit does not itself prove that a Cloudflare preview is deployed. Verify the Worker preview/deployment in Cloudflare before testing it with an institution account.
 
-The `script.js` and existing school-page styling provide a starting point for future individual school websites. Each school site should use its own approved public content and approved photographs. Do not publish identifiable learner photographs without the school's appropriate permissions and consent.
+## Development and release safety
+
+- Current development branch: `feature/universal-institution-manager`.
+- Keep implementation and testing on the feature branch until reviewed.
+- Do not merge to `main`, change production Worker routes, or deploy production without explicit approval.
+- A SQL migration committed to GitHub is not automatically applied to the live Supabase project. Apply migrations through the intended Supabase release process and verify the result.
+- Test with a dedicated institution account and non-sensitive sample content before demonstrating the manager to a client.
+- Never commit Supabase secret/service-role keys, passwords, access tokens, or client data. The browser may use only the project's publishable/anon key with appropriate RLS protection.
+- Do not publish identifiable learner photographs or personal information without the institution's appropriate permissions and consent.
+
+## Current verification boundary
+
+The feature branch contains the universal institution manager, public institution website, Worker router, and universal-manager write-permissions migration. Supabase has confirmed the required authenticated profile and content write grants. This does not yet establish successful end-to-end browser writes or a working Cloudflare preview deployment; those must be tested separately before a client launch.
 
 Built by CRIPRI Technologies.
