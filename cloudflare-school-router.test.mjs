@@ -88,3 +88,27 @@ test("does not cache upstream failures", async () => {
   assert.equal(response.status, 503);
   assert.equal(response.headers.get("Cache-Control"), "no-store");
 });
+
+test("rejects URL-encoded path traversal before contacting the origin", async () => {
+  let called = false;
+  globalThis.fetch = async () => { called = true; return new Response("unexpected"); };
+
+  const response = await worker.fetch(new Request(
+    "https://green-valley.criprisolutions.co.ke/%2e%2e/private.txt"
+  ));
+
+  assert.equal(response.status, 400);
+  assert.equal(called, false);
+});
+
+test("rejects malformed percent encoding before contacting the origin", async () => {
+  let called = false;
+  globalThis.fetch = async () => { called = true; return new Response("unexpected"); };
+
+  const response = await worker.fetch(new Request(
+    "https://green-valley.criprisolutions.co.ke/%E0%A4%A"
+  ));
+
+  assert.equal(response.status, 400);
+  assert.equal(called, false);
+});
