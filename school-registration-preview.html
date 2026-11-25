@@ -128,9 +128,9 @@ Submit your institution’s official details to apply for a dedicated CRIPRI web
 required minlength="2" maxlength="180">
 </div>
 
-<div class="field">
-<label for="school_category">Institution Category / Level *</label>
-<select id="school_category" name="school_category" required>
+<div class="field" id="schoolCategoryField" hidden>
+<label for="school_category">School Category / Level *</label>
+<select id="school_category" name="school_category">
 <option value="">Select category</option>
 <option>Primary</option>
 <option>Secondary</option>
@@ -214,6 +214,18 @@ const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
 const form = document.getElementById('schoolRegistrationForm');
 const message = document.getElementById('formMessage');
 const submitButton = document.getElementById('submitRegistration');
+const institutionType = document.getElementById('institution_type');
+const schoolCategoryField = document.getElementById('schoolCategoryField');
+const schoolCategory = document.getElementById('school_category');
+
+function updateInstitutionFields() {
+  const isSchool = institutionType.value === 'school';
+  schoolCategoryField.hidden = !isSchool;
+  schoolCategory.required = isSchool;
+}
+
+institutionType.addEventListener('change', updateInstitutionFields);
+updateInstitutionFields();
 
 function createSchoolSlug(name) {
   return name
@@ -281,7 +293,7 @@ form.addEventListener('submit', async function(event) {
 
   } finally {
     submitButton.disabled = false;
-    submitButton.textContent = 'Submit School Application';
+    submitButton.textContent = 'Submit Institution Application';
   }
 });
 </script>
