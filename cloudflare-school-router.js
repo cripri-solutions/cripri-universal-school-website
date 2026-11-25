@@ -1,17 +1,17 @@
 /**
- * CRIPRI School Website Host Router
+ * CRIPRI Institution Website Host Router
  *
  * Deploy as a Cloudflare Worker and attach route:
  *   *.criprisolutions.co.ke/*
  *
- * Root requests serve the dynamic school page. Static files (images, CSS,
+ * Root requests serve the dynamic institution page. Static files (images, CSS,
  * JavaScript and other assets) are forwarded to their matching GitHub Pages
  * paths instead of incorrectly receiving school.html.
  */
 const PAGES_ORIGIN = "https://cripri-solutions.github.io";
 const PAGES_BASE = "/cripri-universal-school-website/";
 
-function getSchoolSlug(hostname) {
+function getInstitutionSlug(hostname) {
   const suffix = ".criprisolutions.co.ke";
   const host = hostname.toLowerCase();
 
@@ -31,16 +31,16 @@ function getSchoolSlug(hostname) {
 export default {
   async fetch(request) {
     const incoming = new URL(request.url);
-    const slug = getSchoolSlug(incoming.hostname);
+    const slug = getInstitutionSlug(incoming.hostname);
 
     if (!slug) {
-      return new Response("School website not found.", {
+      return new Response("Institution website not found.", {
         status: 404,
         headers: { "content-type": "text/plain; charset=utf-8" }
       });
     }
 
-    // Serve the school engine at the subdomain root. For every other path,
+    // Serve the institution website engine at the subdomain root. For every other path,
     // proxy the corresponding static asset from the GitHub Pages project.
     const requestedPath = incoming.pathname.replace(/^\/+/, "");
     const assetPath = requestedPath || "school.html";
@@ -56,7 +56,7 @@ export default {
 
     const destination = new URL(PAGES_BASE + assetPath, PAGES_ORIGIN);
 
-    // Pass the school slug only to the dynamic HTML engine.
+    // Pass the institution slug only to the dynamic HTML engine.
     if (assetPath === "school.html") {
       destination.searchParams.set("slug", slug);
     } else {
@@ -69,7 +69,7 @@ export default {
     const upstreamResponse = await fetch(upstreamRequest);
 
     const headers = new Headers(upstreamResponse.headers);
-    headers.set("X-CRIPRI-School-Slug", slug);
+    headers.set("X-CRIPRI-Institution-Slug", slug);
     headers.set(
       "Cache-Control",
       assetPath === "school.html" ? "public, max-age=300" : "public, max-age=3600"
