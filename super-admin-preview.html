@@ -101,17 +101,17 @@ footer{text-align:center;color:#8290a2;padding:25px;font-size:12px}
 
   <div class="cards">
     <div class="card">
-      <div class="label">Registered Schools</div>
+      <div class="label">Registered Institutions</div>
       <div class="number" id="totalSchools">—</div>
       <small>Records in schools table</small>
     </div>
     <div class="card">
-      <div class="label">Active Schools</div>
+      <div class="label">Active Institutions</div>
       <div class="number" id="activeSchools">—</div>
       <small>Schools with active status</small>
     </div>
     <div class="card">
-      <div class="label">Pending School Approvals</div>
+      <div class="label">Pending Institution Approvals</div>
       <div class="number" id="pendingCount">—</div>
       <small>Applications awaiting review</small>
     </div>
@@ -165,8 +165,8 @@ footer{text-align:center;color:#8290a2;padding:25px;font-size:12px}
 <section id="schools" class="section">
   <div class="topline">
     <div>
-      <h1>School Management</h1>
-      <div class="muted">Live registered school records from Supabase.</div>
+      <h1>Institution Management</h1>
+      <div class="muted">Live registered institution records from Supabase.</div>
     </div>
     <button class="primary" id="refreshSchools">↻ Refresh Schools</button>
   </div>
@@ -181,8 +181,9 @@ footer{text-align:center;color:#8290a2;padding:25px;font-size:12px}
       <table id="schoolTable">
         <thead>
           <tr>
-            <th>School Name</th>
-            <th>School ID</th>
+            <th>Institution Name</th>
+            <th>Institution Type</th>
+            <th>Institution ID</th>
             <th>Website Slug</th>
             <th>Location</th>
             <th>Status</th>
@@ -201,8 +202,8 @@ footer{text-align:center;color:#8290a2;padding:25px;font-size:12px}
 <section id="approvals" class="section">
   <div class="topline">
     <div>
-      <h1>School Approvals</h1>
-      <div class="muted">Review school registration applications.</div>
+      <h1>Institution Approvals</h1>
+      <div class="muted">Review institution registration applications.</div>
     </div>
     <button class="primary" id="refreshApprovals">↻ Refresh Applications</button>
   </div>
@@ -247,7 +248,8 @@ footer{text-align:center;color:#8290a2;padding:25px;font-size:12px}
       <table id="approvalTable">
         <thead>
           <tr>
-            <th>School</th>
+            <th>Institution</th>
+            <th>Institution Type</th>
             <th>Contact Person</th>
             <th>Contact</th>
             <th>Location</th>
@@ -257,7 +259,7 @@ footer{text-align:center;color:#8290a2;padding:25px;font-size:12px}
           </tr>
         </thead>
         <tbody id="approvalTableBody">
-          <tr><td colspan="7" class="empty">Loading applications...</td></tr>
+          <tr><td colspan="8" class="empty">Loading applications...</td></tr>
         </tbody>
       </table>
     </div>
@@ -308,7 +310,7 @@ footer{text-align:center;color:#8290a2;padding:25px;font-size:12px}
   <div class="topline"><div><h1>School Administrators</h1><div class="muted">Invite school administrators, assign content-editor access and manage memberships.</div></div><div style="display:flex;gap:8px;flex-wrap:wrap"><button class="primary" type="button" id="adminInviteShortcut">＋ Invite Administrator</button><button class="primary" id="refreshAdmins">↻ Refresh Administrators</button></div></div>
   <div class="cards">
     <div class="card"><div class="label">Total Memberships</div><div class="number" id="adminTotal">—</div><small>Registered school roles</small></div>
-    <div class="card"><div class="label">School Administrators</div><div class="number" id="adminOwners">—</div><small>School admin memberships</small></div>
+    <div class="card"><div class="label">Institution Administrators</div><div class="number" id="adminOwners">—</div><small>School admin memberships</small></div>
     <div class="card"><div class="label">Content Editors</div><div class="number" id="adminEditors">—</div><small>Content editor memberships</small></div>
     <div class="card"><div class="label">Schools With Admins</div><div class="number" id="adminSchools">—</div><small>Schools represented</small></div>
   </div>
@@ -640,7 +642,7 @@ async function loadSchools() {
 
   const { data, error } = await supabase
     .from('schools')
-    .select('id,name,slug,status,created_at,country,county,physical_address')
+    .select('id,name,slug,status,institution_type,created_at,country,county,physical_address')
     .order('created_at', { ascending: false });
 
   if (error) {
@@ -711,6 +713,7 @@ function renderSchools() {
     const tr = document.createElement('tr');
 
     makeCell(tr, s.name);
+    makeCell(tr, s.institution_type || 'school');
     makeCell(tr, s.id);
     makeCell(tr, s.slug);
 
@@ -1018,7 +1021,7 @@ async function loadSchoolApplications() {
 
   const { data, error } = await supabase
     .from('school_applications')
-    .select('id,school_name,contact_person,contact_email,contact_phone,contact_role,school_category,country,region,physical_address,requested_slug,message,status,created_at,reviewed_at,review_reason')
+    .select('id,school_name,institution_type,contact_person,contact_email,contact_phone,contact_role,school_category,country,region,physical_address,requested_slug,message,status,created_at,reviewed_at,review_reason')
     .order('created_at', { ascending: false });
 
   if (error) {
@@ -1071,7 +1074,7 @@ function renderApplications() {
     const tr = document.createElement('tr');
     const td = document.createElement('td');
 
-    td.colSpan = 7;
+    td.colSpan = 8;
     td.className = 'empty';
     td.textContent = 'No applications found for this status.';
 
@@ -1085,6 +1088,7 @@ function renderApplications() {
     const tr = document.createElement('tr');
 
     makeCell(tr, app.school_name);
+    makeCell(tr, app.institution_type || 'school');
     makeCell(tr, app.contact_person);
 
     makeCell(
@@ -1118,7 +1122,8 @@ function renderApplications() {
       '\nEMAIL: ' + safe(app.contact_email) +
       '\nPHONE: ' + safe(app.contact_phone) +
       '\nROLE: ' + safe(app.contact_role) +
-      '\nCATEGORY: ' + safe(app.school_category) +
+      '\nINSTITUTION TYPE: ' + safe(app.institution_type) +
+      '\nCATEGORY / LEVEL: ' + safe(app.school_category) +
       '\nLOCATION: ' +
         [app.physical_address,app.region,app.country]
           .filter(Boolean).join(', ') +

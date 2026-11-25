@@ -5,7 +5,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="robots" content="noindex,nofollow">
-<title>CRIPRI | School Registration</title>
+<title>CRIPRI | Institution Registration</title>
 <link rel="stylesheet" href="style.css">
 
 <style>
@@ -108,12 +108,12 @@ button:disabled {
 
 <p><strong>CRIPRI TECHNOLOGIES</strong></p>
 
-<h1>Register Your School</h1>
+<h1>Register Your Institution</h1>
 
 <p class="intro">
-Submit your school's details to begin the CRIPRI school
-website and workspace onboarding process.
-Applications are reviewed by an authorised administrator.
+Submit your institution's details to begin the CRIPRI website
+and secure management workspace onboarding process.
+Applications are reviewed by an authorised CRIPRI administrator.
 </p>
 
 <form id="schoolRegistrationForm">
@@ -121,20 +121,42 @@ Applications are reviewed by an authorised administrator.
 <div class="form-grid">
 
 <div class="field">
-<label for="school_name">Official School Name *</label>
+<label for="school_name">Official Institution Name *</label>
 <input id="school_name" name="school_name"
 required minlength="2" maxlength="180">
 </div>
 
 <div class="field">
-<label for="school_category">School Category *</label>
-<select id="school_category" name="school_category" required>
-<option value="">Select category</option>
-<option>Primary</option>
-<option>Secondary</option>
-<option>Primary and secondary</option>
-<option>College or other</option>
+<label for="institution_type">Institution Type *</label>
+<select id="institution_type" name="institution_type" required>
+<option value="">Select institution type</option>
+<option value="school">School</option>
+<option value="college">College</option>
+<option value="university">University</option>
+<option value="tvet">TVET / Technical Institution</option>
+<option value="training_centre">Training Centre</option>
+<option value="church">Church</option>
+<option value="mosque">Mosque</option>
+<option value="union">Union</option>
+<option value="association">Association</option>
+<option value="ngo">NGO</option>
+<option value="cooperative">Cooperative</option>
+<option value="company">Company</option>
+<option value="government">Government Institution</option>
+<option value="other">Other Institution</option>
 </select>
+</div>
+
+<div class="field">
+<label for="school_category">Institution Category / Level *</label>
+<select id="school_category" name="school_category" required disabled>
+<option value="">Select institution type first</option>
+</select>
+</div>
+
+<div class="field full" id="categoryOtherField" hidden>
+<label for="category_other">Please specify the category *</label>
+<input id="category_other" name="category_other" maxlength="120">
 </div>
 
 <div class="field">
@@ -189,7 +211,7 @@ name="physical_address"></textarea>
 
 <div class="actions">
 <button type="submit" id="submitRegistration">
-Submit School Application
+Submit Institution Application
 </button>
 </div>
 
@@ -213,6 +235,46 @@ const form = document.getElementById('schoolRegistrationForm');
 const message = document.getElementById('formMessage');
 const submitButton = document.getElementById('submitRegistration');
 
+const institutionType = document.getElementById('institution_type');
+const categorySelect = document.getElementById('school_category');
+const categoryOtherField = document.getElementById('categoryOtherField');
+const categoryOtherInput = document.getElementById('category_other');
+
+const institutionCategories = {
+  school: ['Primary', 'Secondary', 'Primary and secondary'],
+  college: ['Technical college', 'Teacher training college', 'Professional college', 'Community college', 'Other college'],
+  university: ['Public university', 'Private university', 'Constituent college'],
+  tvet: ['TVET institution', 'Polytechnic', 'Vocational training institution'],
+  training_centre: ['Professional training', 'Skills development', 'Short courses', 'Other training centre'],
+  church: ['Church', 'Ministry / Fellowship', 'Other church organisation'],
+  mosque: ['Mosque', 'Islamic centre', 'Other mosque organisation'],
+  union: ['Trade union', 'Professional union', 'Other union'],
+  association: ['Professional association', 'Community association', 'Other association'],
+  ngo: ['Non-governmental organisation', 'Community-based organisation', 'Other NGO'],
+  cooperative: ['Savings and credit cooperative', 'Producer cooperative', 'Other cooperative'],
+  company: ['Private company', 'Public company', 'Other company'],
+  government: ['National government institution', 'County government institution', 'Public agency'],
+  other: ['General institution', 'Other (please specify)']
+};
+
+function updateInstitutionCategories() {
+  const type = institutionType.value;
+  const categories = institutionCategories[type] || [];
+  categorySelect.replaceChildren(new Option('Select category / level', ''));
+  categories.forEach(category => categorySelect.add(new Option(category, category)));
+  categorySelect.disabled = !type;
+  categoryOtherField.hidden = true;
+  categoryOtherInput.required = false;
+  categoryOtherInput.value = '';
+}
+
+institutionType.addEventListener('change', updateInstitutionCategories);
+categorySelect.addEventListener('change', () => {
+  const showOther = categorySelect.value === 'Other (please specify)';
+  categoryOtherField.hidden = !showOther;
+  categoryOtherInput.required = showOther;
+});
+
 function createSchoolSlug(name) {
   return name
     .normalize('NFD')
@@ -233,7 +295,8 @@ form.addEventListener('submit', async function(event) {
 
   const application = {
     school_name: schoolName,
-    school_category: document.getElementById('school_category').value,
+    institution_type: institutionType.value,
+    school_category: categorySelect.value === 'Other (please specify)' ? categoryOtherInput.value.trim() : categorySelect.value,
     country: document.getElementById('country').value.trim(),
     region: document.getElementById('region').value.trim(),
     contact_email: document.getElementById('contact_email').value.trim(),
@@ -244,6 +307,12 @@ form.addEventListener('submit', async function(event) {
     message: document.getElementById('message').value.trim() || null,
     requested_slug: createSchoolSlug(schoolName)
   };
+
+  if (!application.school_category) {
+    message.textContent = 'Please select an institution category or level.';
+    message.className = 'error';
+    return;
+  }
 
   if (!application.requested_slug) {
     message.textContent = 'Please enter a valid school name.';
@@ -267,6 +336,7 @@ form.addEventListener('submit', async function(event) {
     message.className = 'success';
     form.reset();
     document.getElementById('country').value = 'Kenya';
+    updateInstitutionCategories();
 
   } catch (error) {
     console.error('School application error:', error);
@@ -278,7 +348,7 @@ form.addEventListener('submit', async function(event) {
 
   } finally {
     submitButton.disabled = false;
-    submitButton.textContent = 'Submit School Application';
+    submitButton.textContent = 'Submit Institution Application';
   }
 });
 </script>
