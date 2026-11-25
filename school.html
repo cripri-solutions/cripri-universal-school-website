@@ -5,8 +5,8 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="theme-color" content="#123b5d">
-<meta name="description" content="Official school website powered by CRIPRI Technologies.">
-<title>School Website | CRIPRI Technologies</title>
+<meta name="description" content="Official institution website powered by CRIPRI Technologies.">
+<title>Institution Website | CRIPRI Technologies</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.57.4"></script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet">
@@ -150,6 +150,7 @@ h2{font-size:clamp(29px,4vw,42px);color:var(--navy);margin:8px 0 12px}.section-l
   const telwaPhotoNote=document.getElementById("telwaPhotoNote");
   const facilityGrid=document.querySelector(".facility-grid-live");
   const facilityDisclaimer=document.querySelector(".facility-disclaimer");
+  const facilitiesSection=document.getElementById("facilities");
   if(slug==="telwa-girls"){
     if(telwaModernGallery)telwaModernGallery.style.display="grid";
     if(telwaPhotoNote)telwaPhotoNote.style.display="block";
@@ -188,17 +189,46 @@ h2{font-size:clamp(29px,4vw,42px);color:var(--navy);margin:8px 0 12px}.section-l
     });
   }
   try{
-    if(!slug || !/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(slug)){fail("School address required","Open this page with the school's assigned slug, for example ?slug=telwa-girls.");return;}
-    const {data:school,error:schoolError}=await supabase.from("schools").select("id,name,slug,status,motto,description,welcome_message,physical_address,county,country,contact_phone,contact_email,logo_path,banner_path").eq("slug",slug).eq("status","active").maybeSingle();
+    if(!slug || !/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(slug)){fail("Institution address required","Open this page with the institution's assigned website address.");return;}
+    const {data:school,error:schoolError}=await supabase.from("schools").select("id,name,slug,status,institution_type,motto,description,welcome_message,physical_address,county,country,contact_phone,contact_email,logo_path,banner_path").eq("slug",slug).eq("status","active").maybeSingle();
     if(schoolError)throw schoolError;
-    if(!school){fail("School website not available",'No active school was found for "'+slug+'". Check the address or contact CRIPRI Technologies.');return;}
+    if(!school){fail("Institution website not available",'No active institution was found for "'+slug+'". Check the address or contact CRIPRI Technologies.');return;}
     const {data:subscriptionValid,error:subscriptionError}=await supabase.rpc("is_school_website_subscription_valid",{p_school_id:school.id});
     if(subscriptionError)throw subscriptionError;
-    if(subscriptionValid!==true){fail("School subscription inactive","This school's website subscription is not currently active. Please contact CRIPRI Technologies to arrange or renew the subscription.");return;}
-    const name=school.name||"School",motto=school.motto||"Learning • Growth • Opportunity";
+    if(subscriptionValid!==true){fail("Website subscription inactive","This institution's website subscription is not currently active. Please contact CRIPRI Technologies to arrange or renew the subscription.");return;}
+    const institutionType=school.institution_type||"school";
+    const institutionNames={
+      school:{singular:"School",plural:"Schools"},
+      college:{singular:"College",plural:"Colleges"},
+      university:{singular:"University",plural:"Universities"},
+      church:{singular:"Church",plural:"Churches"},
+      mosque:{singular:"Mosque",plural:"Mosques"},
+      union:{singular:"Union",plural:"Unions"},
+      association:{singular:"Association",plural:"Associations"},
+      ngo:{singular:"NGO",plural:"NGOs"},
+      cooperative:{singular:"Cooperative",plural:"Cooperatives"},
+      company:{singular:"Company",plural:"Companies"},
+      government:{singular:"Government Institution",plural:"Government Institutions"},
+      other:{singular:"Institution",plural:"Institutions"}
+    };
+    const terminology=institutionNames[institutionType]||institutionNames.other;
+    const name=school.name||terminology.singular,motto=school.motto||"Welcome • Service • Community";
+    if(institutionType!=="school" && facilitiesSection) facilitiesSection.remove();
+    if(institutionType!=="school") {
+      const walker=document.createTreeWalker(document.body,NodeFilter.SHOW_TEXT);
+      let node;
+      while((node=walker.nextNode())) {
+        if(node.parentElement && node.parentElement.tagName==="SCRIPT") continue;
+        node.nodeValue=node.nodeValue
+          .replace(/\bSchools\b/g,terminology.plural)
+          .replace(/\bschools\b/g,terminology.plural.toLowerCase())
+          .replace(/\bSchool\b/g,terminology.singular)
+          .replace(/\bschool\b/g,terminology.singular.toLowerCase());
+      }
+    }
     const welcome=school.welcome_message||("Welcome to "+name+".");
     const location=[school.physical_address,school.county,school.country].filter(Boolean).join(", ");
-    document.title=name+" | Official School Website";
+    document.title=name+" | Official "+terminology.singular+" Website";
     ["topName","schoolName","heroName","contactName","footerName"].forEach(id=>text(id,name));
     ["schoolMotto","heroMotto"].forEach(id=>text(id,motto));
     text("aboutLead",welcome);text("aboutCopy",school.description||welcome);text("aboutTitle","Discover "+name);text("contactLocation",location||"Contact the school for location details.");
@@ -211,7 +241,7 @@ h2{font-size:clamp(29px,4vw,42px);color:var(--navy);margin:8px 0 12px}.section-l
     if(error)throw error;
     const rows=records||[];
     render("announcementList",rows.filter(r=>["announcement","live_update","live_stream"].includes(r.content_type)),"News & announcement","No published announcements at the moment.");
-    render("eventList",rows.filter(r=>r.content_type==="event"),"School event","No upcoming events have been published yet.");
+    render("eventList",rows.filter(r=>r.content_type==="event"),"Event","No upcoming events have been published yet.");
     render("vacancyList",rows.filter(r=>r.content_type==="vacancy"),"Opportunity","There are no current vacancies or opportunities.");
     render("galleryList",rows.filter(r=>r.content_type==="gallery"),"Gallery","Gallery items will appear here when published.");
     $("loading").classList.add("hidden");$("site").classList.remove("hidden");
