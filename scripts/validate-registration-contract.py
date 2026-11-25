@@ -39,7 +39,16 @@ assert '<option value="college">College</option>' in select.group(0), "College m
 assert '<option value="other">Other Institution</option>' in select.group(0), "Other Institution must be an independent institution type."
 assert '<option value="hospital">Hospital / Health Facility</option>' in select.group(0), "Hospital must be available as an institution type."
 assert "otherInstitutionType.required = isOther;" in registration, "Other Institution description must be required only for Other."
-assert "schoolCategory.required = isSchool;" in registration, "School category must remain limited to schools."
+assert 'id="schoolCategoryField">' in registration, "Institution category/level must be visible for every institution type."
+assert 'school_category" name="school_category" required' in registration, "Institution category/level must be required."
+category_select = re.search(r'<select id="school_category".*?</select>', registration, re.S)
+assert category_select, "Institution category/level selector is missing."
+expected_levels = {"Primary", "Secondary", "Primary and secondary", "College", "Other"}
+form_levels = set(re.findall(r'<option value="([^"]+)"', category_select.group(0))) - {""}
+assert form_levels == expected_levels, f"Category/level options differ: {sorted(form_levels)}"
+assert "school_category: document.getElementById('school_category').value" in payload.group(1), "Selected category/level must be submitted for every institution type."
+assert "schoolCategory.required = true;" in registration, "Category/level must be required for every institution type."
+assert "school_applications_school_category_check" in Path("supabase/migrations/202611250006_institution_category_levels.sql").read_text(encoding="utf-8"), "Independent category/level database migration is missing."
 assert "other_institution_type IS NOT NULL" in extra, "Other Institution database description must not be null."
 
 print(f"Registration contract passed: {len(form_types)} institution types and {len(payload_fields)} payload fields; pending-only RLS, INSERT grants, and Other detail verified.")
