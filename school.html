@@ -168,13 +168,13 @@ h2{font-size:clamp(29px,4vw,42px);color:var(--navy);margin:8px 0 12px}.section-l
     rows.forEach(r=>{
       const card=document.createElement("article");card.className="item";
       const type=document.createElement("span");type.className="type";type.textContent=label;
-      const title=document.createElement("h3");title.textContent=r.title||"School update";
-      const summary=document.createElement("p");summary.textContent=r.summary||r.body||"Contact the school for more information.";
+      const title=document.createElement("h3");title.textContent=r.title||terminology.singular+" update";
+      const summary=document.createElement("p");summary.textContent=r.summary||r.body||"Contact the "+terminology.singular.toLowerCase()+" for more information.";
       if(r.media_path && /^https:\/\//i.test(r.media_path)){
         if(/\.(mp4|webm)(\?|$)/i.test(r.media_path)){
-          const video=document.createElement("video");video.className="item-media";video.src=r.media_path;video.controls=true;video.preload="metadata";video.setAttribute("aria-label",r.title||"School video");card.append(video);
+          const video=document.createElement("video");video.className="item-media";video.src=r.media_path;video.controls=true;video.preload="metadata";video.setAttribute("aria-label",r.title||terminology.singular+" video");card.append(video);
         }else if(/\.(jpe?g|png|webp|gif)(\?|$)/i.test(r.media_path)){
-          const img=document.createElement("img");img.className="item-media";img.src=r.media_path;img.alt=r.title||"School photograph";img.loading="lazy";card.append(img);
+          const img=document.createElement("img");img.className="item-media";img.src=r.media_path;img.alt=r.title||terminology.singular+" photograph";img.loading="lazy";card.append(img);
         }else{const mediaLink=document.createElement("a");mediaLink.href=r.media_path;mediaLink.target="_blank";mediaLink.rel="noopener noreferrer";mediaLink.textContent="View attached file";card.append(mediaLink);}
       }
       card.append(type,title,summary);
@@ -240,9 +240,9 @@ h2{font-size:clamp(29px,4vw,42px);color:var(--navy);margin:8px 0 12px}.section-l
     const {data:records,error}=await supabase.from("institution_content_items").select("content_id,content_type,title,summary,body,venue,event_start_at,application_deadline,application_email,application_url,video_url,media_path,status,publish_at,created_at").eq("institution_id",school.institution_id).in("status",["published","scheduled"]).or("publish_at.is.null,publish_at.lte."+new Date().toISOString()).order("created_at",{ascending:false});
     if(error)throw error;
     const rows=records||[];
-    render("announcementList",rows.filter(r=>["announcement","live_update","live_stream"].includes(r.content_type)),"News & announcement","No published announcements at the moment.");
+    render("announcementList",rows.filter(r=>["announcement","live_update","live_stream"].includes(r.content_type)),"News & updates","No published updates at the moment.");
     render("eventList",rows.filter(r=>r.content_type==="event"),"Event","No upcoming events have been published yet.");
-    render("vacancyList",rows.filter(r=>r.content_type==="vacancy"),"Opportunity","There are no current vacancies or opportunities.");
+    render("vacancyList",rows.filter(r=>r.content_type==="vacancy"),"Opportunities","There are no current opportunities.");
     render("galleryList",rows.filter(r=>r.content_type==="gallery"),"Gallery","Gallery items will appear here when published.");
     $("loading").classList.add("hidden");$("site").classList.remove("hidden");
   }catch(err){console.error("Public website error:",err);fail("Unable to load school website","The public website could not retrieve its information. Please try again later.");}
