@@ -119,15 +119,28 @@ export default {
       redirect: "follow"
     });
 
-    const upstreamResponse = await fetch(upstreamRequest);
+    // Cache successful public responses at Cloudflare's edge so repeat visits
+    // do not need to reach GitHub Pages on every request. The school page is
+    // cached briefly; static assets can be cached longer. The slug remains in
+    // the school.html query string, keeping institution page variants separate.
+    const isInstitutionPage = assetPath === "school.html";
+    const upstreamResponse = await fetch(upstreamRequest, {
+      cf: {
+        cacheEverything: true,
+        cacheTtlByStatus: {
+          "200-299": isInstitutionPage ? 60 : 3600,
+          "404": 30
+        }
+      }
+    });
     const headers = new Headers(upstreamResponse.headers);
 
     headers.set("X-CRIPRI-Institution-Slug", slug);
     headers.set(
       "Cache-Control",
-      assetPath === "school.html"
-        ? "public, max-age=300"
-        : "public, max-age=3600"
+      isInstitutionPage
+        ? "public, max-age=60, s-maxage=60"
+        : "public, max-age=3600, s-maxage=3600"
     );
 
     return new Response(upstreamResponse.body, {
