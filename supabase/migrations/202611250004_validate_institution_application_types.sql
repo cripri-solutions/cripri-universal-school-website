@@ -11,7 +11,7 @@ BEGIN
     ALTER TABLE public.school_applications
       ADD CONSTRAINT school_applications_institution_type_check
       CHECK (institution_type IN (
-        'school', 'college', 'university', 'tvet', 'training_centre',
+        'school', 'college', 'university', 'tvet', 'training_centre', 'hospital',
         'church', 'mosque', 'ngo', 'company', 'association',
         'cooperative', 'government', 'union', 'other'
       )) NOT VALID;
