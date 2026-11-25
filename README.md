@@ -9,12 +9,13 @@ A multi-tenant website platform maintained by CRIPRI Technologies. The shared pl
 - `school.html` — public institution website rendered from the institution slug.
 - `cloudflare-school-router.js` — Cloudflare Worker router for institution subdomains under `*.criprisolutions.co.ke`; serves the dynamic institution page and forwards static assets to GitHub Pages.
 - `wrangler.jsonc` — Worker configuration, including preview configuration.
-- `supabase/migrations/` — versioned SQL migrations. Review and apply database migrations deliberately; committing a migration does not execute it against Supabase.
-- `school-registration-preview.html`, `portal-preview.html`, and `registration-review-preview.html` — legacy illustrative preview pages. They are not the authenticated production manager or reviewer console.
+- `supabase/migrations/` — versioned SQL migrations. Apply them in order after reviewing the target database; committing a migration does not execute it against Supabase. The institution application fields and allowed-type/category constraints are in migrations `202611250003` and `202611250004`.
+- `school-registration-preview.html` — public institution application form. It submits applications to `school_applications` using the Supabase publishable key and relies on database grants and row-level security.
+- `portal-preview.html` and `registration-review-preview.html` — legacy illustrative preview pages; they are not the authenticated production manager or reviewer console.
 
 ## Institution model
 
-The platform uses a shared institution model with an `institution_type` field. Supported types are defined by the database constraint and include schools, colleges, universities, churches, mosques, NGOs, companies, associations, cooperatives, government institutions, unions and other institutions.
+The platform uses a shared institution model with an `institution_type` field. Supported types are defined by the database constraint and include schools, colleges, universities, TVET institutes, training centres, churches, mosques, NGOs, companies, associations, cooperatives, government institutions, unions and other institutions.
 
 For compatibility, the underlying database retains legacy table names such as `schools`, `school_memberships`, and `school_content_items`. Universal views such as `institutions`, `institution_memberships`, and `institution_content_items` provide institution-oriented names to the application.
 
@@ -50,7 +51,7 @@ A GitHub feature-branch commit does not itself prove that a Cloudflare preview i
 - Current development branch: `feature/universal-institution-manager`.
 - Keep implementation and testing on the feature branch until reviewed.
 - Do not merge to `main`, change production Worker routes, or deploy production without explicit approval.
-- A SQL migration committed to GitHub is not automatically applied to the live Supabase project. Apply migrations through the intended Supabase release process and verify the result.
+- A SQL migration committed to GitHub is not automatically applied to the live Supabase project. Apply migrations through the intended Supabase release process and verify the result, including anonymous `INSERT` grants and the `public may submit applications` row-level security policy on `school_applications`.
 - Test with a dedicated institution account and non-sensitive sample content before demonstrating the manager to a client.
 - Never commit Supabase secret/service-role keys, passwords, access tokens, or client data. The browser may use only the project's publishable/anon key with appropriate RLS protection.
 - Do not publish identifiable learner photographs or personal information without the institution's appropriate permissions and consent.
