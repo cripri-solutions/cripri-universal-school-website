@@ -862,7 +862,10 @@ async function loadNotifications() {
       makeCell(tr, dateText(n.created_at));
       makeStatusCell(tr, n.email_status);
       const actions = document.createElement('td'); actions.className = 'actions';
-      if (n.email_status !== 'sent') {
+      if (n.email_status === 'sending') {
+        const sending = document.createElement('span'); sending.className = 'muted'; sending.textContent = 'Send in progress';
+        actions.appendChild(sending);
+      } else if (n.email_status !== 'sent') {
         const send = document.createElement('button');
         send.type = 'button'; send.className = 'primary'; send.textContent = n.email_status === 'failed' ? 'Retry Email' : 'Send Email';
         send.addEventListener('click', () => sendSchoolNotification(n, send));
