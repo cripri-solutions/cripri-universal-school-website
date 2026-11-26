@@ -130,14 +130,9 @@ required minlength="2" maxlength="180">
 </div>
 
 <div class="field" id="schoolCategoryField">
-<label for="school_category">Institution Category / Level *</label>
-<select id="school_category" name="school_category" required>
-<option value="">Select category / level</option>
-<option value="Primary">Primary</option>
-<option value="Secondary">Secondary</option>
-<option value="Primary and secondary">Primary and Secondary</option>
-<option value="College">College</option>
-<option value="Other">Other</option>
+<label for="school_category">Institution Category / Level</label>
+<select id="school_category" name="school_category">
+<option value="">Not applicable (optional)</option>
 </select>
 </div>
 
@@ -224,9 +219,34 @@ const otherInstitutionTypeField = document.getElementById('otherInstitutionTypeF
 const otherInstitutionType = document.getElementById('other_institution_type');
 
 function updateInstitutionFields() {
+  const type = institutionType.value;
+  const isSchool = type === 'school';
+  const isCollege = type === 'college';
+  const isOther = type === 'other';
+
+  // Rebuild options for the selected type to prevent school levels being
+  // submitted accidentally for a non-school institution.
+  schoolCategory.replaceChildren();
+  const placeholder = document.createElement('option');
+  placeholder.value = '';
+  placeholder.textContent = isSchool ? 'Select school level'
+    : isCollege ? 'College category' : 'Not applicable (optional)';
+  schoolCategory.appendChild(placeholder);
+
+  const categories = isSchool
+    ? [['Primary', 'Primary'], ['Secondary', 'Secondary'], ['Primary and secondary', 'Primary and Secondary']]
+    : isCollege ? [['College', 'College']] : [['Other', 'Other']];
+
+  categories.forEach(([value, label]) => {
+    const option = document.createElement('option');
+    option.value = value;
+    option.textContent = label;
+    schoolCategory.appendChild(option);
+  });
+
+  schoolCategory.required = isSchool || isCollege;
+  schoolCategory.value = isCollege ? 'College' : '';
   schoolCategoryField.hidden = false;
-  schoolCategory.required = true;
-  const isOther = institutionType.value === 'other';
   otherInstitutionTypeField.hidden = !isOther;
   otherInstitutionType.required = isOther;
 }
@@ -256,7 +276,7 @@ form.addEventListener('submit', async function(event) {
     school_name: schoolName,
     institution_type: document.getElementById('institution_type').value,
     other_institution_type: document.getElementById('institution_type').value === 'other' ? otherInstitutionType.value.trim() : null,
-    school_category: document.getElementById('school_category').value,
+    school_category: document.getElementById('school_category').value || null,
     country: document.getElementById('country').value.trim(),
     region: document.getElementById('region').value.trim(),
     contact_email: document.getElementById('contact_email').value.trim(),
