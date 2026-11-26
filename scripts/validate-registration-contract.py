@@ -124,13 +124,13 @@ manager_fields = {
 }
 for column, element_id in manager_fields.items():
     assert f'id="{element_id}"' in manager, f"Manager profile control missing for {column}."
-    assert re.search(r"currentSchool\\." + column + r"\\s*\\|\\|", manager), (
+    assert re.search(r"currentSchool\." + column + r"\s*\|\|", manager), (
         f"Manager must load existing {column} value."
     )
-    assert re.search(r"\\b" + column + r"\\s*:\\s*\\$\\('" + element_id + r"'\\)", manager), (
+    assert re.search(r"\b" + column + r"\s*:\s*\$\('" + element_id + r"'\)\.value", manager), (
         f"Manager must save {column} from its profile control."
     )
-manager_selects = re.findall(r"\\.select\\('([^']+)'\\)", manager)
+manager_selects = re.findall(r"\.select\('([^']+)'\)", manager)
 expected_manager_columns = set(manager_fields) | {
     "institution_id", "name", "slug", "status", "institution_type",
     "motto", "description", "welcome_message", "physical_address",
