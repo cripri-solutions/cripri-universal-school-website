@@ -70,4 +70,31 @@ assert "schoolCategory.required = true;" in registration, "Category/level must b
 assert "school_applications_school_category_check" in Path("supabase/migrations/202611250006_institution_category_levels.sql").read_text(encoding="utf-8"), "Independent category/level database migration is missing."
 assert "other_institution_type IS NOT NULL" in extra, "Other Institution database description must not be null."
 
+
+# Approval must preserve every submitted institution detail and its authorization boundary.
+approval = Path("supabase/migrations/202611260001_preserve_institution_application_details.sql").read_text(encoding="utf-8")
+assert re.search(r"CREATE\s+OR\s+REPLACE\s+FUNCTION\s+public\.review_school_application", approval, re.I), "Institution review RPC replacement is missing."
+assert re.search(r"SECURITY\s+DEFINER", approval, re.I), "Review RPC security mode changed; require explicit security review."
+assert "v_reviewer_id := auth.uid();" in approval, "Review RPC must derive reviewer identity from the authenticated session."
+assert re.search(r"pr\.user_id\s*=\s*v_reviewer_id\s+AND\s+pr\.active\s*=\s*true", approval, re.I), "Review RPC must require an active platform reviewer."
+assert re.search(r"a\.status\s*=\s*'pending'\s+FOR\s+UPDATE", approval, re.I), "Review RPC must lock only a pending application."
+for column in (
+    "institution_type", "school_category", "other_institution_type", "region",
+    "contact_person", "contact_role", "physical_address", "country",
+    "contact_phone", "contact_email",
+):
+    assert re.search(r"v_application\." + column + r"\b", approval), (
+        f"Approved institution must preserve application field: {column}"
+    )
+assert re.search(r"INSERT\s+INTO\s+public\.application_review_audit", approval, re.I), "Review decisions must remain auditable."
+assert re.search(r"UPDATE\s+public\.school_applications\s+SET\s+status\s*=\s*v_decision", approval, re.I), "Review RPC must record the final decision."
+
+# Notification claim schema must match the sender's in-flight state.
+notification_schema = Path("supabase/migrations/20261126120000_notification_email_send_claim.sql").read_text(encoding="utf-8")
+notification_sender = Path("supabase/functions/send-school-notification/index.ts").read_text(encoding="utf-8")
+assert re.search(r"ADD\s+COLUMN\s+IF\s+NOT\s+EXISTS\s+email_claimed_at\s+timestamptz", notification_schema, re.I), "Notification claim timestamp column is missing."
+for status in ("pending", "sending", "sent", "failed", "skipped"):
+    assert re.search(r"'" + status + r"'::text", notification_schema), f"Notification email status missing: {status}"
+assert "claimNotification" in notification_sender and "reclaimStaleNotification" in notification_sender and "finalizeNotification" in notification_sender, "Notification sender must claim, recover and finalize sends."
+
 print(f"Registration contract passed: {len(form_types)} institution types and {len(payload_fields)} payload fields; pending-only RLS, INSERT grants, and Other detail verified.")
