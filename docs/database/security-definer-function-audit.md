@@ -94,3 +94,27 @@ The trigger functions have owner-only EXECUTE and should remain that way.
 ## Change status
 
 This audit is documentation only. No grants, functions, policies, triggers, schema objects, or data were changed.
+
+
+## Additional live checks — 26 November 2026
+
+### Schema CREATE privileges
+
+A fresh catalog check confirmed that the `anon`, `authenticated`, and `service_role` roles do not have CREATE privilege on schema `public`. This supports the existing decision not to mass-rewrite the small group of security-definer functions configured with `search_path = public, pg_temp`; their references were separately observed as schema-qualified. No privilege was changed.
+
+### RLS tables with no policies
+
+The only public base tables found with RLS enabled and zero policies are:
+
+- `cripri_content_admins`
+- `cripri_content_schools`
+
+For ordinary roles, RLS with no policies is fail-closed. The inspected `manage_school_site_content` and `get_my_cripri_schools` SECURITY DEFINER functions access these tables after checking the caller identity, school assignment, active status and `SCHOOL_ADMIN` role. Do not add direct table policies until every legacy admin workflow and intended service-role access is mapped. The absence of policies is not by itself evidence of a vulnerability.
+
+### Live approval-function ordering mismatch
+
+The currently deployed `review_school_application(uuid,text,text)` inserts into `application_review_audit` **after** it updates `school_applications.status`. The status update fires the notification trigger synchronously. The proposed notification migration resolves the exact institution ID from the audit row, so it depends on the proposed replacement approval function inserting the audit row before the status update. The feature migration has been adjusted to do this. These two proposed changes must be reviewed and deployed together in a controlled rollout; applying only the notification-trigger migration would risk producing a notification with a null institution reference.
+
+### Current disposition
+
+No additional direct permission vulnerability was established by these checks. The remaining risks are workflow validation and release coordination: test the two legacy content-admin workflows, test activation functions with ambiguous/multiple matching applications, and test the approval-trigger/audit ordering as one transaction in an isolated database. No live database changes were made.
