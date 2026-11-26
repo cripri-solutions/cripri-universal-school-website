@@ -145,3 +145,18 @@ assert "$('profileForm').querySelectorAll('input,select,textarea,button')" in ma
 )
 print("Institution manager contract passed: preserved registration details are loaded, editable and saved.");
 
+# The new profile fields require column-level UPDATE grants on both the base table and view.
+profile_migration = Path("supabase/migrations/202611260001_preserve_institution_application_details.sql").read_text(encoding="utf-8")
+for relation in ("public.schools", "public.institutions"):
+    grant = re.search(
+        r"GRANT\\s+UPDATE\\s*\\((.*?)\\)\\s*ON\\s+TABLE\\s+" + re.escape(relation) + r"\\s+TO\\s+authenticated",
+        profile_migration,
+        re.I | re.S,
+    )
+    assert grant, f"Manager UPDATE grant is missing on {relation}."
+    granted_columns = set(re.findall(r"[a-z_]+", grant.group(1), re.I))
+    assert set(manager_fields).issubset(granted_columns), (
+        f"Manager UPDATE grant on {relation} omits preserved registration fields."
+    )
+
+
