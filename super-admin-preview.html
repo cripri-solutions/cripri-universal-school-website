@@ -75,7 +75,7 @@ footer{text-align:center;color:#8290a2;padding:25px;font-size:12px}
   <h4>PLATFORM MANAGEMENT</h4>
   <button class="nav active" data-page="overview">▦ Overview</button>
   <button class="nav" data-page="schools">🏢 Institutions</button>
-  <button class="nav" data-page="approvals">✓ Institution Approvals</button>
+  <button class="nav" data-page="approvals">✓ Institutional Approval</button>
   <button class="nav" data-page="notifications">🔔 Notifications <span id="notificationNavCount" style="float:right;background:#d84c4c;color:white;border-radius:12px;padding:2px 7px;font-size:11px">0</span></button>
   <a class="nav" href="super-admin-domain-onboarding.html">🌐 Domain &amp; Website Onboarding</a>
   <button class="nav" data-page="admins">♙ Administrators</button>
@@ -149,6 +149,7 @@ footer{text-align:center;color:#8290a2;padding:25px;font-size:12px}
         <thead>
           <tr>
             <th>Institution</th>
+            <th>Type</th>
             <th>Contact Person</th>
             <th>Submitted</th>
             <th>Status</th>
@@ -201,10 +202,10 @@ footer{text-align:center;color:#8290a2;padding:25px;font-size:12px}
 <section id="approvals" class="section">
   <div class="topline">
     <div>
-      <h1>Institution Approvals</h1>
-      <div class="muted">Review institution registration applications.</div>
+      <h1>Institutional Approval</h1>
+      <div class="muted">Review and decide applications submitted by schools, unions and other institutions.</div>
     </div>
-    <button class="primary" id="refreshApprovals">↻ Refresh Applications</button>
+    <button class="primary" id="refreshApprovals">↻ Refresh Institutional Applications</button>
   </div>
 
   <div class="cards">
@@ -257,7 +258,7 @@ footer{text-align:center;color:#8290a2;padding:25px;font-size:12px}
           </tr>
         </thead>
         <tbody id="approvalTableBody">
-          <tr><td colspan="7" class="empty">Loading applications...</td></tr>
+          <tr><td colspan="8" class="empty">Loading institutional applications...</td></tr>
         </tbody>
       </table>
     </div>
@@ -635,7 +636,7 @@ async function loadSchools() {
 
   setMessage(
     'schoolsMessage',
-    'Loading registered schools from Supabase...'
+    'Loading registered institutions from Supabase...'
   );
 
   const { data, error } = await supabase
@@ -649,7 +650,7 @@ async function loadSchools() {
 
     setMessage(
       'schoolsMessage',
-      'Could not load schools: ' + error.message,
+      'Could not load institutions: ' + error.message,
       'error'
     );
 
@@ -662,7 +663,7 @@ async function loadSchools() {
 
   setMessage(
     'schoolsMessage',
-    currentSchools.length + ' school record(s) loaded from the schools table.',
+    currentSchools.length + ' institution record(s) loaded from the institutions table.',
     'success'
   );
 }
@@ -1012,25 +1013,25 @@ async function loadSchoolApplications() {
   const body = byId('approvalTableBody');
 
   body.innerHTML =
-    '<tr><td colspan="7" class="empty">Loading applications...</td></tr>';
+    '<tr><td colspan="8" class="empty">Loading institutional applications...</td></tr>';
 
   setMessage(
     'approvalMessage',
-    'Loading applications from Supabase...'
+    'Loading institutional applications from Supabase...'
   );
 
   const { data, error } = await supabase
     .from('school_applications')
-    .select('id,school_name,contact_person,contact_email,contact_phone,contact_role,school_category,country,region,physical_address,requested_slug,message,status,created_at,reviewed_at,review_reason')
+    .select('id,school_name,institution_type,contact_person,contact_email,contact_phone,contact_role,country,region,physical_address,requested_slug,message,status,created_at,reviewed_at,review_reason')
     .order('created_at', { ascending: false });
 
   if (error) {
     body.innerHTML =
-      '<tr><td colspan="7" class="empty">Unable to load applications.</td></tr>';
+      '<tr><td colspan="8" class="empty">Unable to load institutional applications.</td></tr>';
 
     setMessage(
       'approvalMessage',
-      'Could not load applications: ' + error.message,
+      'Could not load institutional applications: ' + error.message,
       'error'
     );
 
@@ -1054,7 +1055,7 @@ async function loadSchoolApplications() {
 
   setMessage(
     'approvalMessage',
-    currentApplications.length + ' application(s) loaded from Supabase.',
+    currentApplications.length + ' institutional application(s) loaded from Supabase.',
     'success'
   );
 }
@@ -1074,9 +1075,9 @@ function renderApplications() {
     const tr = document.createElement('tr');
     const td = document.createElement('td');
 
-    td.colSpan = 7;
+    td.colSpan = 8;
     td.className = 'empty';
-    td.textContent = 'No applications found for this status.';
+    td.textContent = 'No institutional applications found for this status.';
 
     tr.appendChild(td);
     body.appendChild(tr);
@@ -1088,6 +1089,7 @@ function renderApplications() {
     const tr = document.createElement('tr');
 
     makeCell(tr, app.school_name);
+    makeCell(tr, app.institution_type || 'institution');
     makeCell(tr, app.contact_person);
 
     makeCell(
@@ -1121,7 +1123,7 @@ function renderApplications() {
       '\nEMAIL: ' + safe(app.contact_email) +
       '\nPHONE: ' + safe(app.contact_phone) +
       '\nROLE: ' + safe(app.contact_role) +
-      '\nCATEGORY: ' + safe(app.school_category) +
+      '\nINSTITUTION TYPE: ' + safe(app.institution_type) +
       '\nLOCATION: ' +
         [app.physical_address,app.region,app.country]
           .filter(Boolean).join(', ') +
