@@ -54,7 +54,7 @@ for migration_path in (
 ):
     migration_sql = Path(migration_path).read_text(encoding="utf-8")
     category_constraint = re.search(
-        r"school_category\\s+IS\\s+NULL\\s+OR\\s+school_category\\s+IN\\s*\\((.*?)\\)",
+        r"school_category\s+IS\s+NULL\s+OR\s+school_category\s+IN\s*\((.*?)\)",
         migration_sql,
         re.S | re.I,
     )
