@@ -159,6 +159,11 @@ assert 'school.institution_type==="other"?school.other_institution_type:null' in
 )
 assert "school.county||school.region" in public_page, "Public profile must fall back to submitted region when county is absent."
 
+# Universal public page must not retain school-only calls to action or section labels.
+for school_only in ("Discover our school", "School calendar", "School gallery", "Schools should replace these examples"):
+    assert school_only not in public_page, f"School-specific public wording remains: {school_only}"
+
+
 
 # The new profile fields require column-level UPDATE grants on both the base table and view.
 profile_migration = Path("supabase/migrations/202611260001_preserve_institution_application_details.sql").read_text(encoding="utf-8")
