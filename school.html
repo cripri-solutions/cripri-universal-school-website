@@ -92,14 +92,7 @@ h2{font-size:clamp(29px,4vw,42px);color:var(--navy);margin:8px 0 12px}.section-l
     <p class="eyebrow dark">Our campus and facilities</p>
     <h2>A modern environment for learning and growth</h2>
     <p class="section-lead">Explore the learning spaces, student amenities and shared facilities that support our school community.</p>
-    <div class="telwa-modern-gallery" id="telwaModernGallery">
-      <figure><img src="./images/Sunny%20School%20Courtyard%20Gathering-1.png?v=20261122" alt="Illustrative school courtyard and learner community" loading="lazy"><figcaption>Welcoming School Community</figcaption></figure>
-      <figure><img src="./images/Modern%20School%20Campus%20Entrance-2.png?v=20261122" alt="Illustrative modern school campus entrance" loading="lazy"><figcaption>Modern Campus Environment</figcaption></figure>
-      <figure><img src="./images/science-lab-hd.jpg?v=20261122" alt="AI-generated illustration of learners working in a science laboratory" loading="lazy"><figcaption>Science Laboratory</figcaption></figure>
-      <figure><img src="./images/computer-lab-hd.jpg?v=20261122" alt="AI-generated illustration of a school computer laboratory" loading="lazy"><figcaption>Computer Laboratory</figcaption></figure>
-      <figure><img src="./images/classroom-hd.jpg?v=20261122" alt="AI-generated illustration of a modern school classroom" loading="lazy"><figcaption>Modern Classroom</figcaption></figure>
-    </div>
-    <p class="telwa-photo-note" id="telwaPhotoNote">AI-generated illustrative images for website demonstration. They are not verified photographs of actual TELWA GIRLS facilities or learners.</p>
+    <div class="telwa-photo-note" id="telwaPhotoNote" style="display:block;padding:18px 20px;border:1px solid var(--line);border-radius:10px;background:#fff;color:var(--muted)">Official campus and facility photographs will be added here when supplied and approved by the institution.</div>
     <div class="facilities-showcase" id="telwaCampusConcept">
       <img src="./images/telwa-campus-concept.svg" alt="Illustrative school campus architectural concept" loading="lazy">
       <div class="facilities-showcase-copy">
@@ -147,13 +140,11 @@ h2{font-size:clamp(29px,4vw,42px);color:var(--navy);margin:8px 0 12px}.section-l
   const slug=querySlug||(validHostSlug?hostSlug:"");
   // Keep TELWA-specific campus artwork off every other school's website.
   const telwaCampusConcept=document.getElementById("telwaCampusConcept");
-  const telwaModernGallery=document.getElementById("telwaModernGallery");
   const telwaPhotoNote=document.getElementById("telwaPhotoNote");
   const facilityGrid=document.querySelector(".facility-grid-live");
   const facilityDisclaimer=document.querySelector(".facility-disclaimer");
   const facilitiesSection=document.getElementById("facilities");
   if(slug==="telwa-girls"){
-    if(telwaModernGallery)telwaModernGallery.style.display="grid";
     if(telwaPhotoNote)telwaPhotoNote.style.display="block";
     if(telwaCampusConcept)telwaCampusConcept.remove();
     if(facilityGrid)facilityGrid.remove();
