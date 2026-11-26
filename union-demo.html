@@ -1,0 +1,146 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex,nofollow">
+<title>CRIPRI Union Demonstration</title>
+<style>
+:root{--navy:#123b5d;--blue:#1c567c;--gold:#e6b64c;--ink:#203040;--muted:#667788;--line:#dce5ec;--bg:#f3f6f9;--green:#176347}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.55 Arial,sans-serif}
+header{background:var(--navy);color:#fff;padding:20px max(20px,calc((100% - 1080px)/2))}
+header strong{font-size:1.1rem}header p{margin:4px 0 0;color:#d7e4ed}
+main{width:min(1080px,calc(100% - 32px));margin:24px auto 50px}
+.warning{padding:15px 18px;border-left:5px solid var(--gold);background:#fff7e5;border-radius:8px;color:#70551e;margin-bottom:20px}
+nav{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:18px}
+nav button,.action{border:0;border-radius:7px;padding:11px 15px;background:#e4ebf0;color:var(--navy);font-weight:700;cursor:pointer}
+nav button.active,.action.primary{background:var(--navy);color:#fff}
+.panel{display:none;background:#fff;border:1px solid var(--line);border-radius:13px;padding:24px;box-shadow:0 5px 20px #123b5d0b}
+.panel.active{display:block}h1,h2,h3{color:var(--navy);margin-top:0}h1{font-size:1.8rem}h2{font-size:1.25rem}
+.intro{color:var(--muted);max-width:760px}.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:15px}
+.field{display:flex;flex-direction:column;gap:6px}.field.full{grid-column:1/-1}label{font-weight:700}
+input,textarea,select{width:100%;padding:11px;border:1px solid #cbd7e0;border-radius:7px;font:inherit}textarea{min-height:85px}
+.actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:18px}.action{background:#e8eef2}.action:disabled{opacity:.45;cursor:not-allowed}
+.status{margin-top:15px;padding:12px;border-radius:7px;background:#eef6f1;color:var(--green);display:none}
+.record{border:1px solid var(--line);border-radius:9px;padding:16px;margin:12px 0;background:#fbfcfd}
+.pill{display:inline-block;padding:4px 9px;border-radius:20px;background:#fff0ce;color:#78550c;font-size:.75rem;font-weight:800}
+.pill.ok{background:#e6f5ed;color:#176347}
+.profile{border:1px solid var(--line);border-radius:10px;padding:20px;background:#fbfcfd}
+footer{text-align:center;color:var(--muted);font-size:.8rem;padding:22px}
+@media(max-width:650px){.grid{grid-template-columns:1fr}.field.full{grid-column:auto}.panel{padding:18px}header{padding:18px}}
+</style>
+</head>
+<body>
+<header><strong>CRIPRI TECHNOLOGIES · UNIVERSAL INSTITUTION PLATFORM</strong><p>Union registration and website demonstration</p></header>
+<main>
+<div class="warning"><strong>DEMO ONLY — NO LIVE DATABASE CONNECTION.</strong><br>This is a browser-only simulation. Registration, review, approval and website edits are temporary and are not saved, submitted to CRIPRI, or published. Use fictional/sample contact details only. Do not enter passwords or confidential information.</div>
+<nav aria-label="Demonstration sections">
+<button class="active" data-tab="register">1. Union registration</button>
+<button data-tab="review">2. Admin review</button>
+<button data-tab="website">3. Union website</button>
+</nav>
+<section class="panel active" id="register">
+<h1>Register a Union</h1><p class="intro">Demonstrate the information a union would provide when applying for its own CRIPRI-managed website.</p>
+<form id="registration">
+<div class="grid">
+<div class="field full"><label for="unionName">Official union name *</label><input id="unionName" required minlength="2" maxlength="180" placeholder="e.g. Example Workers Union"></div>
+<div class="field"><label for="country">Country *</label><input id="country" value="Kenya" required></div>
+<div class="field"><label for="region">County / Region *</label><input id="region" required placeholder="Enter county or region"></div>
+<div class="field"><label for="email">Official email (sample only) *</label><input id="email" type="email" required placeholder="demo@example.org"></div>
+<div class="field"><label for="phone">Telephone (sample only)</label><input id="phone" type="tel" placeholder="+254..."></div>
+<div class="field"><label for="person">Authorised representative *</label><input id="person" required placeholder="Representative's name"></div>
+<div class="field"><label for="role">Representative's position *</label><select id="role" required><option value="">Select position</option><option>Secretary General</option><option>National Chairperson</option><option>Union Administrator</option><option>Board / committee representative</option><option>Other authorised representative</option></select></div>
+<div class="field full"><label for="address">Postal / physical address</label><textarea id="address" placeholder="Optional sample address"></textarea></div>
+<div class="field full"><label for="about">Union purpose / additional information</label><textarea id="about" placeholder="Briefly describe the union"></textarea></div>
+</div>
+<div class="actions"><button class="action primary" type="submit">Simulate application submission</button><button class="action" type="reset">Clear form</button></div>
+<div class="status" id="registrationStatus" role="status" aria-live="polite"></div>
+</form>
+</section>
+<section class="panel" id="review">
+<h1>Administrator review</h1><p class="intro">Simulate the review decision for the application entered in the first step. This is not an authenticated administrator console.</p>
+<div id="reviewEmpty" class="record">No demo application has been created yet. Complete the registration step first.</div>
+<div id="reviewRecord" class="record" hidden>
+<p><span class="pill" id="reviewState">PENDING REVIEW</span></p>
+<h2 id="reviewName"></h2><p id="reviewDetails"></p><p id="reviewContact"></p><p id="reviewAbout"></p>
+<div class="actions"><button class="action primary" id="approve" type="button">Simulate approval</button><button class="action" id="reject" type="button">Simulate rejection</button></div>
+<div class="status" id="reviewStatus" role="status" aria-live="polite"></div>
+</div>
+</section>
+<section class="panel" id="website">
+<h1>Union website preview</h1><p class="intro">After simulated approval, customise the sample public-facing union profile. Changes remain in this page only.</p>
+<div class="profile">
+<p><span class="pill" id="siteState">AWAITING DEMO APPROVAL</span></p>
+<h2 id="siteName">Your Union Name</h2>
+<p id="siteLocation">Country · County / Region</p>
+<p id="siteAbout">A short union introduction will appear here.</p>
+<hr>
+<h3>About the Union</h3><p id="siteWelcome">A member-focused union committed to representation, support and service.</p>
+</div>
+<div class="grid" style="margin-top:18px">
+<div class="field"><label for="editName">Website heading</label><input id="editName" placeholder="Union display name"></div>
+<div class="field"><label for="editLocation">Location text</label><input id="editLocation" placeholder="County / Country"></div>
+<div class="field full"><label for="editAbout">Welcome message</label><textarea id="editAbout" placeholder="Write a short public welcome message"></textarea></div>
+</div>
+<div class="actions"><button class="action primary" id="applyEdits" type="button">Apply local website preview</button></div>
+<div class="status" id="siteStatus" role="status" aria-live="polite"></div>
+</section>
+</main>
+<footer>CRIPRI Technologies · Union demonstration prototype · Fictional data only · No server writes</footer>
+<script>
+(function(){
+let application=null,decision='pending';
+const $=id=>document.getElementById(id);
+document.querySelectorAll('nav button').forEach(button=>button.addEventListener('click',()=>{
+ document.querySelectorAll('nav button').forEach(b=>b.classList.toggle('active',b===button));
+ document.querySelectorAll('.panel').forEach(p=>p.classList.toggle('active',p.id===button.dataset.tab));
+}));
+$('registration').addEventListener('submit',event=>{
+ event.preventDefault();
+ application={
+  name:$('unionName').value.trim(),country:$('country').value.trim(),region:$('region').value.trim(),
+  email:$('email').value.trim(),phone:$('phone').value.trim(),person:$('person').value.trim(),
+  role:$('role').value,address:$('address').value.trim(),about:$('about').value.trim()
+ };
+ decision='pending';
+ const ref='DEMO-UNION-'+Math.random().toString(36).slice(2,8).toUpperCase();
+ application.ref=ref;
+ $('registrationStatus').style.display='block';
+ $('registrationStatus').textContent='Demo application created: '+ref+'. This exists only in the current browser page; nothing was sent or saved.';
+ $('reviewEmpty').hidden=true;$('reviewRecord').hidden=false;
+ $('reviewName').textContent=application.name;
+ $('reviewDetails').textContent=application.country+' · '+application.region+' · '+application.ref;
+ $('reviewContact').textContent='Representative: '+application.person+' ('+application.role+') · '+application.email+(application.phone?' · '+application.phone:'');
+ $('reviewAbout').textContent=application.about||'No additional information supplied.';
+ $('reviewState').textContent='PENDING REVIEW';$('reviewState').className='pill';
+ $('approve').disabled=false;$('reject').disabled=false;
+ $('reviewStatus').style.display='none';
+ $('siteName').textContent=application.name;$('siteLocation').textContent=application.country+' · '+application.region;
+ $('siteAbout').textContent=application.about||'Union profile preview.';
+ $('editName').value=application.name;$('editLocation').value=application.region+', '+application.country;
+});
+function setDecision(value){
+ if(!application)return;
+ decision=value;
+ $('reviewState').textContent=value==='approved'?'APPROVED (SIMULATED)':'REJECTED (SIMULATED)';
+ $('reviewState').className=value==='approved'?'pill ok':'pill';
+ $('approve').disabled=true;$('reject').disabled=true;
+ $('reviewStatus').style.display='block';
+ $('reviewStatus').textContent='Decision simulated in this browser only. No official review or database update occurred.';
+ $('siteState').textContent=value==='approved'?'APPROVED · DEMO ONLY':'NOT APPROVED · DEMO';
+ $('siteState').className=value==='approved'?'pill ok':'pill';
+});
+$('approve').addEventListener('click',()=>setDecision('approved'));
+$('reject').addEventListener('click',()=>setDecision('rejected'));
+$('applyEdits').addEventListener('click',()=>{
+ if(!application){$('siteStatus').style.display='block';$('siteStatus').textContent='Create a demo application first.';return;}
+ $('siteName').textContent=$('editName').value.trim()||application.name;
+ $('siteLocation').textContent=$('editLocation').value.trim();
+ $('siteWelcome').textContent=$('editAbout').value.trim()||'A member-focused union committed to representation, support and service.';
+ $('siteStatus').style.display='block';
+ $('siteStatus').textContent='Local website preview updated. It has not been saved or published.';
+});
+})();
+</script>
+</body>
+</html>
