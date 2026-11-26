@@ -112,3 +112,36 @@ assert "ara.application_id = NEW.id" in notification_trigger and "ara.decision =
 assert "lower(btrim(s.name))" not in notification_trigger, "Notification must not associate institutions by non-unique name."
 assert "ON CONFLICT (application_id, event_type) DO NOTHING" in notification_trigger, "Notification duplicate protection must remain."
 print("Review notification association contract passed: audit-first ordering, exact application/decision mapping, and idempotent insert verified.")
+
+# Institution manager must load, display, and save the details preserved by approval.
+manager = Path("school-website.manager.html").read_text(encoding="utf-8")
+manager_fields = {
+    "school_category": "profileCategory",
+    "other_institution_type": "profileOtherType",
+    "region": "profileRegion",
+    "contact_person": "profileContactPerson",
+    "contact_role": "profileContactRole",
+}
+for column, element_id in manager_fields.items():
+    assert f'id="{element_id}"' in manager, f"Manager profile control missing for {column}."
+    assert re.search(r"currentSchool\\." + column + r"\\s*\\|\\|", manager), (
+        f"Manager must load existing {column} value."
+    )
+    assert re.search(r"\\b" + column + r"\\s*:\\s*\\$\\('" + element_id + r"'\\)", manager), (
+        f"Manager must save {column} from its profile control."
+    )
+manager_selects = re.findall(r"\\.select\\('([^']+)'\\)", manager)
+expected_manager_columns = set(manager_fields) | {
+    "institution_id", "name", "slug", "status", "institution_type",
+    "motto", "description", "welcome_message", "physical_address",
+    "county", "country", "contact_phone", "contact_email", "logo_path",
+    "banner_path"
+}
+assert any(expected_manager_columns.issubset(set(columns.split(","))) for columns in manager_selects), (
+    "Manager institution profile query must load every preserved registration field."
+)
+assert "$('profileForm').querySelectorAll('input,select,textarea,button')" in manager, (
+    "View-only manager role must disable the added select controls too."
+)
+print("Institution manager contract passed: preserved registration details are loaded, editable and saved.");
+
