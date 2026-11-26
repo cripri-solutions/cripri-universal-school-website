@@ -87,3 +87,18 @@ This audit did not:
 **Status: BLOCKED pending source reconciliation and a verified full restorable backup.**
 
 The next safe step is to search GitHub's accessible commit and branch history for the exact original migration SQL, beginning with the 21 live version identifiers and recorded names. Do not synthesize historical SQL or mark migrations as applied merely to make repository history appear complete.
+
+
+## 7. Follow-up repository-history search — 26 November 2026
+
+A second targeted GitHub commit search was run within `cripri-solutions/cripri-universal-school-website` for the three outstanding live ledger entries:
+
+- `align institution notifications secure subscription RPC`
+- `revoke direct execution subscription trigger functions`
+- `add public institution profile view`
+
+No matching commits were returned for these queries. This strengthens the finding that the original SQL is not currently discoverable through the repository's searchable commit messages, but it is not proof that the SQL does not exist in another branch, tag, archive, deployment artifact, or Supabase backup.
+
+The latest PR validation workflow (run 45812764785, run number 190) completed successfully. That workflow validates the current source contracts and JavaScript/Worker tests; it does not reconcile or restore the historical live database migration sources.
+
+**Current reconciliation status: still blocked.** Keep the 21 live migration ledger entries unchanged. Do not fabricate original migration files, mark reconstructed files as historical originals, or apply the proposed feature migrations to production. Continue seeking trusted source artifacts and preserve a separate clearly labelled current-state schema snapshot where useful.
