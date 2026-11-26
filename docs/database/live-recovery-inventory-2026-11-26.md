@@ -118,3 +118,45 @@ The current operator environment is Windows 8, without PostgreSQL command-line t
 The next safe action is to preserve and reconcile source/configuration artifacts that can be recovered without exporting sensitive data, then determine whether the project dashboard provides a supported full backup download under the current plan. CSV/table exports are not a substitute for a full database backup.
 
 **Release status: BLOCKED.** Do not apply production migrations, merge the release PR, or deploy until the migration history and a verified restorable backup are resolved.
+
+
+## Additional PostgreSQL catalog inventory
+
+A second read-only catalog pass recorded these object totals:
+
+| Object | Count |
+|---|---:|
+| Public functions/procedures | 25 |
+| Public SECURITY DEFINER functions | 22 |
+| Public views | 4 |
+| Public RLS policies | 42 |
+| Public non-internal triggers | 7 |
+| Public constraints | 128 |
+| Public foreign-key constraints | 38 |
+| Public indexes | 43 |
+
+The 7 public triggers observed were:
+
+| Trigger | Table | Function |
+|---|---|---|
+| school_content_items_set_audit | school_content_items | set_school_content_item_audit |
+| school_content_set_updated_at | school_content | set_updated_at |
+| schools_set_updated_at | schools | set_updated_at |
+| trg_enforce_school_subscription_payment | school_subscriptions | enforce_school_subscription_payment |
+| trg_school_domain_onboarding_audit | school_domain_onboarding | audit_school_domain_onboarding_change |
+| trg_school_domain_onboarding_updated_at | school_domain_onboarding | set_school_domain_onboarding_updated_at |
+| trg_school_review_notification | school_applications | create_school_review_notification |
+
+These counts are catalog observations, not exported object definitions. A complete recovery export still needs the full SQL definitions, dependencies, ownership and grants.
+
+## Security advisory snapshot
+
+The Supabase security advisor returned these items during this audit:
+
+- **ERROR:** `public.public_institution_profiles` is reported as a security-definer view. This needs a deliberate view-owner/RLS review; do not change it blindly because public institution pages depend on it.
+- **WARN:** two SECURITY DEFINER helpers are executable by anon: `is_active_cripri_school(uuid)` and `is_school_website_subscription_valid(uuid)`. Existing public website behavior depends on the latter; do not revoke without a tested replacement.
+- **WARN:** 19 SECURITY DEFINER functions are executable by authenticated users. Review each function's authorization logic and call sites individually; do not apply blanket revocations.
+- **WARN:** leaked-password protection is disabled in Auth. This is a configuration hardening item, not a recovery-export result.
+- **INFO:** `cripri_content_admins` and `cripri_content_schools` have RLS enabled but no policies. This appears fail-closed for ordinary API roles; do not add policies without confirming intended access paths.
+
+No security advisor remediation was applied in this inventory pass. See the linked Supabase remediation guidance in the project advisor for each finding.
