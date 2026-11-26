@@ -21,6 +21,18 @@ The live ACL is:
 
 In PostgreSQL 17 this includes privileges beyond the intended public read access for `anon` and `authenticated`. The view is not marked `security_invoker=true`; it is therefore important not to alter its owner or view security mode as part of this narrow permissions proposal.
 
+## Follow-up live verification — 26 November 2026
+
+A second read-only check reconfirmed the view definition and effective privileges:
+
+- Owner remains `postgres`; option remains `security_barrier=true`.
+- The view still returns only the 12 listed public-profile fields for rows where `schools.status = 'active'`.
+- `anon` and `authenticated` both have effective `SELECT`.
+- Neither role has effective `INSERT`, `UPDATE`, or `DELETE` on this view.
+- The catalog ACL / information-schema grants still list unnecessary `REFERENCES`, `TRIGGER`, and `TRUNCATE` privileges for both roles.
+
+This distinction matters: the extra catalog grants are a least-privilege cleanup finding, not evidence that anonymous users can currently modify institution profile rows. No permission was changed during this check. The cleanup remains deferred until a restorable backup and a safe read-path test are available.
+
 ## Dependency and safety findings
 
 - Public institution pages need to read active institution profiles. Preserve `SELECT` for `anon` and `authenticated`.
