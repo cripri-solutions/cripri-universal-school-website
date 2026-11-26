@@ -75,6 +75,50 @@ The existing `trg_school_review_notification` remains attached to `school_applic
 
 Adds `email_claimed_at` and expands the notification email status constraint. It does not define a trigger or replace a database function. The matching Edge Function must be reviewed for atomic claiming, idempotency, stale-claim recovery and finalization before rollout.
 
+## Follow-up security-advisor and authorization review — 26 November 2026
+
+### Security advisor snapshot
+
+The latest live Supabase security advisor reports:
+
+- 1 ERROR: `public.public_institution_profiles` is a SECURITY DEFINER view.
+- 2 anonymous-executable SECURITY DEFINER RPCs: `is_active_cripri_school(uuid)` and `is_school_website_subscription_valid(uuid)`.
+- 19 authenticated-executable SECURITY DEFINER functions.
+- 2 INFO findings: `cripri_content_admins` and `cripri_content_schools` have RLS enabled but no policies.
+- 1 Auth warning: leaked-password protection is disabled.
+- The performance advisor reports 22 unindexed foreign keys, 7 unused indexes, and 9 multiple-permissive-policy findings. These are not automatic deletion or rewrite instructions.
+
+### Public profile view: retain narrow public projection pending safer conversion
+
+Live catalog checks reconfirmed:
+
+- Owner: `postgres`; option: `security_barrier=true`.
+- View columns are limited to public profile fields and rows are filtered to `schools.status = 'active'`.
+- `anon` and `authenticated` have effective SELECT on the view and no effective INSERT, UPDATE or DELETE.
+- The underlying `schools` table has RLS enabled and a public active-row SELECT policy.
+- Authenticated has table-level SELECT on `schools`, but anon does not.
+
+**Decision:** do not simply set `security_invoker=true`. An invoker view would require the caller to have SELECT on every referenced underlying column. Granting anon table-level SELECT on `schools` would expose additional columns through the direct table API, even with the active-row RLS filter. A safer future conversion would require carefully scoped column-level SELECT grants for only the view's projection, followed by public API/RLS regression tests. Until a restorable backup and test environment exist, retain the current limited projection and record the advisor finding as an accepted, bounded risk rather than making an unsafe change.
+
+The unrelated extra view ACL grants are separately documented in `public-profile-permissions-review.md`; effective INSERT/UPDATE/DELETE checks are false for anon and authenticated.
+
+### Individual SECURITY DEFINER function review
+
+Read-only inspection of live definitions confirmed:
+
+- `activate_institution()`: derives the caller from `auth.uid()`; requires a confirmed Auth email; matches exactly one approved non-school application and its audit-linked institution using that email; locks the relevant records; blocks suspended institutions and accounts already linked to a different institution; assigns the institution-admin membership; activates a pending institution. Uses an empty search path. No immediate authorization bypass was identified in the inspected body.
+- `activate_principal_school()`: likewise requires an authenticated caller and confirmed email; matches exactly one approved school application whose recorded contact role matches principal/headteacher/school administrator; follows the approved audit link; locks application and school; blocks suspended schools and cross-institution membership; assigns school-admin membership. Uses an empty search path. No immediate authorization bypass was identified in the inspected body.
+- `refresh_expired_school_subscriptions()`: checks `auth.uid()` against an active `platform_reviewers` row before expiring subscriptions; uses a fixed `public, pg_temp` search path. Its authenticated EXECUTE grant is consistent with the internal reviewer check, though unauthorized-call and reviewer-call tests remain required.
+
+These checks do not establish that every SECURITY DEFINER function is safe. The remaining subscription lifecycle, content-management, and helper RPCs still need individual source review and caller/dependency mapping. Do not revoke EXECUTE globally.
+
+### Additional findings to retain
+
+- `cripri_content_admins` and `cripri_content_schools` have RLS enabled without policies. This is fail-closed for ordinary roles, but inspect service-role/owner workflows before adding policies.
+- The 19 authenticated SECURITY DEFINER findings require per-function authorization review, not blanket revocation.
+- The two anonymous helper findings have known application/RLS dependencies. Preserve their current grants until the full dependency and API exposure review is complete.
+- Leaked-password protection is an Auth configuration improvement. Do not change it blindly; first confirm the current sign-up/login flows and whether enabling it is available under the existing no-cost plan.
+
 ## Release decisions
 
 1. Do not revoke EXECUTE from all SECURITY DEFINER functions as a blanket operation.
