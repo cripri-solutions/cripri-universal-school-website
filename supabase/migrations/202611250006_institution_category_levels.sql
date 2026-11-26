@@ -10,7 +10,7 @@ ALTER TABLE public.school_applications
     OR school_category IN (
       'Primary',
       'Secondary',
-      'Primary and secondary',
+      'Primary and Secondary',
       'College',
       'Other'
     )
