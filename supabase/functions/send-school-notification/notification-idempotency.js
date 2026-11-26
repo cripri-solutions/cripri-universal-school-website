@@ -13,21 +13,40 @@ export function notificationEmailPayload({ from, recipient, title, message }) {
   };
 }
 
-// The conditional UPDATE is the atomic claim: only one concurrent request can
-// move a notification from pending/failed to sending.
 export async function claimNotification(caller, notificationId, claimedAt) {
   const { data, error } = await caller
     .from("platform_notifications")
-    .update({
-      email_status: "sending",
-      email_claimed_at: claimedAt,
-      email_error: null,
-    })
+    .update({ email_status: "sending", email_claimed_at: claimedAt, email_error: null })
     .eq("id", notificationId)
     .in("email_status", ["pending", "failed"])
     .select("id")
     .maybeSingle();
+  if (error) throw error;
+  return data;
+}
 
+export async function reclaimStaleNotification(caller, notificationId, previousClaim, claimedAt) {
+  const { data, error } = await caller
+    .from("platform_notifications")
+    .update({ email_status: "sending", email_claimed_at: claimedAt, email_error: null })
+    .eq("id", notificationId)
+    .eq("email_status", "sending")
+    .eq("email_claimed_at", previousClaim)
+    .select("id")
+    .maybeSingle();
+  if (error) throw error;
+  return data;
+}
+
+export async function finalizeNotification(caller, notificationId, claimedAt, values) {
+  const { data, error } = await caller
+    .from("platform_notifications")
+    .update(values)
+    .eq("id", notificationId)
+    .eq("email_status", "sending")
+    .eq("email_claimed_at", claimedAt)
+    .select("id")
+    .maybeSingle();
   if (error) throw error;
   return data;
 }
