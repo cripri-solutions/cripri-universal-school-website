@@ -1,4 +1,4 @@
-# CRIPRI Universal Institution Website Platform
+# CRIPRI Universal Institution Website
 
 A multi-tenant website platform maintained by CRIPRI Technologies. The shared platform supports schools and other institution types while retaining the existing school data model for backward compatibility.
 
