@@ -374,6 +374,33 @@ footer {
 
           <div class="form-grid">
             <div>
+              <label for="profileCategory">Institution Category / Level</label>
+              <select id="profileCategory">
+                <option value="">Not applicable</option>
+                <option value="Primary">Primary</option>
+                <option value="Secondary">Secondary</option>
+                <option value="Primary and secondary">Primary and secondary</option>
+                <option value="College">College</option>
+                <option value="Other">Other</option>
+              </select>
+            </div>
+            <div>
+              <label for="profileOtherType">Other Institution Type Description</label>
+              <input id="profileOtherType" minlength="2" maxlength="120">
+            </div>
+            <div>
+              <label for="profileRegion">County / Region</label>
+              <input id="profileRegion" maxlength="120">
+            </div>
+            <div>
+              <label for="profileContactPerson">Authorised Contact Person</label>
+              <input id="profileContactPerson" maxlength="120">
+            </div>
+            <div>
+              <label for="profileContactRole">Representative's Position</label>
+              <input id="profileContactRole" maxlength="120">
+            </div>
+            <div>
               <label for="profileMotto">Motto / Tagline</label>
               <input id="profileMotto" maxlength="250">
             </div>
@@ -955,7 +982,7 @@ async function initialiseWorkspace(selectedMembershipId = null) {
 
   const {data:school,error:schoolError} = await supabase
     .from('institutions')
-    .select('institution_id,name,slug,status,institution_type,motto,description,welcome_message,physical_address,county,country,contact_phone,contact_email,logo_path,banner_path')
+    .select('institution_id,name,slug,status,institution_type,school_category,other_institution_type,region,contact_person,contact_role,motto,description,welcome_message,physical_address,county,country,contact_phone,contact_email,logo_path,banner_path')
     .eq('institution_id',membership.institution_id)
     .single();
 
@@ -977,7 +1004,7 @@ async function initialiseWorkspace(selectedMembershipId = null) {
   populateSchoolProfile();
 
   if(!['school_admin','institution_admin'].includes(currentRole)) {
-    $('profileForm').querySelectorAll('input,textarea,button')
+    $('profileForm').querySelectorAll('input,select,textarea,button')
       .forEach(control => control.disabled = true);
 
     $('profileMessage').textContent =
@@ -1006,6 +1033,11 @@ function populateSchoolProfile() {
 
   if(!currentSchool) return;
 
+  $('profileCategory').value = currentSchool.school_category || '';
+  $('profileOtherType').value = currentSchool.other_institution_type || '';
+  $('profileRegion').value = currentSchool.region || '';
+  $('profileContactPerson').value = currentSchool.contact_person || '';
+  $('profileContactRole').value = currentSchool.contact_role || '';
   $('profileMotto').value = currentSchool.motto || '';
   $('profileCountry').value = currentSchool.country || 'Kenya';
   $('profileCounty').value = currentSchool.county || '';
@@ -1097,6 +1129,11 @@ $('profileForm').addEventListener('submit',async event => {
       : currentSchool.banner_path;
 
     const payload = {
+      school_category:$('profileCategory').value || null,
+      other_institution_type:$('profileOtherType').value.trim() || null,
+      region:$('profileRegion').value.trim() || null,
+      contact_person:$('profileContactPerson').value.trim() || null,
+      contact_role:$('profileContactRole').value.trim() || null,
       motto:$('profileMotto').value.trim() || null,
       country:$('profileCountry').value.trim() || 'Kenya',
       county:$('profileCounty').value.trim() || null,
@@ -1114,7 +1151,7 @@ $('profileForm').addEventListener('submit',async event => {
       .from('institutions')
       .update(payload)
       .eq('institution_id',currentSchool.id)
-      .select('institution_id,name,slug,status,institution_type,motto,description,welcome_message,physical_address,county,country,contact_phone,contact_email,logo_path,banner_path')
+      .select('institution_id,name,slug,status,institution_type,school_category,other_institution_type,region,contact_person,contact_role,motto,description,welcome_message,physical_address,county,country,contact_phone,contact_email,logo_path,banner_path')
       .single();
 
     if(error) throw error;
