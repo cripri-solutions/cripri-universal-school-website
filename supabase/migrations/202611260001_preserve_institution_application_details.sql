@@ -92,6 +92,25 @@ FROM public.schools;
 
 GRANT SELECT ON public.institutions TO anon, authenticated;
 
+-- Let institution administrators maintain the newly preserved registration
+-- details through the security-invoker view. Existing schools UPDATE RLS
+-- remains the row-level boundary; these grants do not bypass it.
+GRANT UPDATE (
+  school_category,
+  other_institution_type,
+  region,
+  contact_person,
+  contact_role
+) ON TABLE public.schools TO authenticated;
+
+GRANT UPDATE (
+  school_category,
+  other_institution_type,
+  region,
+  contact_person,
+  contact_role
+) ON TABLE public.institutions TO authenticated;
+
 -- Keep the existing reviewer authorization, approval audit, and pending
 -- activation flow. The additional registration details now follow the
 -- approved application into its institution record instead of being lost.
