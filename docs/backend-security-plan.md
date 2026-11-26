@@ -1,4 +1,4 @@
-# CRIPRI Universal School Website — backend security plan
+# CRIPRI Universal Institution Website — backend security plan
 
 ## Purpose and boundaries
 
