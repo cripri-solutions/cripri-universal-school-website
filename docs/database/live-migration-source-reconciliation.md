@@ -102,3 +102,12 @@ No matching commits were returned for these queries. This strengthens the findin
 The latest PR validation workflow (run 45812764785, run number 190) completed successfully. That workflow validates the current source contracts and JavaScript/Worker tests; it does not reconcile or restore the historical live database migration sources.
 
 **Current reconciliation status: still blocked.** Keep the 21 live migration ledger entries unchanged. Do not fabricate original migration files, mark reconstructed files as historical originals, or apply the proposed feature migrations to production. Continue seeking trusted source artifacts and preserve a separate clearly labelled current-state schema snapshot where useful.
+
+
+## 7. Follow-up exact-version commit search (2026-11-26)
+
+A further read-only GitHub commit search was run within `cripri-solutions/cripri-universal-school-website` for all 21 exact live migration version identifiers and the three missing migration names listed above. No matching commits were returned for those exact search terms.
+
+This result narrows the recovery path but is not proof that the SQL never existed: GitHub commit search may not index every branch, deleted ref, private archive, external deployment artifact, or workstation copy. The original SQL remains unrecovered. Do not generate substitute historical files or alter the live migration ledger.
+
+**Current decision:** keep all proposed feature migrations unapplied. Continue seeking the original migration sources and a full restorable backup. If sources cannot be recovered, any current-state reconciliation snapshot must be separately labelled and reviewed as a snapshot, not represented as historical migration source.
