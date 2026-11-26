@@ -183,7 +183,7 @@ h2{font-size:clamp(29px,4vw,42px);color:var(--navy);margin:8px 0 12px}.section-l
   }
   try{
     if(!slug || !/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(slug)){fail("Institution address required","Open this page with the institution's assigned website address.");return;}
-    const {data:school,error:schoolError}=await supabase.from("institutions").select("institution_id,name,slug,status,institution_type,school_category,other_institution_type,region,motto,description,welcome_message,physical_address,county,country,contact_phone,contact_email,logo_path,banner_path").eq("slug",slug).eq("status","active").maybeSingle();
+    const {data:school,error:schoolError}=await supabase.from("institutions").select("institution_id,name,slug,status,institution_type,motto,description,welcome_message,physical_address,county,country,contact_phone,contact_email,logo_path,banner_path").eq("slug",slug).eq("status","active").maybeSingle();
     if(schoolError)throw schoolError;
     if(!school){fail("Institution website not available",'No active institution was found for "'+slug+'". Check the address or contact CRIPRI Technologies.');return;}
     const {data:subscriptionValid,error:subscriptionError}=await supabase.rpc("is_school_website_subscription_valid",{p_school_id:school.institution_id});
