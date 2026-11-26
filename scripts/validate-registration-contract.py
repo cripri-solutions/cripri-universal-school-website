@@ -163,13 +163,22 @@ assert "school.county||school.region" in public_page, "Public profile must fall 
 for school_only in ("Discover our school", "School calendar", "School gallery", "Schools should replace these examples"):
     assert school_only not in public_page, f"School-specific public wording remains: {school_only}"
 
+# Hard-coded demonstration facilities must not be exposed on public institution websites.
+assert 'if(facilitiesSection) facilitiesSection.remove();' in public_page, (
+    "Unverified demonstration facilities must be hidden from public institution websites."
+)
+assert 'const facilitiesLink=document.querySelector(\'#nav a[href="#facilities"]\');' in public_page, (
+    "Facilities navigation must be removed when the demonstration section is hidden."
+)
+
+
 
 
 # The new profile fields require column-level UPDATE grants on both the base table and view.
 profile_migration = Path("supabase/migrations/202611260001_preserve_institution_application_details.sql").read_text(encoding="utf-8")
 for relation in ("public.schools", "public.institutions"):
     grant = re.search(
-        r"GRANT\\s+UPDATE\\s*\\((.*?)\\)\\s*ON\\s+TABLE\\s+" + re.escape(relation) + r"\\s+TO\\s+authenticated",
+        r"GRANT\s+UPDATE\s*\((.*?)\)\s*ON\s+TABLE\s+" + re.escape(relation) + r"\\s+TO\\s+authenticated",
         profile_migration,
         re.I | re.S,
     )
