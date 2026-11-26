@@ -19,9 +19,8 @@ BEGIN
 END
 $$;
 
--- Legacy school applications may have no category. New submissions are
--- required to provide one by the registration form. Non-school applications
--- must always store NULL for this school-specific field.
+-- Category/level is independent of institution type. Existing applications
+-- may remain NULL; new form submissions require a value in the registration UI.
 DO $$
 BEGIN
   IF NOT EXISTS (
@@ -33,16 +32,14 @@ BEGIN
     ALTER TABLE public.school_applications
       ADD CONSTRAINT school_applications_school_category_check
       CHECK (
-        (institution_type = 'school' AND (
-          school_category IS NULL OR school_category IN (
-            'Primary',
-            'Secondary',
-            'Primary and secondary',
-            'College or other'
-          )
-        ))
-        OR
-        (institution_type <> 'school' AND school_category IS NULL)
+        school_category IS NULL
+        OR school_category IN (
+          'Primary',
+          'Secondary',
+          'Primary and secondary',
+          'College',
+          'Other'
+        )
       ) NOT VALID;
   END IF;
 END
