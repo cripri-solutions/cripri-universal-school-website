@@ -14,6 +14,38 @@ COMMENT ON COLUMN public.schools.school_category IS
 COMMENT ON COLUMN public.schools.other_institution_type IS
   'Applicant-provided description when institution_type is other.';
 
+-- Keep the institution table's allowlist aligned with the public registration
+-- form, including hospitals. Existing institution types remain accepted.
+ALTER TABLE public.schools
+  DROP CONSTRAINT IF EXISTS schools_institution_type_check;
+
+ALTER TABLE public.schools
+  ADD CONSTRAINT schools_institution_type_check
+  CHECK (institution_type IN (
+    'school', 'college', 'university', 'tvet', 'training_centre',
+    'hospital', 'church', 'mosque', 'ngo', 'company', 'association',
+    'cooperative', 'government', 'union', 'other'
+  )) NOT VALID;
+
+ALTER TABLE public.schools
+  VALIDATE CONSTRAINT schools_institution_type_check;
+
+-- Institution category/level remains independent of institution_type.
+ALTER TABLE public.schools
+  DROP CONSTRAINT IF EXISTS schools_school_category_check;
+
+ALTER TABLE public.schools
+  ADD CONSTRAINT schools_school_category_check
+  CHECK (
+    school_category IS NULL
+    OR school_category IN (
+      'Primary', 'Secondary', 'Primary and secondary', 'College', 'Other'
+    )
+  ) NOT VALID;
+
+ALTER TABLE public.schools
+  VALIDATE CONSTRAINT schools_school_category_check;
+
 -- Append new fields only; preserve the existing view column order for clients.
 CREATE OR REPLACE VIEW public.institutions
 WITH (security_invoker = true)
