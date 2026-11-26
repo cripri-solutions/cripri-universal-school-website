@@ -5,8 +5,8 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="theme-color" content="#123b5d">
-<meta name="description" content="Official school website powered by CRIPRI Technologies.">
-<title>School Website | CRIPRI Technologies</title>
+<meta name="description" content="Official institution website powered by CRIPRI Technologies.">
+<title>Institution Website | CRIPRI Technologies</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.57.4"></script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet">
@@ -74,32 +74,25 @@ h2{font-size:clamp(29px,4vw,42px);color:var(--navy);margin:8px 0 12px}.section-l
 </style>
 </head>
 <body>
-<div id="loading" class="status"><div class="status-card"><p class="eyebrow dark">CRIPRI Technologies</p><h1>Loading school website</h1><p>Retrieving the school's public information. Please wait.</p></div></div>
-<div id="error" class="status hidden"><div class="status-card"><p class="eyebrow dark">CRIPRI Universal School Website</p><h1 id="errorTitle">Website unavailable</h1><p id="errorText">We could not load this school website.</p><a class="btn btn-gold" href="./index.html">Visit CRIPRI platform</a></div></div>
+<div id="loading" class="status"><div class="status-card"><p class="eyebrow dark">CRIPRI Technologies</p><h1>Loading institution website</h1><p>Retrieving this institution's public information. Please wait.</p></div></div>
+<div id="error" class="status hidden"><div class="status-card"><p class="eyebrow dark">CRIPRI Universal Institution Website</p><h1 id="errorTitle">Website unavailable</h1><p id="errorText">We could not load this institution website.</p><a class="btn btn-gold" href="./index.html">Visit CRIPRI platform</a></div></div>
 <div id="site" class="hidden">
-<div class="topbar"><div class="container"><span id="topName">School website</span><span>Official school information and updates</span></div></div>
+<div class="topbar"><div class="container"><span id="topName">Institution website</span><span>Official information and updates</span></div></div>
 <header class="header"><div class="container header-inner">
-<a class="brand" href="#home"><span class="crest" id="crest">S</span><span><span id="schoolName">School name</span><small id="schoolMotto">Welcome to our school</small></span></a>
+<a class="brand" href="#home"><span class="crest" id="crest">S</span><span><span id="schoolName">Institution name</span><small id="schoolMotto">Welcome</small></span></a>
 <button class="menu" id="menuButton" aria-expanded="false">Menu</button>
-<nav class="nav" id="nav"><a href="#about">About</a><a href="#facilities">Facilities</a><a href="#announcements">News & Notices</a><a href="#events">Events</a><a href="#vacancies">Vacancies</a><a href="#gallery">Gallery</a><a href="#contact">Contact</a></nav>
+<nav class="nav" id="nav"><a href="#about">About</a><a href="#facilities">Facilities</a><a href="#announcements">News & Notices</a><a href="#events">Events</a><a href="#vacancies">Vacancies</a><a href="#gallery">Gallery</a><a href="#services">Facilities & Services</a><a href="#contact">Contact</a></nav>
 </div></header>
 <main>
-<section class="hero" id="home"><div class="container hero-copy"><p class="eyebrow">Welcome to <span id="heroName">our school</span></p><h1 id="heroTitle">A place to learn, grow and achieve.</h1><p class="lead" id="heroMotto">A community committed to learning, character and opportunity.</p><a class="btn btn-gold" href="#about">Discover our school</a><a class="btn btn-outline" href="#announcements">Latest updates</a></div></section>
-<section class="content" id="about"><div class="container intro"><div><p class="eyebrow dark">Our school</p><h2 id="aboutTitle">A community where learners thrive.</h2><p class="section-lead" id="aboutLead">Learn more about our school.</p></div><div><p class="intro-copy" id="aboutCopy">Our school is committed to providing a supportive environment for learning, growth and achievement. Please contact the school for further information about its programmes and services.</p><div class="values"><div class="value"><strong>Learning</strong><span>Building knowledge and lifelong skills</span></div><div class="value"><strong>Character</strong><span>Encouraging responsibility and respect</span></div><div class="value"><strong>Community</strong><span>Working together for every learner</span></div></div></div></div></section>
+<section class="hero" id="home"><div class="container hero-copy"><p class="eyebrow">Welcome to <span id="heroName">our institution</span></p><h1 id="heroTitle">A place to learn, grow and achieve.</h1><p class="lead" id="heroMotto">A community committed to learning, character and opportunity.</p><a class="btn btn-gold" href="#about">Discover our institution</a><a class="btn btn-outline" href="#announcements">Latest updates</a></div></section>
+<section class="content" id="about"><div class="container intro"><div><p class="eyebrow dark">About us</p><h2 id="aboutTitle">A community where learners thrive.</h2><p class="section-lead" id="aboutLead">Learn more about our institution.</p></div><div><p class="intro-copy" id="aboutCopy">Our school is committed to providing a supportive environment for learning, growth and achievement. Please contact the institution for further information about its programmes and services.</p><div class="values"><div class="value"><strong>Learning</strong><span>Building knowledge and lifelong skills</span></div><div class="value"><strong>Character</strong><span>Encouraging responsibility and respect</span></div><div class="value"><strong>Community</strong><span>Working together for every learner</span></div></div></div></div></section>
 
 <section class="content tint" id="facilities">
   <div class="container">
     <p class="eyebrow dark">Our campus and facilities</p>
     <h2>A modern environment for learning and growth</h2>
     <p class="section-lead">Explore the learning spaces, student amenities and shared facilities that support our school community.</p>
-    <div class="telwa-modern-gallery" id="telwaModernGallery">
-      <figure><img src="./images/Sunny%20School%20Courtyard%20Gathering-1.png?v=20261122" alt="Illustrative school courtyard and learner community" loading="lazy"><figcaption>Welcoming School Community</figcaption></figure>
-      <figure><img src="./images/Modern%20School%20Campus%20Entrance-2.png?v=20261122" alt="Illustrative modern school campus entrance" loading="lazy"><figcaption>Modern Campus Environment</figcaption></figure>
-      <figure><img src="./images/science-lab-hd.jpg?v=20261122" alt="AI-generated illustration of learners working in a science laboratory" loading="lazy"><figcaption>Science Laboratory</figcaption></figure>
-      <figure><img src="./images/computer-lab-hd.jpg?v=20261122" alt="AI-generated illustration of a school computer laboratory" loading="lazy"><figcaption>Computer Laboratory</figcaption></figure>
-      <figure><img src="./images/classroom-hd.jpg?v=20261122" alt="AI-generated illustration of a modern school classroom" loading="lazy"><figcaption>Modern Classroom</figcaption></figure>
-    </div>
-    <p class="telwa-photo-note" id="telwaPhotoNote">AI-generated illustrative images for website demonstration. They are not verified photographs of actual TELWA GIRLS facilities or learners.</p>
+    <div class="telwa-photo-note" id="telwaPhotoNote" style="display:block;padding:18px 20px;border:1px solid var(--line);border-radius:10px;background:#fff;color:var(--muted)">Official campus and facility photographs will be added here when supplied and approved by the institution.</div>
     <div class="facilities-showcase" id="telwaCampusConcept">
       <img src="./images/telwa-campus-concept.svg" alt="Illustrative school campus architectural concept" loading="lazy">
       <div class="facilities-showcase-copy">
@@ -118,19 +111,20 @@ h2{font-size:clamp(29px,4vw,42px);color:var(--navy);margin:8px 0 12px}.section-l
       <article class="facility-card-live"><img src="./images/facilities/sports.svg" alt="Illustrative sports and recreation facilities" loading="lazy"><div class="facility-copy"><span class="facility-index">07 · WELLBEING</span><h3>Sports & Recreation</h3><p>Facilities that encourage fitness, teamwork and co-curricular achievement.</p></div></article>
       <article class="facility-card-live"><img src="./images/facilities/administration.svg" alt="Illustrative administration block" loading="lazy"><div class="facility-copy"><span class="facility-index">08 · SUPPORT</span><h3>Administration Block</h3><p>A professional reception and administration environment.</p></div></article>
     </div>
-    <p class="facility-disclaimer">Illustrative architectural concepts only. Schools should replace these examples with current, approved photographs of their own facilities before presenting them as existing campus facilities.</p>
+    <p class="facility-disclaimer">Illustrative architectural concepts only. Institutions should replace these examples with current, approved photographs of their own facilities before presenting them as existing campus facilities.</p>
   </div>
 </section>
 
-<section class="content tint" id="announcements"><div class="container"><p class="eyebrow dark">From the school</p><h2>News & announcements</h2><p class="section-lead">Notices and updates published by the school.</p><div class="cards" id="announcementList"><div class="empty">Loading announcements…</div></div></div></section>
-<section class="content" id="events"><div class="container"><p class="eyebrow dark">School calendar</p><h2>Upcoming events</h2><p class="section-lead">Activities and important dates from our school community.</p><div class="cards" id="eventList"><div class="empty">Loading events…</div></div></div></section>
-<section class="content tint" id="vacancies"><div class="container"><p class="eyebrow dark">Join our community</p><h2>Vacancies & opportunities</h2><p class="section-lead">Opportunities published by the school.</p><div class="cards" id="vacancyList"><div class="empty">Loading vacancies…</div></div></div></section>
-<section class="content" id="gallery"><div class="container"><p class="eyebrow dark">Our community</p><h2>School gallery</h2><p class="section-lead">Photographs and media shared by the school.</p><div class="cards" id="galleryList"><div class="empty">Loading gallery…</div></div></div></section>
-<section class="content tint" id="contact"><div class="container contact"><div><p class="eyebrow dark">Get in touch</p><h2>Contact our school</h2><p class="section-lead">For enquiries, please use the school's official contact details.</p></div><div class="contact-panel"><div class="contact-row"><strong>School</strong><span id="contactName">—</span></div><div class="contact-row"><strong>Location</strong><span id="contactLocation">Contact the school for location details.</span></div>
+<section class="content tint" id="announcements"><div class="container"><p class="eyebrow dark">From our institution</p><h2>News & announcements</h2><p class="section-lead">Notices and updates published by this institution.</p><div class="cards" id="announcementList"><div class="empty">Loading announcements…</div></div></div></section>
+<section class="content" id="events"><div class="container"><p class="eyebrow dark">Institution calendar</p><h2>Upcoming events</h2><p class="section-lead">Activities and important dates from our community.</p><div class="cards" id="eventList"><div class="empty">Loading events…</div></div></div></section>
+<section class="content tint" id="vacancies"><div class="container"><p class="eyebrow dark">Join our community</p><h2>Vacancies & opportunities</h2><p class="section-lead">Opportunities published by this institution.</p><div class="cards" id="vacancyList"><div class="empty">Loading vacancies…</div></div></div></section>
+<section class="content tint" id="services"><div class="container"><p class="eyebrow dark">What we offer</p><h2>Facilities & Services</h2><p class="section-lead">Explore facilities, services, departments, programmes and amenities published by this institution.</p><div class="cards" id="servicesList"><div class="empty">Loading facilities and services…</div></div></div></section>
+<section class="content" id="gallery"><div class="container"><p class="eyebrow dark">Our community</p><h2>Institution gallery</h2><p class="section-lead">Photographs and media shared by our community.</p><div class="cards" id="galleryList"><div class="empty">Loading gallery…</div></div></div></section>
+<section class="content tint" id="contact"><div class="container contact"><div><p class="eyebrow dark">Get in touch</p><h2>Contact us</h2><p class="section-lead">For enquiries, please use this institution's official contact details.</p></div><div class="contact-panel"><div class="contact-row"><strong>Institution</strong><span id="contactName">—</span></div><div class="contact-row" id="categoryRow"><strong>Category / Level</strong><span id="contactCategory">—</span></div><div class="contact-row"><strong>Location</strong><span id="contactLocation">Contact this institution for location details.</span></div>
 <div class="contact-row" id="phoneRow"><strong>Telephone</strong><span id="contactPhone">—</span></div>
 <div class="contact-row" id="emailRow"><strong>Email</strong><span id="contactEmail">—</span></div><div class="contact-row"><strong>Website address</strong><span id="contactSlug">—</span></div></div></div></section>
 </main>
-<footer class="footer"><div class="container"><span>© <span id="year"></span> <span id="footerName">School</span>. All rights reserved.</span><a href="./index.html">Powered by CRIPRI Technologies</a></div></footer>
+<footer class="footer"><div class="container"><span>© <span id="year"></span> <span id="footerName">Institution</span>. All rights reserved.</span><a href="./index.html">Powered by CRIPRI Technologies</a></div></footer>
 </div>
 <script>
 (async function(){
@@ -146,12 +140,11 @@ h2{font-size:clamp(29px,4vw,42px);color:var(--navy);margin:8px 0 12px}.section-l
   const slug=querySlug||(validHostSlug?hostSlug:"");
   // Keep TELWA-specific campus artwork off every other school's website.
   const telwaCampusConcept=document.getElementById("telwaCampusConcept");
-  const telwaModernGallery=document.getElementById("telwaModernGallery");
   const telwaPhotoNote=document.getElementById("telwaPhotoNote");
   const facilityGrid=document.querySelector(".facility-grid-live");
   const facilityDisclaimer=document.querySelector(".facility-disclaimer");
+  const facilitiesSection=document.getElementById("facilities");
   if(slug==="telwa-girls"){
-    if(telwaModernGallery)telwaModernGallery.style.display="grid";
     if(telwaPhotoNote)telwaPhotoNote.style.display="block";
     if(telwaCampusConcept)telwaCampusConcept.remove();
     if(facilityGrid)facilityGrid.remove();
@@ -161,19 +154,20 @@ h2{font-size:clamp(29px,4vw,42px);color:var(--navy);margin:8px 0 12px}.section-l
   const text=(id,value)=>$(id).textContent=value;
   function fail(title,message){$("loading").classList.add("hidden");$("site").classList.add("hidden");text("errorTitle",title);text("errorText",message);$("error").classList.remove("hidden");}
   function date(value){if(!value)return "";const d=new Date(value);return Number.isNaN(d.getTime())?"":new Intl.DateTimeFormat("en-KE",{dateStyle:"medium",timeStyle:"short"}).format(d);}
+  let terminology={singular:"Institution",plural:"Institutions"};
   function render(id,rows,label,emptyText){
     const target=$(id);target.replaceChildren();
     if(!rows.length){const e=document.createElement("div");e.className="empty";e.textContent=emptyText;target.append(e);return;}
     rows.forEach(r=>{
       const card=document.createElement("article");card.className="item";
       const type=document.createElement("span");type.className="type";type.textContent=label;
-      const title=document.createElement("h3");title.textContent=r.title||"School update";
-      const summary=document.createElement("p");summary.textContent=r.summary||r.body||"Contact the school for more information.";
+      const title=document.createElement("h3");title.textContent=r.title||terminology.singular+" update";
+      const summary=document.createElement("p");summary.textContent=r.summary||r.body||"Contact the "+terminology.singular.toLowerCase()+" for more information.";
       if(r.media_path && /^https:\/\//i.test(r.media_path)){
         if(/\.(mp4|webm)(\?|$)/i.test(r.media_path)){
-          const video=document.createElement("video");video.className="item-media";video.src=r.media_path;video.controls=true;video.preload="metadata";video.setAttribute("aria-label",r.title||"School video");card.append(video);
+          const video=document.createElement("video");video.className="item-media";video.src=r.media_path;video.controls=true;video.preload="metadata";video.setAttribute("aria-label",r.title||terminology.singular+" video");card.append(video);
         }else if(/\.(jpe?g|png|webp|gif)(\?|$)/i.test(r.media_path)){
-          const img=document.createElement("img");img.className="item-media";img.src=r.media_path;img.alt=r.title||"School photograph";img.loading="lazy";card.append(img);
+          const img=document.createElement("img");img.className="item-media";img.src=r.media_path;img.alt=r.title||terminology.singular+" photograph";img.loading="lazy";card.append(img);
         }else{const mediaLink=document.createElement("a");mediaLink.href=r.media_path;mediaLink.target="_blank";mediaLink.rel="noopener noreferrer";mediaLink.textContent="View attached file";card.append(mediaLink);}
       }
       card.append(type,title,summary);
@@ -188,34 +182,74 @@ h2{font-size:clamp(29px,4vw,42px);color:var(--navy);margin:8px 0 12px}.section-l
     });
   }
   try{
-    if(!slug || !/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(slug)){fail("School address required","Open this page with the school's assigned slug, for example ?slug=telwa-girls.");return;}
-    const {data:school,error:schoolError}=await supabase.from("schools").select("id,name,slug,status,motto,description,welcome_message,physical_address,county,country,contact_phone,contact_email,logo_path,banner_path").eq("slug",slug).eq("status","active").maybeSingle();
+    if(!slug || !/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(slug)){fail("Institution address required","Open this page with the institution's assigned website address.");return;}
+    const {data:school,error:schoolError}=await supabase.from("institutions").select("institution_id,name,slug,status,institution_type,motto,description,welcome_message,physical_address,county,country,contact_phone,contact_email,logo_path,banner_path").eq("slug",slug).eq("status","active").maybeSingle();
     if(schoolError)throw schoolError;
-    if(!school){fail("School website not available",'No active school was found for "'+slug+'". Check the address or contact CRIPRI Technologies.');return;}
-    const {data:subscriptionValid,error:subscriptionError}=await supabase.rpc("is_school_website_subscription_valid",{p_school_id:school.id});
+    if(!school){fail("Institution website not available",'No active institution was found for "'+slug+'". Check the address or contact CRIPRI Technologies.');return;}
+    const {data:subscriptionValid,error:subscriptionError}=await supabase.rpc("is_school_website_subscription_valid",{p_school_id:school.institution_id});
     if(subscriptionError)throw subscriptionError;
-    if(subscriptionValid!==true){fail("School subscription inactive","This school's website subscription is not currently active. Please contact CRIPRI Technologies to arrange or renew the subscription.");return;}
-    const name=school.name||"School",motto=school.motto||"Learning • Growth • Opportunity";
+    if(subscriptionValid!==true){fail("Website subscription inactive","This institution's website subscription is not currently active. Please contact CRIPRI Technologies to arrange or renew the subscription.");return;}
+    const institutionType=school.institution_type||"school";
+    const institutionNames={
+      school:{singular:"School",plural:"Schools"},
+      college:{singular:"College",plural:"Colleges"},
+      university:{singular:"University",plural:"Universities"},
+      tvet:{singular:"TVET / Technical Institute",plural:"TVET / Technical Institutes"},
+      training_centre:{singular:"Training Centre",plural:"Training Centres"},
+      hospital:{singular:"Hospital / Health Facility",plural:"Hospitals / Health Facilities"},
+      church:{singular:"Church",plural:"Churches"},
+      mosque:{singular:"Mosque",plural:"Mosques"},
+      union:{singular:"Union",plural:"Unions"},
+      association:{singular:"Association",plural:"Associations"},
+      ngo:{singular:"NGO",plural:"NGOs"},
+      cooperative:{singular:"Cooperative",plural:"Cooperatives"},
+      company:{singular:"Company",plural:"Companies"},
+      government:{singular:"Government Institution",plural:"Government Institutions"},
+      other:{singular:"Other Institution",plural:"Other Institutions"}
+    };
+    terminology=institutionNames[institutionType]||institutionNames.other;
+    const name=school.name||terminology.singular,motto=school.motto||"Welcome • Service • Community";
+    // Do not publish hard-coded demonstration facilities as if they belong to
+    // a real institution. A dynamic facilities/services editor is not yet
+    // available, so keep this demonstration-only section out of every live site.
+    if(facilitiesSection) facilitiesSection.remove();
+    const facilitiesLink=document.querySelector('#nav a[href="#facilities"]');
+    if(facilitiesLink) facilitiesLink.remove();
+    if(institutionType!=="school") {
+      const walker=document.createTreeWalker(document.body,NodeFilter.SHOW_TEXT);
+      let node;
+      while((node=walker.nextNode())) {
+        if(node.parentElement && node.parentElement.tagName==="SCRIPT") continue;
+        node.nodeValue=node.nodeValue
+          .replace(/\bSchools\b/g,terminology.plural)
+          .replace(/\bschools\b/g,terminology.plural.toLowerCase())
+          .replace(/\bSchool\b/g,terminology.singular)
+          .replace(/\bschool\b/g,terminology.singular.toLowerCase());
+      }
+    }
     const welcome=school.welcome_message||("Welcome to "+name+".");
-    const location=[school.physical_address,school.county,school.country].filter(Boolean).join(", ");
-    document.title=name+" | Official School Website";
+    const location=[school.physical_address,school.county||school.region,school.country].filter(Boolean).join(", ");
+    document.title=name+" | Official "+terminology.singular+" Website";
     ["topName","schoolName","heroName","contactName","footerName"].forEach(id=>text(id,name));
     ["schoolMotto","heroMotto"].forEach(id=>text(id,motto));
-    text("aboutLead",welcome);text("aboutCopy",school.description||welcome);text("aboutTitle","Discover "+name);text("contactLocation",location||"Contact the school for location details.");
+    text("aboutLead",welcome);text("aboutCopy",school.description||welcome);text("aboutTitle","Discover "+name);text("contactLocation",location||"Contact this institution for location details.");
+    const category=school.school_category||(school.institution_type==="other"?school.other_institution_type:null);
+    if(category){text("contactCategory",category);}else $("categoryRow").classList.add("hidden");
     if(school.contact_phone){const phone=document.createElement("a");phone.href="tel:"+school.contact_phone;phone.textContent=school.contact_phone;$("contactPhone").replaceChildren(phone);}else $("phoneRow").classList.add("hidden");
     if(school.contact_email){const email=document.createElement("a");email.href="mailto:"+school.contact_email;email.textContent=school.contact_email;$("contactEmail").replaceChildren(email);}else $("emailRow").classList.add("hidden");
     if(school.logo_path){const logo=document.createElement("img");logo.src=school.logo_path;logo.alt=name+" logo";logo.className="brand-logo";$("crest").replaceChildren(logo);}
     if(school.banner_path){$("home").classList.add("has-banner");$("home").style.backgroundImage="linear-gradient(105deg,rgba(7,35,58,.90),rgba(18,59,93,.56)),url("+JSON.stringify(school.banner_path)+")";}
     text("heroTitle","Welcome to "+name);text("crest",name.charAt(0).toUpperCase());text("contactSlug",school.slug);text("year",String(new Date().getFullYear()));
-    const {data:records,error}=await supabase.from("school_content_items").select("id,content_type,title,summary,body,venue,event_start_at,application_deadline,application_email,application_url,video_url,media_path,status,publish_at,created_at").eq("school_id",school.id).in("status",["published","scheduled"]).or("publish_at.is.null,publish_at.lte."+new Date().toISOString()).order("created_at",{ascending:false});
+    const {data:records,error}=await supabase.from("institution_content_items").select("content_id,content_type,title,summary,body,venue,event_start_at,application_deadline,application_email,application_url,video_url,media_path,status,publish_at,created_at").eq("institution_id",school.institution_id).or("and(status.eq.published,or(publish_at.is.null,publish_at.lte."+new Date().toISOString()+")),and(status.eq.scheduled,publish_at.not.is.null,publish_at.lte."+new Date().toISOString()+")").order("created_at",{ascending:false});
     if(error)throw error;
     const rows=records||[];
-    render("announcementList",rows.filter(r=>["announcement","live_update","live_stream"].includes(r.content_type)),"News & announcement","No published announcements at the moment.");
-    render("eventList",rows.filter(r=>r.content_type==="event"),"School event","No upcoming events have been published yet.");
-    render("vacancyList",rows.filter(r=>r.content_type==="vacancy"),"Opportunity","There are no current vacancies or opportunities.");
+    render("announcementList",rows.filter(r=>["announcement","live_update","live_stream"].includes(r.content_type)),"News & updates","No published updates at the moment.");
+    render("eventList",rows.filter(r=>r.content_type==="event"),"Event","No upcoming events have been published yet.");
+    render("vacancyList",rows.filter(r=>r.content_type==="vacancy"),"Opportunities","There are no current opportunities.");
     render("galleryList",rows.filter(r=>r.content_type==="gallery"),"Gallery","Gallery items will appear here when published.");
+    render("servicesList",rows.filter(r=>r.content_type==="facility_service"),"Facility / Service","No facilities or services have been published yet.");
     $("loading").classList.add("hidden");$("site").classList.remove("hidden");
-  }catch(err){console.error("Public website error:",err);fail("Unable to load school website","The public website could not retrieve its information. Please try again later.");}
+  }catch(err){console.error("Public website error:",err);fail("Unable to load institution website","The public website could not retrieve its information. Please try again later.");}
   const menu=$("menuButton"),nav=$("nav");
   menu.addEventListener("click",()=>{const open=nav.classList.toggle("open");menu.setAttribute("aria-expanded",String(open));});
   nav.querySelectorAll("a").forEach(a=>a.addEventListener("click",()=>{nav.classList.remove("open");menu.setAttribute("aria-expanded","false");}));

@@ -4,8 +4,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="robots" content="noindex,nofollow">
-<title>CRIPRI | School Registration</title>
+<meta name="description" content="Register your school, college, university, TVET or training institution on the CRIPRI Universal Institution Website.">
+<title>Register an Institution | CRIPRI</title>
 <link rel="stylesheet" href="style.css">
 
 <style>
@@ -108,32 +108,31 @@ button:disabled {
 
 <p><strong>CRIPRI TECHNOLOGIES</strong></p>
 
-<h1>Register Your School</h1>
+<h1>Register Your Institution</h1>
 
 <p class="intro">
-Submit your school's details to begin the CRIPRI school
-website and workspace onboarding process.
-Applications are reviewed by an authorised administrator.
+Submit your institution’s official details to apply for a dedicated CRIPRI website and secure management workspace. Applications are reviewed by an authorised administrator before activation.
 </p>
 
 <form id="schoolRegistrationForm">
 
 <div class="form-grid">
+<div class="field full"><label for="institution_type">Institution Type *</label><select id="institution_type" name="institution_type" required><option value="">Choose institution type</option><option value="school">School</option><option value="college">College</option><option value="university">University</option><option value="tvet">TVET / Technical Institute</option><option value="training_centre">Training Centre</option><option value="hospital">Hospital / Health Facility</option><option value="church">Church</option><option value="mosque">Mosque</option><option value="ngo">NGO / Non-profit</option><option value="company">Company</option><option value="association">Association</option><option value="cooperative">Cooperative</option><option value="government">Government Institution</option><option value="union">Union</option><option value="other">Other Institution</option></select></div>
+<div class="field full" id="otherInstitutionTypeField" hidden><label for="other_institution_type">Specify Institution Type *</label><input id="other_institution_type" name="other_institution_type" minlength="2" maxlength="120" placeholder="e.g. professional body, community organisation"></div>
+</div>
+
+<div class="form-grid">
 
 <div class="field">
-<label for="school_name">Official School Name *</label>
+<label for="school_name">Official Institution Name *</label>
 <input id="school_name" name="school_name"
 required minlength="2" maxlength="180">
 </div>
 
-<div class="field">
-<label for="school_category">School Category *</label>
-<select id="school_category" name="school_category" required>
-<option value="">Select category</option>
-<option>Primary</option>
-<option>Secondary</option>
-<option>Primary and secondary</option>
-<option>College or other</option>
+<div class="field" id="schoolCategoryField">
+<label for="school_category">Institution Category / Level</label>
+<select id="school_category" name="school_category">
+<option value="">Not applicable (optional)</option>
 </select>
 </div>
 
@@ -148,7 +147,7 @@ required minlength="2" maxlength="180">
 </div>
 
 <div class="field">
-<label for="contact_email">Official School Email *</label>
+<label for="contact_email">Official Institution Email *</label>
 <input id="contact_email" name="contact_email"
 type="email" required>
 </div>
@@ -166,16 +165,17 @@ name="physical_address"></textarea>
 
 <div class="field">
 <label for="contact_person">Authorised Contact Person *</label>
-<input id="contact_person" name="contact_person" required>
+<input id="contact_person" name="contact_person" required minlength="2" maxlength="120">
 </div>
 
 <div class="field">
-<label for="contact_role">Contact Person's Role *</label>
+<label for="contact_role">Authorised Representative's Position *</label>
 <select id="contact_role" name="contact_role" required>
 <option value="">Select role</option>
-<option>Headteacher / Principal</option>
-<option>Director / Proprietor</option>
-<option>School administrator</option>
+<option>Institution head / principal</option>
+<option>Director / proprietor</option>
+<option>Registrar / administrator</option>
+<option>Board or committee representative</option>
 <option>Other authorised representative</option>
 </select>
 </div>
@@ -189,7 +189,7 @@ name="physical_address"></textarea>
 
 <div class="actions">
 <button type="submit" id="submitRegistration">
-Submit School Application
+Submit Institution Application
 </button>
 </div>
 
@@ -212,6 +212,47 @@ const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
 const form = document.getElementById('schoolRegistrationForm');
 const message = document.getElementById('formMessage');
 const submitButton = document.getElementById('submitRegistration');
+const institutionType = document.getElementById('institution_type');
+const schoolCategoryField = document.getElementById('schoolCategoryField');
+const schoolCategory = document.getElementById('school_category');
+const otherInstitutionTypeField = document.getElementById('otherInstitutionTypeField');
+const otherInstitutionType = document.getElementById('other_institution_type');
+
+function updateInstitutionFields() {
+  const type = institutionType.value;
+  const isSchool = type === 'school';
+  const isCollege = type === 'college';
+  const isOther = type === 'other';
+
+  // Rebuild options for the selected type to prevent school levels being
+  // submitted accidentally for a non-school institution.
+  schoolCategory.replaceChildren();
+  const placeholder = document.createElement('option');
+  placeholder.value = '';
+  placeholder.textContent = isSchool ? 'Select school level'
+    : isCollege ? 'College category' : 'Not applicable (optional)';
+  schoolCategory.appendChild(placeholder);
+
+  const categories = isSchool
+    ? [['Primary', 'Primary'], ['Secondary', 'Secondary'], ['Primary and secondary', 'Primary and Secondary']]
+    : isCollege ? [['College', 'College']] : [['Other', 'Other']];
+
+  categories.forEach(([value, label]) => {
+    const option = document.createElement('option');
+    option.value = value;
+    option.textContent = label;
+    schoolCategory.appendChild(option);
+  });
+
+  schoolCategory.required = isSchool || isCollege;
+  schoolCategory.value = isCollege ? 'College' : '';
+  schoolCategoryField.hidden = false;
+  otherInstitutionTypeField.hidden = !isOther;
+  otherInstitutionType.required = isOther;
+}
+
+institutionType.addEventListener('change', updateInstitutionFields);
+updateInstitutionFields();
 
 function createSchoolSlug(name) {
   return name
@@ -231,9 +272,22 @@ form.addEventListener('submit', async function(event) {
 
   const schoolName = document.getElementById('school_name').value.trim();
 
+  // Persist only columns that exist in public.school_applications.
+  // The current schema has no school_category or other_institution_type columns,
+  // so preserve those optional details in the existing message field.
+  const institutionKind = document.getElementById('institution_type').value;
+  const extraDetails = [];
+  const selectedCategory = document.getElementById('school_category').value;
+  if (selectedCategory) extraDetails.push('Institution category: ' + selectedCategory);
+  if (institutionKind === 'other' && otherInstitutionType.value.trim()) {
+    extraDetails.push('Institution type: ' + otherInstitutionType.value.trim());
+  }
+  const userMessage = document.getElementById('message').value.trim();
+  if (userMessage) extraDetails.push(userMessage);
+
   const application = {
     school_name: schoolName,
-    school_category: document.getElementById('school_category').value,
+    institution_type: institutionKind,
     country: document.getElementById('country').value.trim(),
     region: document.getElementById('region').value.trim(),
     contact_email: document.getElementById('contact_email').value.trim(),
@@ -241,12 +295,19 @@ form.addEventListener('submit', async function(event) {
     physical_address: document.getElementById('physical_address').value.trim() || null,
     contact_person: document.getElementById('contact_person').value.trim(),
     contact_role: document.getElementById('contact_role').value,
-    message: document.getElementById('message').value.trim() || null,
+    message: extraDetails.join('\\n\\n') || null,
     requested_slug: createSchoolSlug(schoolName)
   };
 
+  if (application.institution_type === 'other' && !application.other_institution_type) {
+    message.textContent = 'Please specify the type of institution.';
+    message.className = 'error';
+    otherInstitutionType.focus();
+    return;
+  }
+
   if (!application.requested_slug) {
-    message.textContent = 'Please enter a valid school name.';
+    message.textContent = 'Please enter a valid institution name.';
     message.className = 'error';
     return;
   }
@@ -262,11 +323,12 @@ form.addEventListener('submit', async function(event) {
     if (error) throw error;
 
     message.textContent =
-      'Your school application has been submitted successfully. It is now awaiting administrator review.';
+      'Your institution application has been submitted successfully and is awaiting CRIPRI administrator review.';
 
     message.className = 'success';
     form.reset();
     document.getElementById('country').value = 'Kenya';
+    updateInstitutionFields();
 
   } catch (error) {
     console.error('School application error:', error);
@@ -278,7 +340,7 @@ form.addEventListener('submit', async function(event) {
 
   } finally {
     submitButton.disabled = false;
-    submitButton.textContent = 'Submit School Application';
+    submitButton.textContent = 'Submit Institution Application';
   }
 });
 </script>
