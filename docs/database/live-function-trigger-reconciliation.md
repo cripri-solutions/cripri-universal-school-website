@@ -131,3 +131,21 @@ These checks do not establish that every SECURITY DEFINER function is safe. The 
 ## Next safe action
 
 Use a restored or isolated non-production database to test the proposed review RPC replacement and notification claim workflow, then test tenant isolation and RLS for admin/member helpers. Do not change production permissions, functions, triggers, schema, or migration history during this work.
+
+
+### Additional source review: content RPCs and review-notification trigger — 26 November 2026
+
+Read-only inspection of the live definitions confirmed:
+
+- `manage_school_content_item(uuid,text,bool)` requires an authenticated actor, joins the content item to its school and membership, requires the caller's membership role to be `school_admin` or `institution_admin`, and requires the school to be active. It locks the content row before recovery, restore, or permanent deletion and records an audit entry. Permanent deletion requires both Recovery Bin status and an explicit confirmation flag.
+- `manage_school_site_content(uuid,text,jsonb)` requires an authenticated actor and an active `SCHOOL_ADMIN` assignment in `cripri_content_admins` joined to an ACTIVE row in `cripri_content_schools`. It scopes content reads/updates/deletes to the supplied school ID and records audit entries. Its separate admin tables have no RLS policies, so their intended access must remain tightly controlled through this SECURITY DEFINER function and service-role/admin workflows; do not add broad policies without mapping those workflows.
+- `get_my_cripri_schools()` filters both admin and school rows to the current `auth.uid()`, active SCHOOL_ADMIN role and ACTIVE school status.
+- `renew_school_subscription(uuid,uuid)` requires an active platform reviewer, locks the subscription, disallows non-active/non-expired states and demo-trial renewal, checks an active priced plan and a confirmed payment tied to the same subscription and school, and requires the payment amount to meet the plan price before extending the subscription.
+
+#### Review-notification association issue — requires correction before rollout
+
+The live `create_school_review_notification()` trigger currently finds `school_id` by matching the application name and institution type, then choosing the most recently created matching school. It does not use the exact `school_id` written by the review RPC into `application_review_audit`. If two applications use the same institution name and type, the notification can be associated with the wrong institution record. The notification still uses the correct application ID and recipient email, but its school association may be incorrect.
+
+**Recommendation:** prepare a narrowly scoped replacement that resolves the school ID from the audit row for `NEW.id` and the corresponding approved decision, rather than matching on name/type. Preserve the unique `(application_id,event_type)` conflict protection. Add an isolated test with two approved applications sharing the same name and type to prove each notification references its own audit-linked school. Do not alter the live trigger/function until a restorable backup, test environment, and explicit production approval exist.
+
+No production objects or data were changed during this inspection.
