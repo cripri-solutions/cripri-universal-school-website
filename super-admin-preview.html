@@ -74,8 +74,8 @@ footer{text-align:center;color:#8290a2;padding:25px;font-size:12px}
 <aside class="sidebar">
   <h4>PLATFORM MANAGEMENT</h4>
   <button class="nav active" data-page="overview">▦ Overview</button>
-  <button class="nav" data-page="schools">🏫 Schools</button>
-  <button class="nav" data-page="approvals">✓ School Approvals</button>
+  <button class="nav" data-page="schools">🏢 Institutions</button>
+  <button class="nav" data-page="approvals">✓ Institution Approvals</button>
   <button class="nav" data-page="notifications">🔔 Notifications <span id="notificationNavCount" style="float:right;background:#d84c4c;color:white;border-radius:12px;padding:2px 7px;font-size:11px">0</span></button>
   <a class="nav" href="super-admin-domain-onboarding.html">🌐 Domain &amp; Website Onboarding</a>
   <button class="nav" data-page="admins">♙ Administrators</button>
@@ -101,17 +101,17 @@ footer{text-align:center;color:#8290a2;padding:25px;font-size:12px}
 
   <div class="cards">
     <div class="card">
-      <div class="label">Registered Schools</div>
+      <div class="label">Registered Institutions</div>
       <div class="number" id="totalSchools">—</div>
-      <small>Records in schools table</small>
+      <small>Institution records</small>
     </div>
     <div class="card">
-      <div class="label">Active Schools</div>
+      <div class="label">Active Institutions</div>
       <div class="number" id="activeSchools">—</div>
-      <small>Schools with active status</small>
+      <small>Institutions with active status</small>
     </div>
     <div class="card">
-      <div class="label">Pending School Approvals</div>
+      <div class="label">Pending Institution Approvals</div>
       <div class="number" id="pendingCount">—</div>
       <small>Applications awaiting review</small>
     </div>
@@ -123,20 +123,20 @@ footer{text-align:center;color:#8290a2;padding:25px;font-size:12px}
   </div>
 
   <div class="panel">
-    <h3>Recent Registered Schools</h3>
+    <h3>Recent Registered Institutions</h3>
     <div class="table-wrap">
       <table>
         <thead>
           <tr>
             <th>School</th>
-            <th>School Slug</th>
+            <th>Institution Slug</th>
             <th>Country</th>
             <th>Created</th>
             <th>Status</th>
           </tr>
         </thead>
         <tbody id="recentSchoolsBody">
-          <tr><td colspan="5" class="empty">Loading schools...</td></tr>
+          <tr><td colspan="5" class="empty">Loading institutions...</td></tr>
         </tbody>
       </table>
     </div>
@@ -165,24 +165,24 @@ footer{text-align:center;color:#8290a2;padding:25px;font-size:12px}
 <section id="schools" class="section">
   <div class="topline">
     <div>
-      <h1>School Management</h1>
-      <div class="muted">Live registered school records from Supabase.</div>
+      <h1>Institution Management</h1>
+      <div class="muted">Live registered institution records from Supabase.</div>
     </div>
-    <button class="primary" id="refreshSchools">↻ Refresh Schools</button>
+    <button class="primary" id="refreshSchools">↻ Refresh Institutions</button>
   </div>
 
   <div class="panel">
     <input class="search" id="schoolSearch"
-      placeholder="Search school name, slug, location or status...">
+      placeholder="Search institution name, slug, location or status...">
 
-    <div class="notice" id="schoolsMessage">Loading schools...</div>
+    <div class="notice" id="schoolsMessage">Loading institutions...</div>
 
     <div class="table-wrap">
       <table id="schoolTable">
         <thead>
           <tr>
-            <th>School Name</th>
-            <th>School ID</th>
+            <th>Institution Name</th>
+            <th>Institution ID</th>
             <th>Website Slug</th>
             <th>Location</th>
             <th>Status</th>
@@ -191,7 +191,7 @@ footer{text-align:center;color:#8290a2;padding:25px;font-size:12px}
           </tr>
         </thead>
         <tbody id="schoolTableBody">
-          <tr><td colspan="7" class="empty">Loading schools...</td></tr>
+          <tr><td colspan="7" class="empty">Loading institutions...</td></tr>
         </tbody>
       </table>
     </div>
@@ -201,8 +201,8 @@ footer{text-align:center;color:#8290a2;padding:25px;font-size:12px}
 <section id="approvals" class="section">
   <div class="topline">
     <div>
-      <h1>School Approvals</h1>
-      <div class="muted">Review school registration applications.</div>
+      <h1>Institution Approvals</h1>
+      <div class="muted">Review institution registration applications.</div>
     </div>
     <button class="primary" id="refreshApprovals">↻ Refresh Applications</button>
   </div>
@@ -241,7 +241,7 @@ footer{text-align:center;color:#8290a2;padding:25px;font-size:12px}
       </select>
     </div>
 
-    <div class="notice" id="approvalMessage">Connecting to the school registration database...</div>
+    <div class="notice" id="approvalMessage">Connecting to the institution registration database...</div>
 
     <div class="table-wrap">
       <table id="approvalTable">
@@ -266,13 +266,13 @@ footer{text-align:center;color:#8290a2;padding:25px;font-size:12px}
   <div class="panel">
     <h3>Approval Guidelines</h3>
     <div class="notice">
-      Only authorised CRIPRI platform reviewers can approve or reject school applications.
+      Only authorised CRIPRI platform reviewers can approve or reject institution applications.
       Decisions are processed by the database review function.
     </div>
     <p class="muted">
-      Application approval and school activation are separate stages.
-      An approved application may have a school record whose status remains pending
-      until the school is activated.
+      Application approval and institution activation are separate stages.
+      An approved application may have an institution record whose status remains pending
+      until the institution is activated.
     </p>
   </div>
 </section>
@@ -281,7 +281,7 @@ footer{text-align:center;color:#8290a2;padding:25px;font-size:12px}
   <div class="topline">
     <div>
       <h1>Notifications</h1>
-      <div class="muted">CRIPRI school application alerts and email delivery status.</div>
+      <div class="muted">CRIPRI institution application alerts and email delivery status.</div>
     </div>
     <button class="primary" id="refreshNotifications">↻ Refresh Notifications</button>
   </div>
@@ -293,10 +293,10 @@ footer{text-align:center;color:#8290a2;padding:25px;font-size:12px}
   </div>
   <div class="notice" id="notificationsMessage">Loading platform notifications...</div>
   <div class="panel">
-    <h3>School notifications</h3>
+    <h3>Institution notifications</h3>
     <div class="table-wrap">
       <table>
-        <thead><tr><th>School / Event</th><th>Notification</th><th>Recipient</th><th>Created</th><th>Email status</th><th>Actions</th></tr></thead>
+        <thead><tr><th>Institution / Event</th><th>Notification</th><th>Recipient</th><th>Created</th><th>Email status</th><th>Actions</th></tr></thead>
         <tbody id="notificationTableBody"><tr><td colspan="6" class="empty">Loading notifications...</td></tr></tbody>
       </table>
     </div>
@@ -305,31 +305,31 @@ footer{text-align:center;color:#8290a2;padding:25px;font-size:12px}
 </section>
 
 <section id="admins" class="section">
-  <div class="topline"><div><h1>School Administrators</h1><div class="muted">Invite school administrators, assign content-editor access and manage memberships.</div></div><div style="display:flex;gap:8px;flex-wrap:wrap"><button class="primary" type="button" id="adminInviteShortcut">＋ Invite Administrator</button><button class="primary" id="refreshAdmins">↻ Refresh Administrators</button></div></div>
+  <div class="topline"><div><h1>Institution Administrators</h1><div class="muted">Invite institution administrators, assign content-editor access and manage memberships.</div></div><div style="display:flex;gap:8px;flex-wrap:wrap"><button class="primary" type="button" id="adminInviteShortcut">＋ Invite Administrator</button><button class="primary" id="refreshAdmins">↻ Refresh Administrators</button></div></div>
   <div class="cards">
-    <div class="card"><div class="label">Total Memberships</div><div class="number" id="adminTotal">—</div><small>Registered school roles</small></div>
-    <div class="card"><div class="label">School Administrators</div><div class="number" id="adminOwners">—</div><small>School admin memberships</small></div>
+    <div class="card"><div class="label">Total Memberships</div><div class="number" id="adminTotal">—</div><small>Registered institution roles</small></div>
+    <div class="card"><div class="label">Institution Administrators</div><div class="number" id="adminOwners">—</div><small>Institution admin memberships</small></div>
     <div class="card"><div class="label">Content Editors</div><div class="number" id="adminEditors">—</div><small>Content editor memberships</small></div>
-    <div class="card"><div class="label">Schools With Admins</div><div class="number" id="adminSchools">—</div><small>Schools represented</small></div>
+    <div class="card"><div class="label">Institutions With Admins</div><div class="number" id="adminSchools">—</div><small>Institutions represented</small></div>
   </div>
-  <div class="panel"><h3>Invite a school administrator or content editor</h3>
+  <div class="panel"><h3>Invite an institution administrator or content editor</h3>
     <form id="adminInviteForm"><div class="cards">
-      <div><label for="adminInviteSchool">School</label><select id="adminInviteSchool" required><option value="">Select active school</option></select></div>
-      <div><label for="adminInviteEmail">Email address</label><input id="adminInviteEmail" type="email" maxlength="254" required placeholder="person@school.org"></div>
-      <div><label for="adminInviteRole">Access role</label><select id="adminInviteRole"><option value="school_admin">School Admin</option><option value="content_editor">Content Editor</option></select></div>
-    </div><div class="notice">The invitation is sent by Supabase Auth. The recipient sets their own password. Access is limited to the selected school.</div>
+      <div><label for="adminInviteSchool">School</label><select id="adminInviteSchool" required><option value="">Select active institution</option></select></div>
+      <div><label for="adminInviteEmail">Email address</label><input id="adminInviteEmail" type="email" maxlength="254" required placeholder="person@institution.org"></div>
+      <div><label for="adminInviteRole">Access role</label><select id="adminInviteRole"><option value="school_admin">Institution Admin</option><option value="content_editor">Content Editor</option></select></div>
+    </div><div class="notice">The invitation is sent by Supabase Auth. The recipient sets their own password. Access is limited to the selected institution.</div>
     <button class="primary" id="adminInviteButton" type="submit">Send Invitation</button></form>
   </div>
-  <div class="panel"><input class="search" id="adminSearch" placeholder="Search school, user ID or role...">
+  <div class="panel"><input class="search" id="adminSearch" placeholder="Search institution, user ID or role...">
     <div class="notice" id="adminsMessage">Loading administrator memberships...</div>
-    <div class="table-wrap"><table><thead><tr><th>School</th><th>Website Slug</th><th>User ID</th><th>Role</th><th>School Status</th><th>Joined</th><th>Actions</th></tr></thead><tbody id="adminTableBody"><tr><td colspan="7" class="empty">Loading...</td></tr></tbody></table></div>
+    <div class="table-wrap"><table><thead><tr><th>School</th><th>Website Slug</th><th>User ID</th><th>Role</th><th>Institution Status</th><th>Joined</th><th>Actions</th></tr></thead><tbody id="adminTableBody"><tr><td colspan="7" class="empty">Loading...</td></tr></tbody></table></div>
   </div>
-  <div class="panel"><h3>Administrator audit history</h3><div class="table-wrap"><table><thead><tr><th>Date</th><th>School ID</th><th>Action</th><th>Target user</th><th>Role</th><th>Changed by</th></tr></thead><tbody id="adminAuditBody"><tr><td colspan="6" class="empty">Loading audit history...</td></tr></tbody></table></div></div>
+  <div class="panel"><h3>Administrator audit history</h3><div class="table-wrap"><table><thead><tr><th>Date</th><th>Institution ID</th><th>Action</th><th>Target user</th><th>Role</th><th>Changed by</th></tr></thead><tbody id="adminAuditBody"><tr><td colspan="6" class="empty">Loading audit history...</td></tr></tbody></table></div></div>
 </section>
 
 <section id="subscriptions" class="section">
   <div class="topline">
-    <div><h1>Website Subscriptions</h1><div class="muted">Manage plans and school subscription records. Payments are not processed here.</div></div>
+    <div><h1>Website Subscriptions</h1><div class="muted">Manage plans and institution subscription records. Payments are not processed here.</div></div>
     <button class="primary" id="refreshSubscriptions">↻ Refresh</button>
   </div>
   <div class="cards">
@@ -344,12 +344,12 @@ footer{text-align:center;color:#8290a2;padding:25px;font-size:12px}
   <div class="notice" id="subscriptionHealthMessage">Expiry monitoring will appear here.</div>
   <div class="panel">
     <h3>Renewal reminders and expired subscriptions</h3>
-    <div class="muted">Schools with an active or trial subscription expiring within 30 days, plus expired records requiring attention.</div>
+    <div class="muted">Institutions with an active or trial subscription expiring within 30 days, plus expired records requiring attention.</div>
     <div id="subscriptionReminderList" class="notice">Loading renewal reminders...</div>
   </div>
   <div class="panel">
     <h3 id="planFormHeading">Create a subscription plan</h3>
-    <p class="muted">Monthly pricing: Basic KES 1,500; Standard KES 2,500; Premium KES 4,500. Every plan includes a CRIPRI school subdomain. Custom domains and additional hosting remain optional add-ons.</p>
+    <p class="muted">Monthly pricing: Basic KES 1,500; Standard KES 2,500; Premium KES 4,500. Every plan includes a CRIPRI institution subdomain. Custom domains and additional hosting remain optional add-ons.</p>
     <form id="planForm">
       <div class="cards">
         <div><label for="planName">Plan name</label><input id="planName" required maxlength="100" placeholder="e.g. Standard Website"></div>
@@ -364,19 +364,19 @@ footer{text-align:center;color:#8290a2;padding:25px;font-size:12px}
     </form>
   </div>
   <div class="panel">
-    <h3>Assign a subscription to a school</h3>
+    <h3>Assign a subscription to an institution</h3>
     <form id="subscriptionForm">
       <div class="cards">
-        <div><label for="subscriptionSchool">School</label><select id="subscriptionSchool" required><option value="">Loading schools...</option></select></div>
+        <div><label for="subscriptionSchool">School</label><select id="subscriptionSchool" required><option value="">Loading institutions...</option></select></div>
         <div><label for="subscriptionPlan">Plan</label><select id="subscriptionPlan"><option value="">No plan selected</option></select></div>
         <div><label for="subscriptionStatus">Initial status</label><select id="subscriptionStatus"><option value="pending">Pending</option><option value="trial">Trial</option></select></div>
         <div><label for="subscriptionStart">Start date</label><input id="subscriptionStart" type="date"></div>
         <div><label for="subscriptionEnd">End date</label><input id="subscriptionEnd" type="date"></div>
-        <div><label for="subscriptionDomain">School-owned custom domain (optional)</label><input id="subscriptionDomain" maxlength="253" placeholder="www.school.ac.ke"></div>
+        <div><label for="subscriptionDomain">Institution-owned custom domain (optional)</label><input id="subscriptionDomain" maxlength="253" placeholder="www.school.ac.ke"></div>
       </div>
       <label><input id="subscriptionCustomDomainAddon" type="checkbox"> Custom-domain service add-on selected (record only)</label>
       <label><input id="subscriptionHostingAddon" type="checkbox"> Additional hosting add-on selected (record only)</label>
-      <div class="notice">The CRIPRI subdomain is included by default. Selecting an add-on records the service choice only; it does not purchase a domain, configure DNS, or charge the school.</div>
+      <div class="notice">The CRIPRI subdomain is included by default. Selecting an add-on records the service choice only; it does not purchase a domain, configure DNS, or charge the institution.</div>
       <button class="primary" type="submit" id="saveSubscriptionButton">Save Subscription Record</button>
     </form>
   </div>
@@ -385,14 +385,14 @@ footer{text-align:center;color:#8290a2;padding:25px;font-size:12px}
     <div class="table-wrap"><table><thead><tr><th>Plan</th><th>Code</th><th>Billing</th><th>Price (KES)</th><th>CRIPRI Subdomain</th><th>Status</th><th>Actions</th></tr></thead><tbody id="planTableBody"><tr><td colspan="6" class="empty">Loading plans...</td></tr></tbody></table></div>
   </div>
   <div class="panel">
-    <h3>School subscription records</h3>
+    <h3>Institution subscription records</h3>
     <div class="table-wrap"><table><thead><tr><th>School</th><th>Plan</th><th>Status</th><th>Start</th><th>End</th><th>Custom Domain</th><th>Add-ons</th><th>Activation</th></tr></thead><tbody id="subscriptionTableBody"><tr><td colspan="8" class="empty">Loading subscriptions...</td></tr></tbody></table></div>
   </div>
 </section>
 
 <section id="payments" class="section">
   <div class="topline">
-    <div><h1>Payments Register</h1><div class="muted">Record and reconcile school payments. This does not initiate M-Pesa or bank transactions.</div></div>
+    <div><h1>Payments Register</h1><div class="muted">Record and reconcile institution payments. This does not initiate M-Pesa or bank transactions.</div></div>
     <button class="primary" id="refreshPayments">↻ Refresh Payments</button>
   </div>
   <div class="cards">
@@ -406,7 +406,7 @@ footer{text-align:center;color:#8290a2;padding:25px;font-size:12px}
     <h3>Record a payment</h3>
     <form id="paymentForm">
       <div class="cards">
-        <div><label for="paymentSchool">School</label><select id="paymentSchool" required><option value="">Select a school</option></select></div>
+        <div><label for="paymentSchool">School</label><select id="paymentSchool" required><option value="">Select an institution</option></select></div>
         <div><label for="paymentSubscription">Subscription (optional)</label><select id="paymentSubscription"><option value="">Not linked</option></select></div>
         <div><label for="paymentAmount">Amount (KES)</label><input id="paymentAmount" type="number" min="0.01" step="0.01" required></div>
         <div><label for="paymentMethod">Payment method</label><select id="paymentMethod" required><option value="mpesa">M-Pesa</option><option value="bank_transfer">Bank transfer</option><option value="cash">Cash</option><option value="card">Card</option><option value="other">Other</option></select></div>
@@ -421,7 +421,7 @@ footer{text-align:center;color:#8290a2;padding:25px;font-size:12px}
   </div>
   <div class="panel">
     <h3>Payment history</h3>
-    <input class="search" id="paymentSearch" placeholder="Search school, reference or status...">
+    <input class="search" id="paymentSearch" placeholder="Search institution, reference or status...">
     <div class="table-wrap"><table><thead><tr><th>School</th><th>Amount (KES)</th><th>Method</th><th>Reference</th><th>Status</th><th>Paid at</th><th>Recorded</th><th>Actions</th></tr></thead><tbody id="paymentTableBody"><tr><td colspan="7" class="empty">Loading payments...</td></tr></tbody></table></div>
   </div>
 </section>
@@ -586,10 +586,10 @@ async function copySchoolWebsiteLink(url, button) {
     await navigator.clipboard.writeText(url);
     const original = button.textContent;
     button.textContent = 'Copied!';
-    setMessage('schoolsMessage', 'Public school website link copied to clipboard.', 'success');
+    setMessage('schoolsMessage', 'Public institution website link copied to clipboard.', 'success');
     window.setTimeout(() => { button.textContent = original; }, 1800);
   } catch (error) {
-    window.prompt('Copy this public school website link:', url);
+    window.prompt('Copy this public institution website link:', url);
   }
 }
 
@@ -631,7 +631,7 @@ async function loadSchools() {
   const body = byId('schoolTableBody');
 
   body.innerHTML =
-    '<tr><td colspan="6" class="empty">Loading schools...</td></tr>';
+    '<tr><td colspan="6" class="empty">Loading institutions...</td></tr>';
 
   setMessage(
     'schoolsMessage',
@@ -698,8 +698,8 @@ function renderSchools() {
     td.className = 'empty';
 
     td.textContent = currentSchools.length
-      ? 'No schools match your search.'
-      : 'No school records found.';
+      ? 'No institutions match your search.'
+      : 'No institution records found.';
 
     tr.appendChild(td);
     body.appendChild(tr);
@@ -773,7 +773,7 @@ function renderSchools() {
 
 async function activateSchool(schoolId, schoolName, button) {
   if (!schoolId) {
-    alert('Cannot activate this school: its school ID is missing.');
+    alert('Cannot activate this institution: its institution ID is missing.');
     return;
   }
 
@@ -789,7 +789,7 @@ async function activateSchool(schoolId, schoolName, button) {
   });
 
   if (error) {
-    alert('School activation failed: ' + error.message);
+    alert('Institution activation failed: ' + error.message);
     button.disabled = false;
     button.textContent = 'Activate';
     return;
@@ -886,7 +886,7 @@ async function loadNotifications() {
 async function sendSchoolNotification(notification, button) {
   if (!notification?.id) return;
   if (!notification.recipient_email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(notification.recipient_email)) {
-    setMessage('notificationsMessage', 'This notification has no valid recipient email. Correct the school application contact email before sending.', 'error');
+    setMessage('notificationsMessage', 'This notification has no valid recipient email. Correct the institution application contact email before sending.', 'error');
     return;
   }
   const school = currentApplications.find(a => a.id === notification.application_id)?.school_name || 'this school';
@@ -923,13 +923,13 @@ async function markNotificationRead(notification, button) {
 byId('refreshNotifications').addEventListener('click', loadNotifications);
 
 /* ==========================================
-   SCHOOL ADMINISTRATORS
+   INSTITUTION ADMINISTRATORS
 ========================================== */
 let currentAdministrators = [];
 async function loadAdministrators() {
   const body = byId('adminTableBody');
   body.innerHTML = '<tr><td colspan="7" class="empty">Loading administrator memberships...</td></tr>';
-  setMessage('adminsMessage', 'Loading school membership records...');
+  setMessage('adminsMessage', 'Loading institution membership records...');
   const [memberships, schools] = await Promise.all([
     supabase.from('school_memberships').select('id,school_id,user_id,role,created_at,schools(name,slug,status)').order('created_at',{ascending:false}),
     supabase.from('schools').select('id,name,status,slug').eq('status','active').order('name')
@@ -940,7 +940,7 @@ async function loadAdministrators() {
   }
   currentAdministrators = memberships.data || [];
   const select = byId('adminInviteSchool'), previous = select.value;
-  select.replaceChildren(new Option('Select active school',''));
+  select.replaceChildren(new Option('Select active institution',''));
   (schools.data || []).forEach(s => select.add(new Option(s.name + ' (' + s.slug + ')', s.id)));
   if ((schools.data || []).some(s => s.id === previous)) select.value = previous;
   byId('adminTotal').textContent = currentAdministrators.length;
@@ -948,14 +948,14 @@ async function loadAdministrators() {
   byId('adminEditors').textContent = currentAdministrators.filter(a => a.role === 'content_editor').length;
   byId('adminSchools').textContent = new Set(currentAdministrators.map(a => a.school_id)).size;
   renderAdministrators();
-  setMessage('adminsMessage', currentAdministrators.length + ' school membership record(s) loaded.', 'success');
+  setMessage('adminsMessage', currentAdministrators.length + ' institution membership record(s) loaded.', 'success');
   await loadAdminAudit();
 }
 function renderAdministrators() {
   const body = byId('adminTableBody'), term = (byId('adminSearch').value || '').trim().toLowerCase();
   const visible = currentAdministrators.filter(a => [a.schools?.name,a.schools?.slug,a.user_id,a.role,a.schools?.status].some(v => String(v || '').toLowerCase().includes(term)));
   body.replaceChildren();
-  if (!visible.length) { const tr=document.createElement('tr'),td=document.createElement('td'); td.colSpan=7;td.className='empty';td.textContent=currentAdministrators.length?'No memberships match your search.':'No school memberships have been registered yet.';tr.appendChild(td);body.appendChild(tr);return; }
+  if (!visible.length) { const tr=document.createElement('tr'),td=document.createElement('td'); td.colSpan=7;td.className='empty';td.textContent=currentAdministrators.length?'No memberships match your search.':'No institution memberships have been registered yet.';tr.appendChild(td);body.appendChild(tr);return; }
   visible.forEach(a => {
     const tr=document.createElement('tr'); makeCell(tr,a.schools?.name || a.school_id); makeCell(tr,a.schools?.slug); makeCell(tr,a.user_id); makeStatusCell(tr,a.role); makeStatusCell(tr,a.schools?.status); makeCell(tr,dateText(a.created_at));
     const td=document.createElement('td');
@@ -979,7 +979,7 @@ async function changeAdminRole(a) {
 }
 async function removeAdminMembership(a) {
   if(!window.confirm('Remove this user’s membership from '+(a.schools?.name || 'this school')+'? Their Supabase account will not be deleted.'))return;
-  try { await callAdminManagement({action:'remove',school_id:a.school_id,user_id:a.user_id,role:a.role}); setMessage('adminsMessage','School membership removed.','success'); await loadAdministrators(); }
+  try { await callAdminManagement({action:'remove',school_id:a.school_id,user_id:a.user_id,role:a.role}); setMessage('adminsMessage','Institution membership removed.','success'); await loadAdministrators(); }
   catch(e){setMessage('adminsMessage','Removal failed: '+e.message,'error');}
 }
 async function loadAdminAudit() {
@@ -1002,7 +1002,7 @@ byId('adminInviteShortcut').addEventListener('click', () => { byId('adminInviteF
 byId('adminSearch').addEventListener('input', renderAdministrators);
 
 /* ==========================================
-   SCHOOL APPLICATIONS
+   INSTITUTION APPLICATIONS
 ========================================== */
 
 async function loadSchoolApplications() {
@@ -1278,7 +1278,7 @@ async function loadOverview() {
   if (!schools.length) {
 
     schoolBody.innerHTML =
-      '<tr><td colspan="5" class="empty">No school records found.</td></tr>';
+      '<tr><td colspan="5" class="empty">No institution records found.</td></tr>';
 
   } else {
 
@@ -1415,7 +1415,7 @@ function populateSubscriptionSelects() {
   const previousSchool = schoolSelect.value;
   schoolSelect.replaceChildren();
   const schoolPrompt = document.createElement('option');
-  schoolPrompt.value = ''; schoolPrompt.textContent = 'Select a school'; schoolSelect.appendChild(schoolPrompt);
+  schoolPrompt.value = ''; schoolPrompt.textContent = 'Select an institution'; schoolSelect.appendChild(schoolPrompt);
   currentSubscriptionSchools.forEach(s => {
     const option = document.createElement('option');
     option.value = s.id; option.textContent = s.name + ' (' + s.slug + ')';
@@ -1697,7 +1697,7 @@ function calculateSubscriptionEnd(startDate, interval) {
 byId('subscriptionForm').addEventListener('submit', async event => {
   event.preventDefault();
   const schoolId = byId('subscriptionSchool').value;
-  if (!schoolId) { setMessage('subscriptionsMessage', 'Select a school before saving.', 'error'); return; }
+  if (!schoolId) { setMessage('subscriptionsMessage', 'Select an institution before saving.', 'error'); return; }
 
   const selectedPlan = currentPlans.find(p => p.id === byId('subscriptionPlan').value && p.active);
   if (!selectedPlan) { setMessage('subscriptionsMessage', 'Select an active subscription plan before assigning the school.', 'error'); return; }
@@ -1783,7 +1783,7 @@ function populatePaymentSelects() {
   const schoolSelect = byId('paymentSchool');
   const oldSchool = schoolSelect.value;
   schoolSelect.replaceChildren();
-  const prompt = document.createElement('option'); prompt.value = ''; prompt.textContent = 'Select a school'; schoolSelect.appendChild(prompt);
+  const prompt = document.createElement('option'); prompt.value = ''; prompt.textContent = 'Select an institution'; schoolSelect.appendChild(prompt);
   paymentSchools.forEach(s => {
     const option = document.createElement('option'); option.value = s.id; option.textContent = s.name; schoolSelect.appendChild(option);
   });
@@ -1892,7 +1892,7 @@ byId('paymentForm').addEventListener('submit', async event => {
   const amount = Number(byId('paymentAmount').value);
   const paidAtValue = byId('paymentDate').value;
   if (!schoolId || !Number.isFinite(amount) || amount <= 0) {
-    setMessage('paymentsMessage', 'Select a school and enter a valid positive amount.', 'error'); return;
+    setMessage('paymentsMessage', 'Select an institution and enter a valid positive amount.', 'error'); return;
   }
   if (status === 'confirmed') {
     setMessage('paymentsMessage', 'New payments must be recorded as Pending. Use Verify & Confirm after checking the provider transaction.', 'error'); return;
