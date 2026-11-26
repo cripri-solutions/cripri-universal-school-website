@@ -164,6 +164,18 @@ for school_only in ("Discover our school", "School calendar", "School gallery", 
     assert school_only not in public_page, f"School-specific public wording remains: {school_only}"
 
 # Hard-coded demonstration facilities must not be exposed on public institution websites.
+# Institution-specific facilities and services use the existing content pipeline.
+manager_page = Path("school-website.manager.html").read_text(encoding="utf-8")
+assert 'data-page="services"' in manager_page
+assert 'id="servicesList"' in manager_page
+assert 'data-create="facility_service"' in manager_page
+assert '<option value="facility_service">Facility / Service</option>' in manager_page
+assert "facility_service:'Facility / Service'" in manager_page
+assert "page === 'services'" in manager_page
+assert "renderCategory('facility_service','servicesList')" in manager_page
+assert 'id="servicesList"' in public_page
+assert 'rows.filter(r=>r.content_type==="facility_service")' in public_page
+assert 'id="services"' in public_page
 assert 'if(facilitiesSection) facilitiesSection.remove();' in public_page, (
     "Unverified demonstration facilities must be hidden from public institution websites."
 )
