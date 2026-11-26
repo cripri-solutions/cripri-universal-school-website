@@ -87,3 +87,11 @@ The only immediate action within the current constraints is to continue read-onl
 - Automated backups with GitHub Actions: https://supabase.com/docs/guides/deployment/ci/backups
 
 **No backup was created. No database data was exported. No project settings, live functions, or database objects were changed. No cost was incurred.**
+
+## 2026-11-26 follow-up verification
+
+A fresh read-only check reconfirmed the organization plan as `free` / `tier_free`, the project as `ACTIVE_HEALTHY`, and the live migration ledger at 21 records. The Supabase Database Backups documentation states that automatic daily backups are provided for Pro, Team, and Enterprise projects; Free projects are directed to export data with the Supabase CLI. It also explicitly states that Storage API object bytes are not included in database backups.
+
+The documentation describes a Management API endpoint for listing available backups, but the connected project tools do not expose that endpoint or a downloadable-backup operation. The available `restore_project` action is destructive restoration, not export, and remains unused. No paid add-on, project/branch creation, CLI installation, or other cost-bearing action was taken.
+
+**Updated decision:** the current constraints still do not provide a verified no-cost, Windows 8-compatible route to a complete restorable package. The next actionable requirement is an owner-controlled, secure export runtime and destination that can handle database schema/data/roles, Auth, Storage object bytes, and restore verification. Until that exists, the backup gate remains blocked.
