@@ -1932,13 +1932,27 @@ byId('paymentForm').addEventListener('submit', async event => {
    REFRESH ALL DASHBOARD DATA
 ========================================== */
 byId('refreshAll').addEventListener('click', async () => {
-
-  await Promise.all([
-    loadOverview(),
-    loadSchools(),
-    loadSchoolApplications()
-  ]);
-
+  const button = byId('refreshAll');
+  button.disabled = true;
+  button.textContent = 'Refreshing...';
+  try {
+    const results = await Promise.allSettled([
+      loadOverview(),
+      loadSchools(),
+      loadSchoolApplications(),
+      loadNotifications(),
+      loadAdministrators(),
+      loadSubscriptions(),
+      loadPayments()
+    ]);
+    const failed = results.filter(result => result.status === 'rejected');
+    if (failed.length) {
+      setMessage('overviewMessage', 'Some dashboard sections could not refresh. Open the affected section for its error details.', 'error');
+    }
+  } finally {
+    button.disabled = false;
+    button.textContent = '↻ Refresh Data';
+  }
 });
 
 /* ==========================================
