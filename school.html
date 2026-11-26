@@ -235,7 +235,7 @@ h2{font-size:clamp(29px,4vw,42px);color:var(--navy);margin:8px 0 12px}.section-l
       }
     }
     const welcome=school.welcome_message||("Welcome to "+name+".");
-    const location=[school.physical_address,school.county,school.country].filter(Boolean).join(", ");
+    const location=[school.physical_address,school.county||school.region,school.country].filter(Boolean).join(", ");
     document.title=name+" | Official "+terminology.singular+" Website";
     ["topName","schoolName","heroName","contactName","footerName"].forEach(id=>text(id,name));
     ["schoolMotto","heroMotto"].forEach(id=>text(id,motto));
