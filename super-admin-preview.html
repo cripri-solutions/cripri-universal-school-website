@@ -63,7 +63,7 @@ footer{text-align:center;color:#8290a2;padding:25px;font-size:12px}
   <div class="account">
     <div>
       <strong>SUPER ADMIN</strong><br>
-      <small>Universal School Platform Management</small><br>
+      <small>Universal Institution Platform Management</small><br>
       <span id="accountEmail"></span>
     </div>
     <button class="primary" id="signOutButton">Sign Out</button>
@@ -471,7 +471,7 @@ footer{text-align:center;color:#8290a2;padding:25px;font-size:12px}
 </main>
 </div>
 
-<footer>CRIPRI TECHNOLOGIES © 2026 | Universal School Platform</footer>
+<footer>CRIPRI TECHNOLOGIES © 2026 | Universal Institution Platform</footer>
 
 <script type="module">
 import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.57.4/+esm';
@@ -2006,7 +2006,7 @@ async function loadPlatformSettings() {
     return;
   }
   const values = Object.fromEntries((data || []).map(row => [row.setting_key, row.setting_value]));
-  byId('platformName').value = values.platform_name || 'CRIPRI Universal School Website';
+  byId('platformName').value = values.platform_name || 'CRIPRI Universal Institution Website';
   byId('defaultCountry').value = values.default_country || 'Kenya';
   setMessage('settingsMessage', 'Saved settings loaded from Supabase.', 'success');
 }
