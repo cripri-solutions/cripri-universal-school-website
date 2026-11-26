@@ -128,7 +128,7 @@ footer{text-align:center;color:#8290a2;padding:25px;font-size:12px}
       <table>
         <thead>
           <tr>
-            <th>School</th>
+            <th>Institution</th>
             <th>Institution Slug</th>
             <th>Country</th>
             <th>Created</th>
@@ -148,7 +148,7 @@ footer{text-align:center;color:#8290a2;padding:25px;font-size:12px}
       <table>
         <thead>
           <tr>
-            <th>School</th>
+            <th>Institution</th>
             <th>Contact Person</th>
             <th>Submitted</th>
             <th>Status</th>
@@ -247,7 +247,7 @@ footer{text-align:center;color:#8290a2;padding:25px;font-size:12px}
       <table id="approvalTable">
         <thead>
           <tr>
-            <th>School</th>
+            <th>Institution</th>
             <th>Contact Person</th>
             <th>Contact</th>
             <th>Location</th>
@@ -314,7 +314,7 @@ footer{text-align:center;color:#8290a2;padding:25px;font-size:12px}
   </div>
   <div class="panel"><h3>Invite an institution administrator or content editor</h3>
     <form id="adminInviteForm"><div class="cards">
-      <div><label for="adminInviteSchool">School</label><select id="adminInviteSchool" required><option value="">Select active institution</option></select></div>
+      <div><label for="adminInviteSchool">Institution</label><select id="adminInviteSchool" required><option value="">Select active institution</option></select></div>
       <div><label for="adminInviteEmail">Email address</label><input id="adminInviteEmail" type="email" maxlength="254" required placeholder="person@institution.org"></div>
       <div><label for="adminInviteRole">Access role</label><select id="adminInviteRole"><option value="school_admin">Institution Admin</option><option value="content_editor">Content Editor</option></select></div>
     </div><div class="notice">The invitation is sent by Supabase Auth. The recipient sets their own password. Access is limited to the selected institution.</div>
@@ -322,7 +322,7 @@ footer{text-align:center;color:#8290a2;padding:25px;font-size:12px}
   </div>
   <div class="panel"><input class="search" id="adminSearch" placeholder="Search institution, user ID or role...">
     <div class="notice" id="adminsMessage">Loading administrator memberships...</div>
-    <div class="table-wrap"><table><thead><tr><th>School</th><th>Website Slug</th><th>User ID</th><th>Role</th><th>Institution Status</th><th>Joined</th><th>Actions</th></tr></thead><tbody id="adminTableBody"><tr><td colspan="7" class="empty">Loading...</td></tr></tbody></table></div>
+    <div class="table-wrap"><table><thead><tr><th>Institution</th><th>Website Slug</th><th>User ID</th><th>Role</th><th>Institution Status</th><th>Joined</th><th>Actions</th></tr></thead><tbody id="adminTableBody"><tr><td colspan="7" class="empty">Loading...</td></tr></tbody></table></div>
   </div>
   <div class="panel"><h3>Administrator audit history</h3><div class="table-wrap"><table><thead><tr><th>Date</th><th>Institution ID</th><th>Action</th><th>Target user</th><th>Role</th><th>Changed by</th></tr></thead><tbody id="adminAuditBody"><tr><td colspan="6" class="empty">Loading audit history...</td></tr></tbody></table></div></div>
 </section>
@@ -367,7 +367,7 @@ footer{text-align:center;color:#8290a2;padding:25px;font-size:12px}
     <h3>Assign a subscription to an institution</h3>
     <form id="subscriptionForm">
       <div class="cards">
-        <div><label for="subscriptionSchool">School</label><select id="subscriptionSchool" required><option value="">Loading institutions...</option></select></div>
+        <div><label for="subscriptionSchool">Institution</label><select id="subscriptionSchool" required><option value="">Loading institutions...</option></select></div>
         <div><label for="subscriptionPlan">Plan</label><select id="subscriptionPlan"><option value="">No plan selected</option></select></div>
         <div><label for="subscriptionStatus">Initial status</label><select id="subscriptionStatus"><option value="pending">Pending</option><option value="trial">Trial</option></select></div>
         <div><label for="subscriptionStart">Start date</label><input id="subscriptionStart" type="date"></div>
@@ -386,7 +386,7 @@ footer{text-align:center;color:#8290a2;padding:25px;font-size:12px}
   </div>
   <div class="panel">
     <h3>Institution subscription records</h3>
-    <div class="table-wrap"><table><thead><tr><th>School</th><th>Plan</th><th>Status</th><th>Start</th><th>End</th><th>Custom Domain</th><th>Add-ons</th><th>Activation</th></tr></thead><tbody id="subscriptionTableBody"><tr><td colspan="8" class="empty">Loading subscriptions...</td></tr></tbody></table></div>
+    <div class="table-wrap"><table><thead><tr><th>Institution</th><th>Plan</th><th>Status</th><th>Start</th><th>End</th><th>Custom Domain</th><th>Add-ons</th><th>Activation</th></tr></thead><tbody id="subscriptionTableBody"><tr><td colspan="8" class="empty">Loading subscriptions...</td></tr></tbody></table></div>
   </div>
 </section>
 
@@ -406,7 +406,7 @@ footer{text-align:center;color:#8290a2;padding:25px;font-size:12px}
     <h3>Record a payment</h3>
     <form id="paymentForm">
       <div class="cards">
-        <div><label for="paymentSchool">School</label><select id="paymentSchool" required><option value="">Select an institution</option></select></div>
+        <div><label for="paymentSchool">Institution</label><select id="paymentSchool" required><option value="">Select an institution</option></select></div>
         <div><label for="paymentSubscription">Subscription (optional)</label><select id="paymentSubscription"><option value="">Not linked</option></select></div>
         <div><label for="paymentAmount">Amount (KES)</label><input id="paymentAmount" type="number" min="0.01" step="0.01" required></div>
         <div><label for="paymentMethod">Payment method</label><select id="paymentMethod" required><option value="mpesa">M-Pesa</option><option value="bank_transfer">Bank transfer</option><option value="cash">Cash</option><option value="card">Card</option><option value="other">Other</option></select></div>
@@ -422,7 +422,7 @@ footer{text-align:center;color:#8290a2;padding:25px;font-size:12px}
   <div class="panel">
     <h3>Payment history</h3>
     <input class="search" id="paymentSearch" placeholder="Search institution, reference or status...">
-    <div class="table-wrap"><table><thead><tr><th>School</th><th>Amount (KES)</th><th>Method</th><th>Reference</th><th>Status</th><th>Paid at</th><th>Recorded</th><th>Actions</th></tr></thead><tbody id="paymentTableBody"><tr><td colspan="7" class="empty">Loading payments...</td></tr></tbody></table></div>
+    <div class="table-wrap"><table><thead><tr><th>Institution</th><th>Amount (KES)</th><th>Method</th><th>Reference</th><th>Status</th><th>Paid at</th><th>Recorded</th><th>Actions</th></tr></thead><tbody id="paymentTableBody"><tr><td colspan="7" class="empty">Loading payments...</td></tr></tbody></table></div>
   </div>
 </section>
 
@@ -431,8 +431,8 @@ footer{text-align:center;color:#8290a2;padding:25px;font-size:12px}
   <p class="muted">Reports based on currently connected platform records.</p>
   <div class="panel">
     <h3>Available live summaries</h3>
-    <p>• Registered school count</p>
-    <p>• Active school count</p>
+    <p>• Registered institution count</p>
+    <p>• Active institution count</p>
     <p>• Application status summary</p>
     <button class="primary" onclick="window.print()">Print Dashboard</button>
   </div>
@@ -449,7 +449,7 @@ footer{text-align:center;color:#8290a2;padding:25px;font-size:12px}
     <p>Approval decisions: Processed by the protected database review function.</p>
     <div class="notice">
       The dashboard uses Supabase authentication and the active platform_reviewers record.
-      Database row-level security remains responsible for access to school and application records.
+      Database row-level security remains responsible for access to institution and application records.
     </div>
   </div>
 </section>
@@ -777,7 +777,7 @@ async function activateSchool(schoolId, schoolName, button) {
     return;
   }
 
-  if (!confirm('Activate ' + safe(schoolName) + '? This will change its school status from pending to active.')) {
+  if (!confirm('Activate ' + safe(schoolName) + '? This will change its status from pending to active.')) {
     return;
   }
 
@@ -889,7 +889,7 @@ async function sendSchoolNotification(notification, button) {
     setMessage('notificationsMessage', 'This notification has no valid recipient email. Correct the institution application contact email before sending.', 'error');
     return;
   }
-  const school = currentApplications.find(a => a.id === notification.application_id)?.school_name || 'this school';
+  const school = currentApplications.find(a => a.id === notification.application_id)?.school_name || 'this institution';
   if (!window.confirm('Send this CRIPRI notification to ' + notification.recipient_email + ' for ' + school + '?')) return;
 
   button.disabled = true; button.textContent = 'Sending...';
@@ -978,7 +978,7 @@ async function changeAdminRole(a) {
   catch(e){setMessage('adminsMessage','Role update failed: '+e.message,'error');}
 }
 async function removeAdminMembership(a) {
-  if(!window.confirm('Remove this user’s membership from '+(a.schools?.name || 'this school')+'? Their Supabase account will not be deleted.'))return;
+  if(!window.confirm('Remove this user’s membership from '+(a.schools?.name || 'this institution')+'? Their Supabase account will not be deleted.'))return;
   try { await callAdminManagement({action:'remove',school_id:a.school_id,user_id:a.user_id,role:a.role}); setMessage('adminsMessage','Institution membership removed.','success'); await loadAdministrators(); }
   catch(e){setMessage('adminsMessage','Removal failed: '+e.message,'error');}
 }
@@ -1113,7 +1113,7 @@ function renderApplications() {
     view.textContent = 'View';
 
     view.onclick = () => alert(
-      'SCHOOL: ' + safe(app.school_name) +
+      'INSTITUTION: ' + safe(app.school_name) +
       '\nCONTACT: ' + safe(app.contact_person) +
       '\nEMAIL: ' + safe(app.contact_email) +
       '\nPHONE: ' + safe(app.contact_phone) +
@@ -1328,7 +1328,7 @@ async function loadOverview() {
   setMessage(
     'overviewMessage',
     'Live overview loaded: ' +
-      schools.length + ' school(s) and ' +
+      schools.length + ' institution(s) and ' +
       apps.length + ' application(s).',
     'success'
   );
@@ -1397,7 +1397,7 @@ async function loadSubscriptions() {
     reminderRows.forEach(({subscription,kind}) => {
       const line = document.createElement('div');
       line.className = 'notice' + (kind === 'Expired' ? ' error' : '');
-      const schoolName = subscription.schools?.name || 'School';
+      const schoolName = subscription.schools?.name || 'Institution';
       const expiry = subscription.ends_at ? dateText(subscription.ends_at) : 'No expiry date';
       line.textContent = schoolName + ' — ' + kind + ' — ' + subscription.status.toUpperCase() + ' — expiry: ' + expiry;
       reminderBox.appendChild(line);
@@ -1407,7 +1407,7 @@ async function loadSubscriptions() {
   renderSubscriptionPlans();
   renderSchoolSubscriptions();
   populateSubscriptionSelects();
-  setMessage('subscriptionsMessage', 'Loaded ' + currentPlans.length + ' plan(s), ' + currentSubscriptionSchools.length + ' school(s), and ' + currentSubscriptions.length + ' subscription record(s).', 'success');
+  setMessage('subscriptionsMessage', 'Loaded ' + currentPlans.length + ' plan(s), ' + currentSubscriptionSchools.length + ' institution(s), and ' + currentSubscriptions.length + ' subscription record(s).', 'success');
 }
 
 function populateSubscriptionSelects() {
@@ -1463,7 +1463,7 @@ function renderSchoolSubscriptions() {
   const body = byId('subscriptionTableBody'); body.replaceChildren();
   if (!currentSubscriptions.length) {
     const tr = document.createElement('tr'), td = document.createElement('td');
-    td.colSpan = 8; td.className = 'empty'; td.textContent = 'No school subscription records yet.';
+    td.colSpan = 8; td.className = 'empty'; td.textContent = 'No institution subscription records yet.';
     tr.appendChild(td); body.appendChild(tr); return;
   }
   currentSubscriptions.forEach(s => {
@@ -1700,7 +1700,7 @@ byId('subscriptionForm').addEventListener('submit', async event => {
   if (!schoolId) { setMessage('subscriptionsMessage', 'Select an institution before saving.', 'error'); return; }
 
   const selectedPlan = currentPlans.find(p => p.id === byId('subscriptionPlan').value && p.active);
-  if (!selectedPlan) { setMessage('subscriptionsMessage', 'Select an active subscription plan before assigning the school.', 'error'); return; }
+  if (!selectedPlan) { setMessage('subscriptionsMessage', 'Select an active subscription plan before assigning the institution.', 'error'); return; }
   if (selectedPlan.price_kes == null || Number(selectedPlan.price_kes) <= 0) {
     setMessage('subscriptionsMessage', 'This plan has no valid price. Set its price before assigning it.', 'error'); return;
   }
@@ -1735,7 +1735,7 @@ byId('subscriptionForm').addEventListener('submit', async event => {
   button.disabled = false;
   if (error) { setMessage('subscriptionsMessage', 'Subscription record was not saved: ' + error.message, 'error'); return; }
   byId('subscriptionForm').reset();
-  setMessage('subscriptionsMessage', 'Pending school subscription saved. Record and verify payment in the Payments Register before activation.', 'success');
+  setMessage('subscriptionsMessage', 'Pending institution subscription saved. Record and verify payment in the Payments Register before activation.', 'success');
   await loadSubscriptions();
 });
 
@@ -1899,7 +1899,7 @@ byId('paymentForm').addEventListener('submit', async event => {
   }
   const subscriptionId = byId('paymentSubscription').value || null;
   if (subscriptionId && !paymentSubscriptions.some(s => s.id === subscriptionId && s.school_id === schoolId)) {
-    setMessage('paymentsMessage', 'The selected subscription does not belong to this school.', 'error'); return;
+    setMessage('paymentsMessage', 'The selected subscription does not belong to this institution.', 'error'); return;
   }
   const button = byId('savePaymentButton'); button.disabled = true;
   const payload = {
