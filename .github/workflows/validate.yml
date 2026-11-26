@@ -23,6 +23,8 @@ jobs:
 
       - name: Test Cloudflare Worker routing behavior
         run: node --test cloudflare-school-router.test.mjs
+      - name: Test notification email idempotency
+        run: node --test supabase/functions/send-school-notification/notification-idempotency.test.mjs
 
       - name: Validate registration and database contract
         run: python3 scripts/validate-registration-contract.py
