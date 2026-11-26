@@ -98,3 +98,13 @@ for status in ("pending", "sending", "sent", "failed", "skipped"):
 assert "claimNotification" in notification_sender and "reclaimStaleNotification" in notification_sender and "finalizeNotification" in notification_sender, "Notification sender must claim, recover and finalize sends."
 
 print(f"Registration contract passed: {len(form_types)} institution types and {len(payload_fields)} payload fields; pending-only RLS, INSERT grants, and Other detail verified.")
+
+
+# Review audit association must exist before the AFTER UPDATE notification trigger fires.
+assert approval.index("INSERT INTO public.application_review_audit") < approval.index("UPDATE public.school_applications"), "Review audit must be inserted before status update triggers notification."
+notification_trigger = Path("supabase/migrations/20261126130000_exact_review_notification_institution.sql").read_text(encoding="utf-8")
+assert "FROM public.application_review_audit ara" in notification_trigger, "Review notification must resolve institution through the exact audit row."
+assert "ara.application_id = NEW.id" in notification_trigger and "ara.decision = NEW.status" in notification_trigger, "Notification audit lookup must match application and decision."
+assert "lower(btrim(s.name))" not in notification_trigger, "Notification must not associate institutions by non-unique name."
+assert "ON CONFLICT (application_id, event_type) DO NOTHING" in notification_trigger, "Notification duplicate protection must remain."
+print("Review notification association contract passed: audit-first ordering, exact application/decision mapping, and idempotent insert verified.")
