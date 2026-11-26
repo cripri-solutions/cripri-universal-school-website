@@ -149,3 +149,13 @@ The live `create_school_review_notification()` trigger currently finds `school_i
 **Recommendation:** prepare a narrowly scoped replacement that resolves the school ID from the audit row for `NEW.id` and the corresponding approved decision, rather than matching on name/type. Preserve the unique `(application_id,event_type)` conflict protection. Add an isolated test with two approved applications sharing the same name and type to prove each notification references its own audit-linked school. Do not alter the live trigger/function until a restorable backup, test environment, and explicit production approval exist.
 
 No production objects or data were changed during this inspection.
+
+
+#### Follow-up verification — 26 November 2026
+
+- GitHub Actions run 45812553362 completed successfully for commit `b7e4812c3081d76faec4566afc0473b924ec9c81` (workflow run 188).
+- Read-only inspection of the live database confirmed the existing unique constraint `platform_notifications_application_event_unique` on `(application_id, event_type)`; the proposed trigger retains `ON CONFLICT (application_id, event_type) DO NOTHING`.
+- The live `school_applications` AFTER UPDATE OF status trigger remains attached to `create_school_review_notification()`; the live function remains SECURITY DEFINER with an empty search_path. No live function or trigger was replaced.
+- These checks establish that the proposed migration preserves the existing duplicate-notification key and trigger attachment. They do not prove the new trigger behaviour at runtime. An isolated integration test with two same-name/same-type applications and rollback verification remains outstanding.
+
+No production database changes were made.
