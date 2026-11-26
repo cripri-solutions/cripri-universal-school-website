@@ -39,13 +39,17 @@ assert '<option value="college">College</option>' in select.group(0), "College m
 assert '<option value="other">Other Institution</option>' in select.group(0), "Other Institution must be an independent institution type."
 assert '<option value="hospital">Hospital / Health Facility</option>' in select.group(0), "Hospital must be available as an institution type."
 assert "otherInstitutionType.required = isOther;" in registration, "Other Institution description must be required only for Other."
-assert 'id="schoolCategoryField">' in registration, "Institution category/level must be visible for every institution type."
-assert 'school_category" name="school_category" required' in registration, "Institution category/level must be required."
+assert 'id="schoolCategoryField">' in registration, "Institution category/level field must be available."
 category_select = re.search(r'<select id="school_category".*?</select>', registration, re.S)
 assert category_select, "Institution category/level selector is missing."
-expected_levels = {"Primary", "Secondary", "Primary and secondary", "College", "Other"}
-form_levels = set(re.findall(r'<option value="([^"]+)"', category_select.group(0))) - {""}
-assert form_levels == expected_levels, f"Category/level options differ: {sorted(form_levels)}"
+assert 'school_category" name="school_category"' in category_select.group(0), "Category/level must retain its submitted field name."
+assert "const isSchool = type === 'school';" in registration and "const isCollege = type === 'college';" in registration, "Category logic must distinguish schools and colleges."
+assert "schoolCategory.required = isSchool || isCollege;" in registration, "Only school and college categories should be mandatory."
+assert "['Primary', 'Primary']" in registration and "['Secondary', 'Secondary']" in registration and "['Primary and secondary', 'Primary and Secondary']" in registration, "School level choices are incomplete."
+assert "[['College', 'College']]" in registration, "College must receive its own fixed category."
+assert "[['Other', 'Other']]" in registration, "Other institution types must offer Other."
+assert "school_category: document.getElementById('school_category').value || null" in payload.group(1), "An unneeded category must be submitted as NULL."
+assert "schoolCategory.value = isCollege ? 'College' : '';" in registration, "Category must reset when institution type changes."
 
 # Catch case-sensitive category mismatches between the form and BOTH migrations.
 for migration_path in (
@@ -66,7 +70,7 @@ for migration_path in (
         f"database-only={sorted(database_levels-form_levels)}"
     )
 assert "school_category: document.getElementById('school_category').value" in payload.group(1), "Selected category/level must be submitted for every institution type."
-assert "schoolCategory.required = true;" in registration, "Category/level must be required for every institution type."
+assert "schoolCategory.required = isSchool || isCollege;" in registration, "Only school and college categories should be required."
 assert "school_applications_school_category_check" in Path("supabase/migrations/202611250006_institution_category_levels.sql").read_text(encoding="utf-8"), "Independent category/level database migration is missing."
 assert "other_institution_type IS NOT NULL" in extra, "Other Institution database description must not be null."
 
