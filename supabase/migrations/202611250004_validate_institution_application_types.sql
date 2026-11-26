@@ -36,7 +36,7 @@ BEGIN
         OR school_category IN (
           'Primary',
           'Secondary',
-          'Primary and secondary',
+          'Primary and Secondary',
           'College',
           'Other'
         )
