@@ -11,8 +11,8 @@ The main frontend-to-database paths are connected to existing RPCs, views, and t
 
 Two release-control gaps remain:
 
-1. The deployed Edge Function source files are not present in the reviewed GitHub feature branch. The live functions can be read from Supabase, but the repository has no `supabase/functions/<name>/index.ts` source for any of the three active functions. This creates source-control and reproducibility drift.
-2. `wrangler.jsonc` contains an empty `previews` object. There is no configured Cloudflare Worker preview deployment, consistent with the existing PR deployment gate.
+1. The deployed Edge Function entrypoints have now been recovered into a separate dated archive. The active branch notification sender still differs from its deployed version, so release-source alignment remains outstanding.
+2. `wrangler.jsonc` contains no declared Worker routes and an empty `previews` object. Dashboard-managed routing may exist, but it cannot be verified from this repository.
 
 No function was redeployed, no Worker deployed, and no live permissions changed.
 
@@ -92,14 +92,42 @@ The archive preserves the deployed entrypoint source only. Supabase reported `im
 - `school_admin_audit` has RLS enabled; active platform reviewers can read audit records.
 - The table ACL for `platform_notifications` gives `anon` no SELECT/INSERT/UPDATE/DELETE, but it has extra non-data privileges (including REFERENCES, TRIGGER and TRUNCATE) that should be considered in a separate least-privilege review. RLS remains enabled. Do not make ACL changes without backup and regression tests.
 
-## Cloudflare Worker
+## Cloudflare Worker and DNS/routing audit (2026-11-26)
 
-- `cloudflare-school-router.js` accepts only GET/HEAD requests.
-- It validates institution subdomains, rejects reserved labels, rejects malformed and nested-encoded traversal paths, and forwards only selected non-sensitive headers.
-- It routes the institution root to `school.html?slug=<institution-slug>`.
-- Its test file covers normal root routing, static asset routing, reserved hosts, method rejection, upstream failure caching, and encoded traversal.
-- `wrangler.jsonc` has `previews: {}`; preview deployment is not configured.
-- Do not merge/publish the Worker-dependent route until Cloudflare preview and production routing have been tested with the GitHub Pages deployment.
+### Repository configuration
+
+- Worker name: `cripri-school-host`.
+- Entrypoint: `cloudflare-school-router.js`.
+- Compatibility date: `2026-11-21`.
+- Expected production route is documented in the Worker source comment as `*.criprisolutions.co.ke/*`.
+- `wrangler.jsonc` does **not** declare a `routes` entry or a `zone_name`/zone ID. A dashboard-managed route could still exist, but this repository does not prove that it does.
+- `wrangler.jsonc` has an empty `previews` object. No preview hostname or preview URL is configured in this repository.
+- No Cloudflare account/DNS connector is available in this workspace. Live zone status, DNS records, proxy state, Worker deployment version, route attachment, certificate status, and dashboard preview settings therefore remain **unverified**.
+
+### Code-level findings
+
+- The Worker accepts GET and HEAD only, validates one-label institution subdomains, and rejects the reserved labels `www`, `admin`, `api`, `mail`, and `ftp`.
+- It rejects malformed percent-encoding and path traversal after repeated decoding, and restricts the upstream origin/path to the CRIPRI GitHub Pages project.
+- It forwards only a small allowlist of request headers; cookies, Authorization and client-IP headers are not forwarded.
+- Institution roots are rewritten to `school.html?slug=<slug>`; non-root asset query parameters are forwarded.
+- Successful institution pages are assigned a 60-second cache lifetime; static assets 3,600 seconds; 404s 30 seconds; other upstream failures are marked no-store.
+- Existing tests cover root routing, static assets, reserved host rejection, unsupported methods, upstream failures, and single/double-encoded traversal plus malformed encoding.
+- The reserved-host list is a short hard-coded list. Before production routing, compare it with the actual CRIPRI subdomain/DNS inventory and add every operational hostname that must not be treated as an institution slug.
+- The code comment's wildcard route is only an expectation; the source alone does not attach it. Cloudflare requires a DNS record for each proxied hostname used with a Worker route. Confirm a proxied wildcard DNS record and the exact route pattern in the live zone before enabling traffic.
+
+### Routing and DNS decisions required
+
+1. Confirm that `criprisolutions.co.ke` is an active Cloudflare zone and identify its authoritative nameservers.
+2. Confirm the wildcard DNS record for `*.criprisolutions.co.ke`, its target, and that it is proxied (orange cloud) if using a Worker Route.
+3. Confirm the deployed Worker service name is `cripri-school-host` and the live route is exactly `*.criprisolutions.co.ke/*`.
+4. Confirm apex `criprisolutions.co.ke` and `www.criprisolutions.co.ke` are intentionally handled separately; the current slug parser rejects the apex and reserves `www`.
+5. Confirm email-related DNS records (MX, SPF, DKIM, DMARC) remain intact and DNS-only where required. Do not replace or bulk-edit existing DNS records.
+6. Configure a dedicated preview hostname separate from production, then test institution root, CSS/JS/images, 404s, cache isolation between two institution slugs, and upstream outage behavior.
+7. Confirm TLS certificate coverage and redirect behavior for the wildcard hostnames.
+
+Cloudflare's current documentation says Worker Routes require an existing DNS record for the hostname, and the record must be proxied for the Worker route to receive traffic. Cloudflare recommends Custom Domains when the Worker itself is the origin; Routes are appropriate when the Worker proxies to an external origin such as GitHub Pages. See [Routes documentation](https://developers.cloudflare.com/workers/configuration/routing/routes/) and [Custom Domains documentation](https://developers.cloudflare.com/workers/configuration/routing/custom-domains/).
+
+**No Cloudflare DNS records, routes, Worker deployments, or preview settings were changed.** No live DNS state has been inferred from the repository configuration.
 
 ## Required next actions
 
