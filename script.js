@@ -1,4 +1,4 @@
-/* CRIPRI Universal School Website
+/* CRIPRI Universal Institution Website
    CUSTOMISE this object for each school's public website.
    Only enter approved public information. Never add passwords,
    private keys, student records or confidential data here. */
