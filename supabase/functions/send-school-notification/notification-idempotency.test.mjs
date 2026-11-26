@@ -2,8 +2,10 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import {
   claimNotification,
+  finalizeNotification,
   notificationEmailPayload,
   notificationIdempotencyKey,
+  reclaimStaleNotification,
 } from "./notification-idempotency.js";
 
 test("idempotency key is stable for one notification and distinct across notifications", () => {
@@ -15,7 +17,6 @@ test("idempotency key is stable for one notification and distinct across notific
 
 test("email payload is deterministic for retries of the same notification", () => {
   const input = { from: "CRIPRI <mail@example.org>", recipient: "person@example.org", title: "Approved", message: "Your application was approved." };
-  assert.deepEqual(notificationEmailPayload(input), notificationEmailPayload(input));
   assert.deepEqual(notificationEmailPayload(input), {
     from: input.from,
     to: [input.recipient],
@@ -24,19 +25,20 @@ test("email payload is deterministic for retries of the same notification", () =
   });
 });
 
-function createAtomicMock(initialStatus) {
-  const row = { id: "notice-1", email_status: initialStatus };
-  let updateValues;
-  let allowedStatuses;
-  let requestedId;
+function createAtomicMock(initialStatus, initialClaim = null) {
+  const row = { id: "notice-1", email_status: initialStatus, email_claimed_at: initialClaim };
+  let values, predicates = [];
   const query = {
-    update(values) { updateValues = values; return this; },
-    eq(column, value) { assert.equal(column, "id"); requestedId = value; return this; },
-    in(column, values) { assert.equal(column, "email_status"); allowedStatuses = values; return this; },
+    update(next) { values = next; predicates = []; return this; },
+    eq(column, value) { predicates.push([column, value]); return this; },
+    in(column, values) { predicates.push([column, values, "in"]); return this; },
     select(columns) { assert.equal(columns, "id"); return this; },
     async maybeSingle() {
-      if (row.id !== requestedId || !allowedStatuses.includes(row.email_status)) return { data: null, error: null };
-      Object.assign(row, updateValues);
+      const matches = predicates.every(([column, value, op]) =>
+        op === "in" ? value.includes(row[column]) : row[column] === value
+      );
+      if (!matches) return { data: null, error: null };
+      Object.assign(row, values);
       return { data: { id: row.id }, error: null };
     },
   };
@@ -54,18 +56,32 @@ test("only one concurrent request can claim a pending notification", async () =>
   assert.ok(row.email_claimed_at);
 });
 
-test("failed notifications remain eligible for a controlled retry", async () => {
+test("failed notifications remain eligible for retry", async () => {
   const { client, row } = createAtomicMock("failed");
-  const claimed = await claimNotification(client, "notice-1", "2026-11-26T12:00:00.000Z");
-  assert.deepEqual(claimed, { id: "notice-1" });
+  assert.deepEqual(await claimNotification(client, "notice-1", "2026-11-26T12:00:00.000Z"), { id: "notice-1" });
   assert.equal(row.email_status, "sending");
 });
 
-test("already-sending and sent notifications cannot be claimed again", async () => {
+test("sending and sent notifications cannot be claimed as new sends", async () => {
   for (const status of ["sending", "sent", "skipped"]) {
     const { client, row } = createAtomicMock(status);
-    const claimed = await claimNotification(client, "notice-1", "2026-11-26T12:00:00.000Z");
-    assert.equal(claimed, null);
+    assert.equal(await claimNotification(client, "notice-1", "2026-11-26T12:00:00.000Z"), null);
     assert.equal(row.email_status, status);
   }
+});
+
+test("stale in-flight claim can be reclaimed only if its timestamp still matches", async () => {
+  const { client, row } = createAtomicMock("sending", "2026-11-26T11:00:00.000Z");
+  const reclaimed = await reclaimStaleNotification(client, "notice-1", row.email_claimed_at, "2026-11-26T12:00:00.000Z");
+  assert.deepEqual(reclaimed, { id: "notice-1" });
+  assert.equal(row.email_claimed_at, "2026-11-26T12:00:00.000Z");
+  assert.equal(await reclaimStaleNotification(client, "notice-1", "2026-11-26T11:00:00.000Z", "2026-11-26T12:01:00.000Z"), null);
+});
+
+test("finalization only succeeds for the current claim owner", async () => {
+  const { client, row } = createAtomicMock("sending", "2026-11-26T12:00:00.000Z");
+  assert.deepEqual(await finalizeNotification(client, "notice-1", "2026-11-26T12:00:00.000Z", { email_status: "sent" }), { id: "notice-1" });
+  assert.equal(row.email_status, "sent");
+  assert.equal(await finalizeNotification(client, "notice-1", "2026-11-26T11:00:00.000Z", { email_status: "failed" }), null);
+  assert.equal(row.email_status, "sent");
 });
