@@ -19,8 +19,8 @@ BEGIN
 END
 $$;
 
--- Category/level is independent of institution type. Existing applications
--- may remain NULL; new form submissions require a value in the registration UI.
+-- Category/level is independent of institution type. The UI requires it for
+-- schools and colleges; other institution types may submit NULL when not applicable.
 DO $$
 BEGIN
   IF NOT EXISTS (
