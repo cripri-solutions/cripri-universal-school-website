@@ -51,7 +51,8 @@ assert "[['Other', 'Other']]" in registration, "Other institution types must off
 assert "school_category: document.getElementById('school_category').value || null" in payload.group(1), "An unneeded category must be submitted as NULL."
 assert "schoolCategory.value = isCollege ? 'College' : '';" in registration, "Category must reset when institution type changes."
 
-# Catch case-sensitive category mismatches between the form and BOTH migrations.
+# The database allowlist remains broad enough for per-type UI selection.
+expected_database_levels = {"Primary", "Secondary", "Primary and secondary", "College", "Other"}
 for migration_path in (
     "supabase/migrations/202611250004_validate_institution_application_types.sql",
     "supabase/migrations/202611250006_institution_category_levels.sql",
@@ -64,13 +65,12 @@ for migration_path in (
     )
     assert category_constraint, f"Category/level constraint missing from {migration_path}"
     database_levels = set(re.findall(r"'([^']+)'", category_constraint.group(1)))
-    assert database_levels == form_levels, (
-        f"Form/database category levels differ in {migration_path}: "
-        f"form-only={sorted(form_levels-database_levels)}, "
-        f"database-only={sorted(database_levels-form_levels)}"
+    assert database_levels == expected_database_levels, (
+        f"Database category allowlist differs in {migration_path}: "
+        f"expected={sorted(expected_database_levels)}, actual={sorted(database_levels)}"
     )
-assert "school_category: document.getElementById('school_category').value" in payload.group(1), "Selected category/level must be submitted for every institution type."
-assert "schoolCategory.required = isSchool || isCollege;" in registration, "Only school and college categories should be required."
+assert "school_category: document.getElementById('school_category').value || null" in payload.group(1), "Category must be submitted as its selected value or NULL."
+
 assert "school_applications_school_category_check" in Path("supabase/migrations/202611250006_institution_category_levels.sql").read_text(encoding="utf-8"), "Independent category/level database migration is missing."
 assert "other_institution_type IS NOT NULL" in extra, "Other Institution database description must not be null."
 
