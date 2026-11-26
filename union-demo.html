@@ -129,7 +129,7 @@ function setDecision(value){
  $('reviewStatus').textContent='Decision simulated in this browser only. No official review or database update occurred.';
  $('siteState').textContent=value==='approved'?'APPROVED · DEMO ONLY':'NOT APPROVED · DEMO';
  $('siteState').className=value==='approved'?'pill ok':'pill';
-});
+}
 $('approve').addEventListener('click',()=>setDecision('approved'));
 $('reject').addEventListener('click',()=>setDecision('rejected'));
 $('applyEdits').addEventListener('click',()=>{
