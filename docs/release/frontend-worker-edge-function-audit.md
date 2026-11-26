@@ -142,3 +142,37 @@ Cloudflare's current documentation says Worker Routes require an existing DNS re
 ## Change status
 
 Documentation only. No live database changes, Edge Function deployments, Cloudflare Worker deployments, email sends, or costs were incurred.
+
+
+## Feature preview and automated smoke-check status (2026-11-26)
+
+The latest audited feature-branch commit `2d85c2a9c54b58b9f4db81f6e27da26e394d2371` has the following verified CI/deployment results:
+
+- Cloudflare Pages preview: **success**.
+  - Commit preview: https://ecc632f8.cripri-universal-school-website.pages.dev/
+  - Branch preview: https://feature-universal-institutio.cripri-universal-school-website.pages.dev/
+- Cloudflare Worker preview build: **success** (build ID `77278bfc-5ea0-4260-a090-6e5f7244b7a6`). This is a preview build result, not proof that the production wildcard route is attached.
+- Both GitHub validation runs: **success**.
+  - Worker syntax validation: passed.
+  - Worker routing behavior tests: passed.
+  - Notification email idempotency tests: passed.
+  - Registration/database contract validation: passed.
+  - Inline JavaScript validation: passed.
+
+### What is and is not proven
+
+The checks above prove successful CI and preview build publication. They do not establish a successful real-browser walkthrough of the deployed preview, successful Supabase sign-in/profile/content writes, successful Storage upload, or production institution-subdomain routing. Those require browser-level checks with an authorized test account and live Cloudflare zone access.
+
+The current preview environment has not been used to submit real institution applications, alter live records, upload media, or send notification emails. Do not test with real personal data.
+
+### Safe browser smoke-check sequence still outstanding
+
+1. Open the branch preview URL and confirm the landing page renders without a blank screen or JavaScript error.
+2. Open the institution registration page; check that institution types and school category options render correctly. Do not submit a real application.
+3. Open the public institution website without a slug and confirm the intended “not found / choose an institution” state is handled safely.
+4. Open the manager and reviewer pages only to verify their unauthenticated state; do not attempt privileged actions.
+5. In browser developer tools, check that the public page's CSS, JavaScript, fonts and images return successfully.
+6. Use only a dedicated test account and test institution for authenticated workflows, after confirming the target preview points to the intended Supabase project and no production data will be changed.
+7. Separately test the Worker using an authorized preview hostname; production wildcard DNS/route remains unverified.
+
+**No production deployment, DNS change, database migration, or live data mutation was performed.**
