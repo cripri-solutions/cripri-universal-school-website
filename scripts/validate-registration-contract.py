@@ -46,6 +46,25 @@ assert category_select, "Institution category/level selector is missing."
 expected_levels = {"Primary", "Secondary", "Primary and secondary", "College", "Other"}
 form_levels = set(re.findall(r'<option value="([^"]+)"', category_select.group(0))) - {""}
 assert form_levels == expected_levels, f"Category/level options differ: {sorted(form_levels)}"
+
+# Catch case-sensitive category mismatches between the form and BOTH migrations.
+for migration_path in (
+    "supabase/migrations/202611250004_validate_institution_application_types.sql",
+    "supabase/migrations/202611250006_institution_category_levels.sql",
+):
+    migration_sql = Path(migration_path).read_text(encoding="utf-8")
+    category_constraint = re.search(
+        r"school_category\\s+IS\\s+NULL\\s+OR\\s+school_category\\s+IN\\s*\\((.*?)\\)",
+        migration_sql,
+        re.S | re.I,
+    )
+    assert category_constraint, f"Category/level constraint missing from {migration_path}"
+    database_levels = set(re.findall(r"'([^']+)'", category_constraint.group(1)))
+    assert database_levels == form_levels, (
+        f"Form/database category levels differ in {migration_path}: "
+        f"form-only={sorted(form_levels-database_levels)}, "
+        f"database-only={sorted(database_levels-form_levels)}"
+    )
 assert "school_category: document.getElementById('school_category').value" in payload.group(1), "Selected category/level must be submitted for every institution type."
 assert "schoolCategory.required = true;" in registration, "Category/level must be required for every institution type."
 assert "school_applications_school_category_check" in Path("supabase/migrations/202611250006_institution_category_levels.sql").read_text(encoding="utf-8"), "Independent category/level database migration is missing."
