@@ -272,11 +272,22 @@ form.addEventListener('submit', async function(event) {
 
   const schoolName = document.getElementById('school_name').value.trim();
 
+  // Persist only columns that exist in public.school_applications.
+  // The current schema has no school_category or other_institution_type columns,
+  // so preserve those optional details in the existing message field.
+  const institutionKind = document.getElementById('institution_type').value;
+  const extraDetails = [];
+  const selectedCategory = document.getElementById('school_category').value;
+  if (selectedCategory) extraDetails.push('Institution category: ' + selectedCategory);
+  if (institutionKind === 'other' && otherInstitutionType.value.trim()) {
+    extraDetails.push('Institution type: ' + otherInstitutionType.value.trim());
+  }
+  const userMessage = document.getElementById('message').value.trim();
+  if (userMessage) extraDetails.push(userMessage);
+
   const application = {
     school_name: schoolName,
-    institution_type: document.getElementById('institution_type').value,
-    other_institution_type: document.getElementById('institution_type').value === 'other' ? otherInstitutionType.value.trim() : null,
-    school_category: document.getElementById('school_category').value || null,
+    institution_type: institutionKind,
     country: document.getElementById('country').value.trim(),
     region: document.getElementById('region').value.trim(),
     contact_email: document.getElementById('contact_email').value.trim(),
@@ -284,7 +295,7 @@ form.addEventListener('submit', async function(event) {
     physical_address: document.getElementById('physical_address').value.trim() || null,
     contact_person: document.getElementById('contact_person').value.trim(),
     contact_role: document.getElementById('contact_role').value,
-    message: document.getElementById('message').value.trim() || null,
+    message: extraDetails.join('\\n\\n') || null,
     requested_slug: createSchoolSlug(schoolName)
   };
 
