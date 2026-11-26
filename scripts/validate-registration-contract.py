@@ -196,7 +196,7 @@ assert 'const facilitiesLink=document.querySelector(\'#nav a[href="#facilities"]
 profile_migration = Path("supabase/migrations/202611260001_preserve_institution_application_details.sql").read_text(encoding="utf-8")
 for relation in ("public.schools", "public.institutions"):
     grant = re.search(
-        r"GRANT\s+UPDATE\s*\((.*?)\)\s*ON\s+TABLE\s+" + re.escape(relation) + r"\\s+TO\\s+authenticated",
+        r"GRANT\s+UPDATE\s*\((.*?)\)\s*ON\s+TABLE\s+" + re.escape(relation) + r"\s+TO\s+authenticated",
         profile_migration,
         re.I | re.S,
     )
