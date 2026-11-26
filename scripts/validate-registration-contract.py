@@ -145,6 +145,21 @@ assert "$('profileForm').querySelectorAll('input,select,textarea,button')" in ma
 )
 print("Institution manager contract passed: preserved registration details are loaded, editable and saved.");
 
+# Public institution website must read the preserved fields and display category and region safely.
+public_page = Path("school.html").read_text(encoding="utf-8")
+public_query = re.search(r'from\("institutions"\)\.select\("([^"]+)"\)', public_page)
+assert public_query, "Public institution profile query is missing."
+public_columns = set(public_query.group(1).split(","))
+assert {"school_category", "other_institution_type", "region"}.issubset(public_columns), (
+    "Public institution profile query must load category, Other description and region."
+)
+assert 'text("contactCategory",category)' in public_page, "Public institution category is not rendered."
+assert 'school.institution_type==="other"?school.other_institution_type:null' in public_page, (
+    "Public profile must show the supplied Other institution description when no category applies."
+)
+assert "school.county||school.region" in public_page, "Public profile must fall back to submitted region when county is absent."
+
+
 # The new profile fields require column-level UPDATE grants on both the base table and view.
 profile_migration = Path("supabase/migrations/202611260001_preserve_institution_application_details.sql").read_text(encoding="utf-8")
 for relation in ("public.schools", "public.institutions"):
