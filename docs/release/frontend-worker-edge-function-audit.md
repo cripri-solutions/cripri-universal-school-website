@@ -48,13 +48,33 @@ No function was redeployed, no Worker deployed, and no live permissions changed.
 
 ## Live Supabase Edge Functions
 
-The project currently reports these three active functions; all have `verify_jwt=true`:
+The project currently reports these three active functions; all have `verify_jwt=true`. A follow-up read-only comparison on 2026-11-26 retrieved each deployed `index.ts` and compared it with the feature branch:
 
 | Function | Live version | Called by current frontend | Repository source |
 |---|---:|---|---|
-| `school-admin-management` | 2 | Yes — administrator role changes/removal/invitation | Missing from reviewed branch |
-| `send-school-notification` | 4 | Yes — send/retry application email | Missing from reviewed branch |
-| `super-admin-administrators` | 3 | No direct call found in current `super-admin-preview.html` | Missing from reviewed branch |
+| `school-admin-management` | 2 | Yes — administrator role changes/removal/invitation | Exact source match; archived below |
+| `send-school-notification` | 4 | Yes — send/retry application email | Branch source differs; exact live source archived below |
+| `super-admin-administrators` | 3 | No direct call found in current `super-admin-preview.html` | Exact source match; archived below |
+
+### Source recovery comparison (2026-11-26)
+
+The exact deployed `index.ts` files were retrieved through the Supabase project connection. Their deployed SHA-256 values and versions are:
+
+| Function | Live version | Deployed SHA-256 | Comparison with feature-branch source |
+|---|---:|---|---|
+| `school-admin-management` | 2 | `ac8f649ceb23696c4b9750bea0db75aeb53e967b3b6ef5aa3f7f039e5ec419a4` | Exact text match |
+| `send-school-notification` | 4 | `02604f2bb496854608628aa4435375953d0c48cac754db60a37b846291a16a2e` | Not an exact match; branch version contains proposed idempotency changes not present in live version |
+| `super-admin-administrators` | 3 | `4ee26bca8d2a9aa767a9ead88bf08e366e81a5dbbf4ef57ada2e97e44f2794bd` | Exact text match |
+
+All three exact deployed entrypoint files have now been preserved separately in the repository:
+
+- [school-admin-management live version 2](../../recovery/edge-functions/2026-11-26/school-admin-management/index.ts)
+- [send-school-notification live version 4](../../recovery/edge-functions/2026-11-26/send-school-notification/index.ts)
+- [super-admin-administrators live version 3](../../recovery/edge-functions/2026-11-26/super-admin-administrators/index.ts)
+
+The archive preserves the deployed entrypoint source only. Supabase reported `import_map=false` for all three functions and the retrieved deployment payload exposed only `index.ts`; this does not recover secret values, dashboard environment configuration, or any hidden platform configuration. Do not treat the archive as a complete deployment backup.
+
+**Important notification discrepancy:** the branch's current `supabase/functions/send-school-notification/index.ts` includes an atomic claim/idempotency implementation, but the live version 4 does not. The live function currently performs a read/check, sends to Resend, and then updates the notification record. Do not deploy the branch version until its paired database migration, source review, and a verified recovery path are ready. Do not replace the branch source with the archived live file; keep both clearly distinguished.
 
 ### Edge Function security observations
 
