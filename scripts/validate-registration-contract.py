@@ -175,6 +175,12 @@ assert "page === 'services'" in manager_page
 assert "renderCategory('facility_service','servicesList')" in manager_page
 assert 'id="servicesList"' in public_page
 assert 'rows.filter(r=>r.content_type==="facility_service")' in public_page
+
+# Database content-type allowlist must include the facilities/services type used by both pages.
+facility_migration = Path("supabase/migrations/20261126150000_institution_facilities_services_content_type.sql").read_text(encoding="utf-8")
+assert "school_content_items_content_type_check" in facility_migration
+assert "'facility_service'" in facility_migration
+assert "ALTER TABLE public.school_content_items" in facility_migration
 assert 'id="services"' in public_page
 assert 'if(facilitiesSection) facilitiesSection.remove();' in public_page, (
     "Unverified demonstration facilities must be hidden from public institution websites."
