@@ -177,6 +177,16 @@ BEGIN
     RETURNING id INTO v_institution_id;
   END IF;
 
+  -- Insert the audit association before changing status. The AFTER UPDATE
+  -- notification trigger reads this exact application-to-institution mapping.
+  INSERT INTO public.application_review_audit (
+    application_id, school_id, reviewer_id, decision, reason
+  )
+  VALUES (
+    v_application.id, v_institution_id, v_reviewer_id, v_decision,
+    NULLIF(btrim(coalesce(p_reason, '')), '')
+  );
+
   UPDATE public.school_applications
   SET status = v_decision,
       reviewed_at = now(),
@@ -184,21 +194,6 @@ BEGIN
       review_reason = NULLIF(btrim(coalesce(p_reason, '')), '')
   WHERE id = p_application_id
   RETURNING * INTO v_application;
-
-  INSERT INTO public.application_review_audit (
-    application_id,
-    school_id,
-    reviewer_id,
-    decision,
-    reason
-  )
-  VALUES (
-    v_application.id,
-    v_institution_id,
-    v_reviewer_id,
-    v_decision,
-    NULLIF(btrim(coalesce(p_reason, '')), '')
-  );
 
   RETURN v_application;
 END;
