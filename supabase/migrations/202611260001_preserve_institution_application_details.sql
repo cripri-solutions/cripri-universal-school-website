@@ -46,6 +46,21 @@ ALTER TABLE public.schools
 ALTER TABLE public.schools
   VALIDATE CONSTRAINT schools_school_category_check;
 
+ALTER TABLE public.schools
+  DROP CONSTRAINT IF EXISTS schools_other_institution_type_check;
+
+ALTER TABLE public.schools
+  ADD CONSTRAINT schools_other_institution_type_check
+  CHECK (
+    (institution_type = 'other' AND other_institution_type IS NOT NULL
+      AND length(trim(other_institution_type)) BETWEEN 2 AND 120)
+    OR
+    (institution_type <> 'other' AND other_institution_type IS NULL)
+  ) NOT VALID;
+
+ALTER TABLE public.schools
+  VALIDATE CONSTRAINT schools_other_institution_type_check;
+
 -- Append new fields only; preserve the existing view column order for clients.
 CREATE OR REPLACE VIEW public.institutions
 WITH (security_invoker = true)
@@ -155,7 +170,7 @@ BEGIN
       v_application.contact_person,
       v_application.contact_role,
       v_application.physical_address,
-      v_application.country,
+      COALESCE(v_application.country, 'Kenya'),
       v_application.contact_phone,
       v_application.contact_email
     )
