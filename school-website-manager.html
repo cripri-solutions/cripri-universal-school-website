@@ -1,0 +1,1802 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CRIPRI | School Website Manager</title>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.57.4"></script>
+
+<style>
+:root {
+  --navy:#10233f;
+  --blue:#1769aa;
+  --light:#f3f6fb;
+  --green:#15966b;
+  --red:#d84c4c;
+  --text:#26364b;
+}
+
+* {box-sizing:border-box}
+
+body {
+  margin:0;
+  font-family:Arial,sans-serif;
+  background:var(--light);
+  color:var(--text);
+}
+
+header {
+  background:var(--navy);
+  color:white;
+  padding:18px 25px;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  flex-wrap:wrap;
+  gap:12px;
+}
+
+.brand {font-size:21px;font-weight:bold}
+.brand span {color:#56c4e9}
+header small {color:#c4d4e7}
+
+button {
+  cursor:pointer;
+  border:0;
+  border-radius:6px;
+  padding:11px 15px;
+  font-weight:bold;
+}
+
+button:disabled {opacity:.5;cursor:wait}
+
+.primary {background:var(--blue);color:white}
+.success {background:var(--green);color:white}
+.danger {background:#fde6e6;color:#b93636}
+.secondary {background:#e8eef6;color:var(--text)}
+
+.layout {
+  display:flex;
+  min-height:calc(100vh - 75px);
+}
+
+.sidebar {
+  width:235px;
+  background:#172d4c;
+  padding:20px 12px;
+  flex-shrink:0;
+}
+
+.sidebar h4 {
+  color:#8fa8c7;
+  padding-left:12px;
+  font-size:11px;
+  letter-spacing:1px;
+}
+
+.nav {
+  display:block;
+  width:100%;
+  text-align:left;
+  margin:4px 0;
+  background:transparent;
+  color:#d8e5f4;
+}
+
+.nav:hover,.nav.active {
+  background:#28527f;
+  color:white;
+}
+
+main {
+  padding:25px;
+  width:100%;
+  min-width:0;
+}
+
+.section {display:none}
+.section.active {display:block}
+
+.panel {
+  background:white;
+  border-radius:10px;
+  padding:20px;
+  margin:18px 0;
+  box-shadow:0 2px 10px rgba(16,35,63,.06);
+}
+
+.stats {
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(150px,1fr));
+  gap:15px;
+  margin:20px 0;
+}
+
+.stat {
+  background:white;
+  padding:18px;
+  border-radius:9px;
+  box-shadow:0 2px 10px rgba(16,35,63,.06);
+}
+
+.stat strong {
+  display:block;
+  font-size:26px;
+  margin-top:8px;
+  color:var(--navy);
+}
+
+label {
+  display:block;
+  font-weight:bold;
+  margin:13px 0 6px;
+}
+
+input,select,textarea {
+  width:100%;
+  padding:11px;
+  border:1px solid #cbd5e1;
+  border-radius:6px;
+  font:inherit;
+  background:white;
+}
+
+textarea {
+  min-height:100px;
+  resize:vertical;
+}
+
+.form-grid {
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:12px;
+}
+
+.actions {
+  display:flex;
+  flex-wrap:wrap;
+  gap:10px;
+  margin-top:18px;
+}
+
+.message {
+  margin:12px 0;
+  font-weight:bold;
+  color:var(--red);
+}
+
+.muted {color:#64748b}
+.notice {
+  padding:12px;
+  background:#eef5ff;
+  border-left:4px solid var(--blue);
+  margin:14px 0;
+  border-radius:5px;
+}
+
+.table-wrap {overflow-x:auto}
+
+table {
+  width:100%;
+  border-collapse:collapse;
+  background:white;
+}
+
+th,td {
+  text-align:left;
+  padding:12px;
+  border-bottom:1px solid #e5eaf1;
+  vertical-align:top;
+}
+
+th {
+  background:#f4f7fb;
+  color:#334155;
+}
+
+.status {
+  display:inline-block;
+  padding:5px 9px;
+  border-radius:20px;
+  font-size:12px;
+  font-weight:bold;
+  text-transform:capitalize;
+}
+
+.status.published {background:#dcfce7;color:#166534}
+.status.draft {background:#e2e8f0;color:#334155}
+.status.scheduled {background:#fef3c7;color:#92400e}
+.status.archived {background:#fee2e2;color:#991b1b}
+
+.hidden {display:none !important}
+
+footer {
+  text-align:center;
+  padding:18px;
+  color:#64748b;
+  font-size:13px;
+}
+
+.profile-image-note {
+  font-size:13px;
+  color:#64748b;
+  margin-top:6px;
+}
+
+@media(max-width:800px) {
+  .layout {display:block}
+  .sidebar {
+    width:100%;
+    display:flex;
+    flex-wrap:wrap;
+    gap:5px;
+  }
+  .sidebar h4 {width:100%}
+  .nav {width:auto;flex:1 1 130px}
+  main {padding:15px}
+}
+
+@media(max-width:550px) {
+  .form-grid {grid-template-columns:1fr}
+  header {padding:15px}
+}
+</style>
+</head>
+
+<body>
+
+<header>
+  <div>
+    <div class="brand">CRIPRI <span>School Website Manager</span></div>
+    <small id="schoolHeading">Secure School Management Portal</small>
+  </div>
+
+  <div>
+    <small id="managerRole"></small>
+    <button class="secondary" id="signOut">Sign Out</button>
+  </div>
+</header>
+
+<!-- LOGIN -->
+<section id="loginSection" class="section active">
+  <div class="panel" style="max-width:440px;margin:55px auto;">
+    <h1>School Manager Login</h1>
+    <p class="muted">Sign in using your registered school manager account.</p>
+
+    <form id="loginForm">
+      <label>Email Address</label>
+      <input id="email" type="email" autocomplete="username" required>
+
+      <label>Password</label>
+      <input id="password" type="password" autocomplete="current-password" required>
+
+      <div class="actions">
+        <button class="primary" id="loginButton" type="submit">Sign In</button>
+      </div>
+
+      <p id="loginMessage" class="message"></p>
+    </form>
+  </div>
+</section>
+
+<!-- MANAGER WORKSPACE -->
+<div id="workspace" class="layout hidden">
+
+  <aside class="sidebar">
+    <h4>SCHOOL WEBSITE</h4>
+
+    <button class="nav active" data-page="dashboard">Dashboard</button>
+    <button class="nav" data-page="profile">School Profile</button>
+    <button class="nav" data-page="content">All Content</button>
+    <button class="nav" data-page="announcements">Announcements</button>
+    <button class="nav" data-page="events">Events</button>
+    <button class="nav" data-page="vacancies">Vacancies</button>
+    <button class="nav" data-page="gallery">Gallery</button>
+    <button class="nav" data-page="live">Live Updates</button>
+  </aside>
+
+  <main>
+
+    <!-- DASHBOARD -->
+    <section id="dashboard" class="section active">
+      <h1>School Website Dashboard</h1>
+
+      <div class="panel">
+        <h2 id="schoolNameDisplay">School</h2>
+        <p>Website slug: <strong id="schoolSlugDisplay"></strong></p>
+        <p>Account status: <strong id="schoolStatus"></strong></p>
+      </div>
+
+      <div class="stats">
+        <div class="stat">
+          Total Content
+          <strong id="totalCount">0</strong>
+        </div>
+
+        <div class="stat">
+          Published
+          <strong id="publishedCount">0</strong>
+        </div>
+
+        <div class="stat">
+          Drafts
+          <strong id="draftCount">0</strong>
+        </div>
+
+        <div class="stat">
+          Scheduled
+          <strong id="scheduledCount">0</strong>
+        </div>
+      </div>
+
+      <div class="panel">
+        <h2>Recent Content</h2>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Title</th>
+                <th>Category</th>
+                <th>Status</th>
+                <th>Date Created</th>
+              </tr>
+            </thead>
+            <tbody id="recentContent">
+              <tr><td colspan="4">No content loaded.</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- SCHOOL PROFILE -->
+    <section id="profile" class="section">
+      <h1>School Profile Management</h1>
+      <p class="muted">
+        Update the information displayed on your school's public website.
+      </p>
+
+      <div class="panel">
+        <form id="profileForm">
+
+          <div class="form-grid">
+            <div>
+              <label for="profileMotto">School Motto</label>
+              <input id="profileMotto" maxlength="250">
+            </div>
+
+            <div>
+              <label for="profileCountry">Country</label>
+              <input id="profileCountry" value="Kenya">
+            </div>
+
+            <div>
+              <label for="profileCounty">County</label>
+              <input id="profileCounty">
+            </div>
+
+            <div>
+              <label for="profileAddress">Physical Address</label>
+              <input id="profileAddress">
+            </div>
+
+            <div>
+              <label for="profilePhone">Contact Phone</label>
+              <input id="profilePhone" type="tel">
+            </div>
+
+            <div>
+              <label for="profileEmail">Contact Email</label>
+              <input id="profileEmail" type="email">
+            </div>
+          </div>
+
+          <label for="profileWelcome">Welcome Message</label>
+          <textarea id="profileWelcome" maxlength="2000"
+            placeholder="Write a welcome message for visitors"></textarea>
+
+          <label for="profileDescription">About the School</label>
+          <textarea id="profileDescription" maxlength="5000"
+            placeholder="Describe your school, its history and its values"></textarea>
+
+          <label for="profileLogo">School Logo</label>
+          <input id="profileLogo" type="file"
+            accept="image/jpeg,image/png,image/webp,image/gif">
+          <p id="profileLogoCurrent" class="profile-image-note">No logo uploaded.</p>
+
+          <label for="profileBanner">Website Banner Image</label>
+          <input id="profileBanner" type="file"
+            accept="image/jpeg,image/png,image/webp,image/gif">
+          <p id="profileBannerCurrent" class="profile-image-note">No banner uploaded.</p>
+
+          <div class="notice">
+            Use clear school-approved images. Maximum upload size is 50 MB per image.
+          </div>
+
+          <div class="actions">
+            <button class="primary" id="saveProfileButton" type="submit">
+              Save School Profile
+            </button>
+          </div>
+
+          <p id="profileMessage" class="message"></p>
+        </form>
+      </div>
+    </section>
+
+    <!-- ALL CONTENT -->
+    <section id="content" class="section">
+      <h1>Website Content</h1>
+
+      <div class="actions">
+        <button class="primary" data-create="announcement">+ New Announcement</button>
+        <button class="primary" data-create="event">+ New Event</button>
+        <button class="primary" data-create="vacancy">+ New Vacancy</button>
+        <button class="primary" data-create="gallery">+ Add Gallery Item</button>
+      </div>
+
+      <div class="panel">
+        <div class="form-grid">
+          <div>
+            <label>Filter by category</label>
+                    <select id="filterType">
+          <option value="all">All Categories</option>
+          <option value="announcement">Announcements</option>
+          <option value="event">Events</option>
+          <option value="vacancy">Vacancies</option>
+          <option value="gallery">Gallery</option>
+          <option value="live_update">Live Updates</option>
+          <option value="live_stream">Live Streams</option>
+        </select>
+      </div>
+
+      <div>
+        <label>Filter by status</label>
+        <select id="filterStatus">
+          <option value="all">All Statuses</option>
+          <option value="draft">Draft</option>
+          <option value="published">Published</option>
+          <option value="scheduled">Scheduled</option>
+          <option value="archived">Archived</option>
+        </select>
+      </div>
+    </div>
+
+    <p id="contentMessage" class="message"></p>
+
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Title</th>
+            <th>Category</th>
+            <th>Status</th>
+            <th>Date</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+
+        <tbody id="contentTable">
+          <tr><td colspan="5">Loading content...</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="actions" style="margin-top:16px">
+      <button id="toggleRecoveryBin" class="secondary" type="button">Open Recovery Bin</button>
+    </div>
+
+    <div id="recoveryBinPanel" class="panel" hidden style="margin-top:16px">
+      <h2>Recovery Bin</h2>
+      <p class="muted">Recovered items are hidden from the public website. Restore an item as a draft or permanently delete it after confirmation.</p>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Title</th><th>Category</th><th>Moved to Recovery</th><th>Actions</th></tr></thead>
+          <tbody id="recoveryTable"><tr><td colspan="4">Loading recovery items...</td></tr></tbody>
+        </table>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- CATEGORY PAGES -->
+<section id="announcements" class="section">
+  <h1>Announcements</h1>
+  <p class="muted">School notices and important announcements.</p>
+  <button class="primary" data-create="announcement">+ New Announcement</button>
+  <div class="panel" id="announcementsList"></div>
+</section>
+
+<section id="events" class="section">
+  <h1>School Events</h1>
+  <p class="muted">Publish upcoming school activities and events.</p>
+  <button class="primary" data-create="event">+ New Event</button>
+  <div class="panel" id="eventsList"></div>
+</section>
+
+<section id="vacancies" class="section">
+  <h1>Vacancies</h1>
+  <p class="muted">Publish job opportunities and application details.</p>
+  <button class="primary" data-create="vacancy">+ New Vacancy</button>
+  <div class="panel" id="vacanciesList"></div>
+</section>
+
+<section id="gallery" class="section">
+  <h1>School Gallery</h1>
+  <p class="muted">Manage school photographs and videos.</p>
+  <button class="primary" data-create="gallery">+ Add Gallery Item</button>
+  <div class="panel" id="galleryList"></div>
+</section>
+
+<section id="live" class="section">
+  <h1>Live Events</h1>
+  <p class="muted">Publish live-event updates and streaming information.</p>
+  <button class="primary" data-create="live_update">+ New Live Update</button>
+  <div class="panel" id="liveList"></div>
+</section>
+
+<!-- EDITOR -->
+<section id="editor" class="section">
+
+  <h1 id="editorHeading">Create Website Content</h1>
+
+  <p class="muted">
+    Prepare your content and save it as a draft or publish it.
+  </p>
+
+  <div class="panel">
+
+    <form id="contentForm">
+
+      <input type="hidden" id="recordId">
+
+      <label>Content Category</label>
+      <select id="contentType" required>
+        <option value="announcement">Announcement</option>
+        <option value="event">School Event</option>
+        <option value="vacancy">Vacancy</option>
+        <option value="gallery">Gallery</option>
+        <option value="live_update">Live Update</option>
+        <option value="live_stream">Live Stream</option>
+      </select>
+
+      <label>Title</label>
+      <input id="title" maxlength="180" required
+       placeholder="Enter content title">
+
+      <label>Short Description</label>
+      <textarea id="summary" placeholder="Enter a short description"></textarea>
+
+      <label>Full Content</label>
+      <textarea id="bodyText" placeholder="Write the full announcement or details"></textarea>
+
+      <div class="form-grid">
+
+        <div>
+          <label>Event Venue</label>
+          <input id="venue" placeholder="Venue (if applicable)">
+        </div>
+
+        <div>
+          <label>Event Start Date and Time</label>
+          <input id="eventStart" type="datetime-local">
+        </div>
+
+        <div>
+          <label>Event End Date and Time</label>
+          <input id="eventEnd" type="datetime-local">
+        </div>
+
+        <div>
+          <label>Vacancy Application Deadline</label>
+          <input id="deadline" type="date">
+        </div>
+
+        <div>
+          <label>Application Email</label>
+          <input id="applicationEmail" type="email">
+        </div>
+
+        <div>
+          <label>Application Website / URL</label>
+          <input id="applicationUrl" type="url" placeholder="https://">
+        </div>
+
+        <div>
+          <label>Live Streaming URL</label>
+          <input id="videoUrl" type="url" placeholder="https://">
+        </div>
+
+        <div>
+          <label>Publish Date and Time</label>
+          <input id="publishAt" type="datetime-local">
+        </div>
+
+      </div>
+
+      <label>Upload Photograph, Document or Video</label>
+      <input id="mediaFile" type="file"
+       accept="image/jpeg,image/png,image/webp,image/gif,video/mp4,video/webm,application/pdf">
+
+      <p class="muted">
+        Maximum upload size: 50 MB. Supported formats: JPG, PNG, WEBP, GIF,
+        MP4, WEBM and PDF.
+      </p>
+
+      <p id="existingMedia" class="muted"></p>
+
+      <label>Publication Status</label>
+      <select id="contentStatus">
+        <option value="draft">Save as Draft</option>
+        <option value="published">Publish Now</option>
+        <option value="scheduled">Schedule Publication</option>
+      </select>
+
+      <div class="notice">
+        Scheduled content requires a future publication date and time.
+      </div>
+
+      <div class="actions">
+
+        <button class="primary" id="saveButton" type="submit">
+          Save Content
+        </button>
+
+        <button class="secondary" type="button" id="clearButton">
+          Clear Form
+        </button>
+
+        <button class="secondary" type="button" id="cancelButton">
+          Back to Content
+        </button>
+
+      </div>
+
+      <p id="editorMessage" class="message"></p>
+
+    </form>
+
+  </div>
+
+</section>
+
+</main>
+</div>
+
+<footer>
+  CRIPRI TECHNOLOGIES © 2026 | Universal School Website Platform
+</footer>
+
+<script type="module">
+
+// ======================================================
+// SUPABASE CONNECTION
+// ======================================================
+
+const supabase = window.supabase.createClient(
+  'https://dudrolmymjwphwivrlko.supabase.co',
+  'sb_publishable_PLYgkSvgd79KTEHKh21o-g_CKgUTRTY'
+);
+
+const $ = id => document.getElementById(id);
+
+let currentUser = null;
+let currentSchool = null;
+let currentRole = null;
+let contentRecords = [];
+let currentMediaPath = null;
+
+const MAX_FILE_SIZE = 50 * 1024 * 1024;
+
+const ALLOWED_TYPES = [
+  'image/jpeg',
+  'image/png',
+  'image/webp',
+  'image/gif',
+  'video/mp4',
+  'video/webm',
+  'application/pdf'
+];
+
+const categoryNames = {
+  announcement:'Announcement',
+  event:'School Event',
+  vacancy:'Vacancy',
+  gallery:'Gallery',
+  live_update:'Live Update',
+  live_stream:'Live Stream'
+};
+  // ======================================================
+// MESSAGE HANDLER
+// ======================================================
+
+function message(id,text) {
+  $(id).textContent = text;
+}
+
+// ======================================================
+// NAVIGATION
+// ======================================================
+
+function showPage(page) {
+
+  document.querySelectorAll('.section')
+    .forEach(s => s.classList.remove('active'));
+
+  $(page).classList.add('active');
+
+  document.querySelectorAll('.nav')
+    .forEach(n => n.classList.remove('active'));
+
+  const nav = document.querySelector(
+    '.nav[data-page="' + page + '"]'
+  );
+
+  if(nav) nav.classList.add('active');
+
+  if(page === 'content') renderContent();
+  if(page === 'profile') populateSchoolProfile();
+
+  if(page === 'announcements') renderCategory('announcement','announcementsList');
+
+  if(page === 'events') renderCategory('event','eventsList');
+
+  if(page === 'vacancies') renderCategory('vacancy','vacanciesList');
+
+  if(page === 'gallery') renderCategory('gallery','galleryList');
+
+  if(page === 'live') {
+    const items = contentRecords.filter(r =>
+      ['live_update','live_stream'].includes(r.content_type)
+    );
+
+    renderItems(items,'liveList');
+  }
+}
+
+document.querySelectorAll('.nav[data-page]')
+  .forEach(button => {
+    button.addEventListener('click', () => {
+      showPage(button.dataset.page);
+    });
+  });
+
+document.querySelectorAll('[data-create]')
+  .forEach(button => {
+    button.addEventListener('click', () => {
+      newContent(button.dataset.create);
+    });
+  });
+
+// ======================================================
+// LOGIN
+// ======================================================
+
+$('loginForm').addEventListener('submit', async event => {
+
+  event.preventDefault();
+
+  const button = $('loginButton');
+  button.disabled = true;
+  button.textContent = 'Signing in...';
+
+  message('loginMessage','Authenticating...');
+
+  try {
+
+    const {data,error} = await supabase.auth.signInWithPassword({
+      email:$('email').value.trim(),
+      password:$('password').value
+    });
+
+    if(error) throw error;
+
+    currentUser = data.user;
+
+    await initialiseWorkspace();
+
+  } catch(error) {
+
+    message('loginMessage','Login failed: ' + error.message);
+
+  } finally {
+
+    button.disabled = false;
+    button.textContent = 'Sign In';
+
+  }
+
+});
+
+// ======================================================
+// VERIFY SCHOOL MEMBERSHIP
+// ======================================================
+
+async function initialiseWorkspace() {
+
+  const {data:memberships,error} = await supabase
+    .from('school_memberships')
+    .select('school_id,user_id,role')
+    .eq('user_id',currentUser.id);
+
+  if(error) throw error;
+
+  if(!memberships || memberships.length === 0) {
+
+    await supabase.auth.signOut();
+
+    throw new Error(
+      'No school manager membership is assigned to this account. Contact CRIPRI.'
+    );
+
+  }
+
+  if(memberships.length !== 1) {
+    await supabase.auth.signOut();
+    throw new Error(
+      'This account must be assigned to exactly one school. Contact CRIPRI to correct its school membership.'
+    );
+  }
+
+  const membership = memberships[0];
+
+  currentRole = membership.role;
+
+  if(!['school_admin','content_editor'].includes(currentRole)) {
+
+    await supabase.auth.signOut();
+
+    throw new Error('This account does not have a permitted manager role.');
+
+  }
+
+  const {data:school,error:schoolError} = await supabase
+    .from('schools')
+    .select('id,name,slug,status,motto,description,welcome_message,physical_address,county,country,contact_phone,contact_email,logo_path,banner_path')
+    .eq('id',membership.school_id)
+    .single();
+
+  if(schoolError) throw schoolError;
+
+  if(school.status !== 'active') {
+
+    await supabase.auth.signOut();
+
+    throw new Error('This school account is not currently active.');
+
+  }
+
+  currentSchool = school;
+  populateSchoolProfile();
+
+  if(currentRole !== 'school_admin') {
+    $('profileForm').querySelectorAll('input,textarea,button')
+      .forEach(control => control.disabled = true);
+
+    $('profileMessage').textContent =
+      'View-only: contact your School Admin to change profile details.';
+  }
+
+  $('loginSection').classList.add('hidden');
+  $('workspace').classList.remove('hidden');
+
+  $('schoolHeading').textContent = school.name + ' Dashboard';
+  $('schoolNameDisplay').textContent = school.name;
+  $('schoolSlugDisplay').textContent = school.slug;
+  $('managerRole').textContent = currentRole.replace('_',' ');
+  $('schoolStatus').textContent = school.status;
+
+  await loadContent();
+
+}
+
+// ======================================================
+// SCHOOL PROFILE MANAGEMENT
+// ======================================================
+
+function populateSchoolProfile() {
+
+  if(!currentSchool) return;
+
+  $('profileMotto').value = currentSchool.motto || '';
+  $('profileCountry').value = currentSchool.country || 'Kenya';
+  $('profileCounty').value = currentSchool.county || '';
+  $('profileAddress').value = currentSchool.physical_address || '';
+  $('profilePhone').value = currentSchool.contact_phone || '';
+  $('profileEmail').value = currentSchool.contact_email || '';
+  $('profileWelcome').value = currentSchool.welcome_message || '';
+  $('profileDescription').value = currentSchool.description || '';
+
+  $('profileLogoCurrent').textContent =
+    currentSchool.logo_path ? 'Current logo uploaded.' : 'No logo uploaded.';
+
+  $('profileBannerCurrent').textContent =
+    currentSchool.banner_path ? 'Current banner uploaded.' : 'No banner uploaded.';
+
+}
+
+// ======================================================
+// PROFILE IMAGE UPLOAD
+// ======================================================
+
+async function uploadProfileImage(file,kind) {
+
+  if(!file) return null;
+
+  if(file.size > MAX_FILE_SIZE) {
+    throw new Error('Image exceeds the 50 MB upload limit.');
+  }
+
+  if(!['image/jpeg','image/png','image/webp','image/gif'].includes(file.type)) {
+    throw new Error('Please select a JPG, PNG, WEBP or GIF image.');
+  }
+
+  const safeName = file.name.replace(/[^a-zA-Z0-9._-]/g,'_');
+
+  const path =
+    currentSchool.id + '/profile-' + kind + '-' +
+    Date.now() + '-' + safeName;
+
+  const {data,error} = await supabase.storage
+    .from('school-media')
+    .upload(path,file,{
+      cacheControl:'3600',
+      upsert:false,
+      contentType:file.type
+    });
+
+  if(error) throw error;
+
+  const {data:publicData} = await supabase.storage
+    .from('school-media')
+    .getPublicUrl(data.path);
+
+  return publicData.publicUrl;
+
+}
+
+// ======================================================
+// SAVE SCHOOL PROFILE
+// ======================================================
+
+$('profileForm').addEventListener('submit',async event => {
+
+  event.preventDefault();
+
+  if(currentRole !== 'school_admin') {
+    message('profileMessage','Only the School Admin can update the school profile.');
+    return;
+  }
+
+  const button = $('saveProfileButton');
+
+  button.disabled = true;
+  button.textContent = 'Saving profile...';
+
+  message('profileMessage','Saving school profile...');
+
+  try {
+
+    const logoFile = $('profileLogo').files[0];
+    const bannerFile = $('profileBanner').files[0];
+
+    const logoUrl = logoFile
+      ? await uploadProfileImage(logoFile,'logo')
+      : currentSchool.logo_path;
+
+    const bannerUrl = bannerFile
+      ? await uploadProfileImage(bannerFile,'banner')
+      : currentSchool.banner_path;
+
+    const payload = {
+      motto:$('profileMotto').value.trim() || null,
+      country:$('profileCountry').value.trim() || 'Kenya',
+      county:$('profileCounty').value.trim() || null,
+      physical_address:$('profileAddress').value.trim() || null,
+      contact_phone:$('profilePhone').value.trim() || null,
+      contact_email:$('profileEmail').value.trim() || null,
+      welcome_message:$('profileWelcome').value.trim() || null,
+      description:$('profileDescription').value.trim() || null,
+      logo_path:logoUrl,
+      banner_path:bannerUrl,
+      updated_at:new Date().toISOString()
+    };
+
+    const {data,error} = await supabase
+      .from('schools')
+      .update(payload)
+      .eq('id',currentSchool.id)
+      .select('id,name,slug,status,motto,description,welcome_message,physical_address,county,country,contact_phone,contact_email,logo_path,banner_path')
+      .single();
+
+    if(error) throw error;
+
+    if(!data) {
+      throw new Error('No profile was returned. Check School Admin permissions.');
+    }
+
+    currentSchool = data;
+        $('profileLogo').value = '';
+    $('profileBanner').value = '';
+
+    populateSchoolProfile();
+
+    message('profileMessage','School profile saved successfully.');
+
+  } catch(error) {
+
+    message('profileMessage','Unable to save profile: ' + error.message);
+
+  } finally {
+
+    button.disabled = false;
+    button.textContent = 'Save School Profile';
+
+  }
+
+});
+
+// ======================================================
+// LOAD SCHOOL CONTENT
+// ======================================================
+
+async function loadContent() {
+
+  message('contentMessage','Loading school content...');
+
+  const {data,error} = await supabase
+    .from('school_content_items')
+    .select('*')
+    .eq('school_id',currentSchool.id)
+    .order('created_at',{ascending:false});
+
+  if(error) {
+
+    message('contentMessage','Could not load content: ' + error.message);
+
+    throw error;
+
+  }
+
+  contentRecords = data || [];
+
+  updateStatistics();
+  renderRecent();
+  renderContent();
+  renderRecoveryBin();
+
+  const recoveryToggle = $('toggleRecoveryBin');
+  if (recoveryToggle) recoveryToggle.hidden = currentRole !== 'school_admin';
+
+  message(
+    'contentMessage',
+    contentRecords.length + ' school content record(s) loaded.'
+  );
+
+}
+
+// ======================================================
+// STATISTICS
+// ======================================================
+
+function updateStatistics() {
+
+  const activeRecords = contentRecords.filter(r => r.status !== 'recovery');
+  $('totalCount').textContent = activeRecords.length;
+  $('publishedCount').textContent = activeRecords.filter(r => r.status === 'published').length;
+  $('draftCount').textContent = activeRecords.filter(r => r.status === 'draft').length;
+  $('scheduledCount').textContent = activeRecords.filter(r => r.status === 'scheduled').length;
+
+}
+
+// ======================================================
+// DATE FORMATTING
+// ======================================================
+
+function formatDate(value) {
+
+  if(!value) return 'Not set';
+
+  return new Date(value).toLocaleString();
+
+}
+
+// ======================================================
+// RENDER RECENT CONTENT
+// ======================================================
+
+function renderRecent() {
+
+  const body = $('recentContent');
+
+  body.replaceChildren();
+
+  const records = contentRecords.filter(r => r.status !== 'recovery').slice(0,5);
+
+  if(!records.length) {
+
+    body.innerHTML =
+      '<tr><td colspan="4">No content created yet.</td></tr>';
+
+    return;
+
+  }
+
+  records.forEach(record => {
+
+    const tr = document.createElement('tr');
+
+    [
+      record.title,
+      categoryNames[record.content_type],
+      record.status,
+      formatDate(record.created_at)
+    ].forEach(value => {
+
+      const td = document.createElement('td');
+      td.textContent = value || '';
+      tr.appendChild(td);
+
+    });
+
+    body.appendChild(tr);
+
+  });
+
+}
+
+// ======================================================
+// RENDER ALL CONTENT
+// ======================================================
+
+function renderContent() {
+
+  const body = $('contentTable');
+
+  body.replaceChildren();
+
+  const type = $('filterType').value;
+  const status = $('filterStatus').value;
+
+  let records = contentRecords.filter(r => r.status !== 'recovery');
+
+  if(type !== 'all') {
+    records = records.filter(r => r.content_type === type);
+  }
+
+  if(status !== 'all') {
+    records = records.filter(r => r.status === status);
+  }
+
+  if(!records.length) {
+
+    body.innerHTML =
+      '<tr><td colspan="5">No matching content found.</td></tr>';
+
+    return;
+
+  }
+
+  records.forEach(record => {
+
+    const tr = document.createElement('tr');
+
+    const title = document.createElement('td');
+    title.textContent = record.title;
+
+    const category = document.createElement('td');
+    category.textContent =
+      categoryNames[record.content_type] || record.content_type;
+
+    const statusCell = document.createElement('td');
+
+    const badge = document.createElement('span');
+    badge.className = 'status ' + record.status;
+    badge.textContent = record.status;
+
+    statusCell.appendChild(badge);
+
+    const date = document.createElement('td');
+    date.textContent = formatDate(record.created_at);
+
+    const actions = document.createElement('td');
+    const edit = document.createElement('button');
+
+    edit.className = 'secondary';
+    edit.textContent = 'View / Edit';
+
+    edit.addEventListener('click',() => editContent(record));
+
+    actions.appendChild(edit);
+
+    if(currentRole === 'school_admin') {
+      const remove = document.createElement('button');
+      remove.className = 'danger';
+      remove.textContent = 'Delete';
+      remove.style.marginLeft = '6px';
+      remove.addEventListener('click',() => deleteContent(record));
+      actions.appendChild(remove);
+    }
+
+    tr.append(title,category,statusCell,date,actions);
+
+    body.appendChild(tr);
+
+  });
+
+}
+
+// ======================================================
+// CATEGORY CONTENT
+// ======================================================
+
+function renderCategory(type,elementId) {
+
+  const records = contentRecords.filter(
+    r => r.content_type === type && r.status !== 'recovery'
+  );
+
+  renderItems(records,elementId);
+
+}
+
+function renderItems(records,elementId) {
+
+  const container = $(elementId);
+
+  container.replaceChildren();
+
+  if(!records.length) {
+
+    container.textContent = 'No content available in this category.';
+
+    return;
+
+  }
+
+  records.forEach(record => {
+
+    const article = document.createElement('div');
+
+    article.style.cssText =
+      'border-bottom:1px solid #edf0f5;padding:14px 0';
+
+    const heading = document.createElement('h3');
+    heading.textContent = record.title;
+
+    const description = document.createElement('p');
+    description.textContent = record.summary || '';
+
+    const status = document.createElement('p');
+    status.textContent = 'Status: ' + record.status;
+
+    const edit = document.createElement('button');
+    edit.className = 'secondary';
+    edit.textContent = 'View / Edit';
+
+    edit.addEventListener('click',() => editContent(record));
+
+    article.append(heading,description,status,edit);
+
+    if(currentRole === 'school_admin') {
+      const remove = document.createElement('button');
+      remove.className = 'danger';
+      remove.textContent = 'Delete';
+      remove.style.marginLeft = '6px';
+      remove.addEventListener('click',() => deleteContent(record));
+      article.appendChild(remove);
+    }
+
+    container.appendChild(article);
+
+  });
+
+}
+
+// ======================================================
+// FILTERS
+// ======================================================
+
+$('filterType').addEventListener('change',renderContent);
+$('filterStatus').addEventListener('change',renderContent);
+
+$('toggleRecoveryBin').addEventListener('click',() => {
+  const panel = $('recoveryBinPanel');
+  panel.hidden = !panel.hidden;
+  $('toggleRecoveryBin').textContent = panel.hidden ? 'Open Recovery Bin' : 'Close Recovery Bin';
+  if (!panel.hidden) renderRecoveryBin();
+});
+
+// ======================================================
+// NEW CONTENT
+// ======================================================
+
+function newContent(type='announcement') {
+
+  clearForm();
+
+  $('contentType').value = type;
+
+  $('editorHeading').textContent =
+    'Create ' + categoryNames[type];
+
+  showPage('editor');
+
+}
+
+// ======================================================
+// EDIT CONTENT
+// ======================================================
+
+function editContent(record) {
+
+  clearForm();
+
+  $('recordId').value = record.id;
+
+  $('contentType').value = record.content_type;
+
+  $('title').value = record.title || '';
+  $('summary').value = record.summary || '';
+  $('bodyText').value = record.body || '';
+  $('venue').value = record.venue || '';
+
+  $('eventStart').value =
+    record.event_start_at
+      ? new Date(record.event_start_at).toISOString().slice(0,16)
+      : '';
+
+  $('eventEnd').value =
+    record.event_end_at
+      ? new Date(record.event_end_at).toISOString().slice(0,16)
+      : '';
+
+  $('deadline').value = record.application_deadline || '';
+
+  $('applicationEmail').value = record.application_email || '';
+
+  $('applicationUrl').value = record.application_url || '';
+
+  $('videoUrl').value = record.video_url || '';
+
+  $('publishAt').value =
+    record.publish_at
+      ? new Date(record.publish_at).toISOString().slice(0,16)
+      : '';
+
+  $('contentStatus').value = record.status;
+
+  currentMediaPath = record.media_path || null;
+
+  $('existingMedia').textContent =
+    currentMediaPath
+      ? 'Existing media: ' + currentMediaPath
+      : 'No media attached.';
+
+  $('editorHeading').textContent = 'Edit Website Content';
+
+  showPage('editor');
+
+}
+
+// ======================================================
+// CLEAR FORM
+// ======================================================
+
+function clearForm() {
+
+  $('contentForm').reset();
+
+  $('recordId').value = '';
+
+  currentMediaPath = null;
+
+  $('existingMedia').textContent = '';
+
+  $('editorHeading').textContent = 'Create Website Content';
+
+  message('editorMessage','');
+
+}
+
+$('clearButton').addEventListener('click',clearForm);
+
+$('cancelButton').addEventListener('click',() => showPage('content'));
+
+// ======================================================
+// UPLOAD CONTENT MEDIA
+// ======================================================
+
+async function uploadMedia(file) {
+
+  if(!file) return currentMediaPath;
+
+  if(file.size > MAX_FILE_SIZE) {
+    throw new Error('File exceeds the 50 MB upload limit.');
+  }
+
+  if(!ALLOWED_TYPES.includes(file.type)) {
+    throw new Error('Unsupported file format.');
+  }
+
+  const safeName = file.name.replace(/[^a-zA-Z0-9._-]/g,'_');
+
+  const path =
+    currentSchool.id + '/' + Date.now() + '-' + safeName;
+
+  const {data,error} = await supabase.storage
+    .from('school-media')
+    .upload(path,file,{
+      cacheControl:'3600',
+      upsert:false,
+      contentType:file.type
+    });
+
+  if(error) throw error;
+
+  const {data:publicData} = await supabase.storage
+    .from('school-media')
+    .getPublicUrl(data.path);
+
+  return publicData.publicUrl;
+
+}
+
+// ======================================================
+// SAVE CONTENT
+// ======================================================
+
+$('contentForm').addEventListener('submit',async event => {
+
+  event.preventDefault();
+
+  const button = $('saveButton');
+
+  button.disabled = true;
+  button.textContent = 'Saving...';
+
+  try {
+
+    const id = $('recordId').value;
+    const type = $('contentType').value;
+    const title = $('title').value.trim();
+
+    if(!title) {
+      throw new Error('Please enter a title.');
+    }
+
+    if(
+      $('eventEnd').value &&
+      $('eventStart').value &&
+      new Date($('eventEnd').value) < new Date($('eventStart').value)
+    ) {
+      throw new Error('Event end time cannot be before its start time.');
+    }
+
+    const status = $('contentStatus').value;
+
+    let publishAt = null;
+
+    if(status === 'scheduled') {
+
+      if(!$('publishAt').value) {
+        throw new Error('Please select a publication date and time.');
+      }
+
+      publishAt = new Date($('publishAt').value).toISOString();
+
+      if(new Date(publishAt) <= new Date()) {
+        throw new Error('Scheduled publication must be in the future.');
+      }
+
+    } else if(status === 'published') {
+
+      publishAt = new Date().toISOString();
+
+    }
+
+    let mediaPath = currentMediaPath;
+
+    const file = $('mediaFile').files[0];
+
+    if(file) {
+      mediaPath = await uploadMedia(file);
+    }
+
+    const payload = {
+
+      school_id:currentSchool.id,
+      content_type:type,
+      title:title,
+      summary:$('summary').value.trim() || null,
+      body:$('bodyText').value.trim() || null,
+      venue:$('venue').value.trim() || null,
+
+      event_start_at:$('eventStart').value
+        ? new Date($('eventStart').value).toISOString()
+        : null,
+
+      event_end_at:$('eventEnd').value
+        ? new Date($('eventEnd').value).toISOString()
+        : null,
+
+      application_deadline:$('deadline').value || null,
+      application_email:$('applicationEmail').value.trim() || null,
+      application_url:$('applicationUrl').value.trim() || null,
+      media_path:mediaPath,
+      video_url:$('videoUrl').value.trim() || null,
+      status:status,
+      publish_at:publishAt,
+      updated_by:currentUser.id
+
+    };
+
+    let result;
+
+    if(id) {
+
+      result = await supabase
+        .from('school_content_items')
+        .update(payload)
+        .eq('id',id)
+        .eq('school_id',currentSchool.id);
+
+    } else {
+
+      payload.created_by = currentUser.id;
+
+      result = await supabase
+        .from('school_content_items')
+        .insert(payload);
+
+    }
+
+    if(result.error) throw result.error;
+
+    message('editorMessage','Content saved successfully.');
+
+    clearForm();
+
+    await loadContent();
+
+    showPage('content');
+
+  } catch(error) {
+
+    message('editorMessage','Unable to save content: ' + error.message);
+
+  } finally {
+
+    button.disabled = false;
+    button.textContent = 'Save Content';
+
+  }
+
+});
+
+// ======================================================
+// ARCHIVE CONTENT
+// ======================================================
+
+async function archiveContent(id) {
+
+  if(!confirm('Archive this content?')) return;
+
+  const {error} = await supabase
+    .from('school_content_items')
+    .update({
+      status:'archived',
+      publish_at:null,
+      updated_by:currentUser.id
+    })
+    .eq('id',id)
+    .eq('school_id',currentSchool.id);
+
+  if(error) {
+    alert('Archive failed: ' + error.message);
+    return;
+  }
+
+  await loadContent();
+
+}
+
+// ======================================================
+// CONTENT RECOVERY AND PERMANENT DELETION
+// ======================================================
+
+async function deleteContent(record) {
+  if(currentRole !== 'school_admin') {
+    alert('Only the School Admin can move content to the Recovery Bin.');
+    return;
+  }
+  if(!record || !record.id || !currentSchool) {
+    alert('Unable to identify this school content record.');
+    return;
+  }
+  const label = record.title || 'this content';
+  if(!confirm('Move "' + label + '" to the Recovery Bin? It will be removed from the public website and can be restored.')) return;
+
+  try {
+    const {data,error} = await supabase.rpc('manage_school_content_item', {
+      p_content_id: record.id,
+      p_action: 'recover',
+      p_confirm_permanent_delete: false
+    });
+    if(error) throw error;
+    if(!data || data.status !== 'recovery') throw new Error('The content was not moved to the Recovery Bin.');
+    await loadContent();
+    alert('Content moved to the Recovery Bin.');
+  } catch(error) {
+    console.error('Content recovery failed:',error);
+    alert('Recovery failed: ' + error.message);
+  }
+}
+
+function renderRecoveryBin() {
+  const body = $('recoveryTable');
+  if(!body) return;
+  body.replaceChildren();
+  const records = contentRecords.filter(r => r.status === 'recovery');
+  if(!records.length) {
+    const row = document.createElement('tr');
+    const cell = document.createElement('td');
+    cell.colSpan = 4;
+    cell.textContent = 'The Recovery Bin is empty.';
+    row.appendChild(cell);
+    body.appendChild(row);
+    return;
+  }
+  records.forEach(record => {
+    const row = document.createElement('tr');
+    const title = document.createElement('td');
+    title.textContent = record.title || 'Untitled content';
+    const category = document.createElement('td');
+    category.textContent = categoryNames[record.content_type] || record.content_type || '';
+    const date = document.createElement('td');
+    date.textContent = formatDate(record.updated_at || record.created_at);
+    const actions = document.createElement('td');
+    if(currentRole === 'school_admin') {
+      const restore = document.createElement('button');
+      restore.className = 'secondary';
+      restore.textContent = 'Restore as Draft';
+      restore.addEventListener('click',() => restoreContent(record));
+      const remove = document.createElement('button');
+      remove.className = 'danger';
+      remove.textContent = 'Permanently Delete';
+      remove.style.marginLeft = '6px';
+      remove.addEventListener('click',() => permanentlyDeleteContent(record));
+      actions.append(restore,remove);
+    } else {
+      actions.textContent = 'Administrator access required';
+    }
+    row.append(title,category,date,actions);
+    body.appendChild(row);
+  });
+}
+
+async function restoreContent(record) {
+  if(currentRole !== 'school_admin' || !record || !record.id || !currentSchool) {
+    alert('School administrator access is required.');
+    return;
+  }
+  if(!confirm('Restore "' + (record.title || 'this content') + '" as a draft?')) return;
+  try {
+    const {data,error} = await supabase.rpc('manage_school_content_item', {
+      p_content_id: record.id,
+      p_action: 'restore',
+      p_confirm_permanent_delete: false
+    });
+    if(error) throw error;
+    if(!data || data.status !== 'draft') throw new Error('The item was not restored as a draft.');
+    await loadContent();
+    $('recoveryBinPanel').hidden = false;
+    $('toggleRecoveryBin').textContent = 'Close Recovery Bin';
+    alert('Content restored as a draft. Review and publish it when ready.');
+  } catch(error) {
+    console.error('Content restore failed:',error);
+    alert('Restore failed: ' + error.message);
+  }
+}
+
+async function permanentlyDeleteContent(record) {
+  if(currentRole !== 'school_admin' || !record || !record.id || !currentSchool) {
+    alert('School administrator access is required.');
+    return;
+  }
+  const label = record.title || 'this content';
+  if(!confirm('PERMANENTLY DELETE "' + label + '"? This cannot be undone. The audit record will be retained.')) return;
+  try {
+    const {data,error} = await supabase.rpc('manage_school_content_item', {
+      p_content_id: record.id,
+      p_action: 'permanent_delete',
+      p_confirm_permanent_delete: true
+    });
+    if(error) throw error;
+    if(!data || data.status !== 'permanently_deleted') throw new Error('Permanent deletion was not confirmed by the database.');
+    await loadContent();
+    $('recoveryBinPanel').hidden = false;
+    $('toggleRecoveryBin').textContent = 'Close Recovery Bin';
+    alert('Content permanently deleted. The audit record has been retained.');
+  } catch(error) {
+    console.error('Permanent content deletion failed:',error);
+    alert('Permanent deletion failed: ' + error.message);
+  }
+}
+
+// ======================================================
+// SIGN OUT
+// ======================================================
+
+$('signOut').addEventListener('click',async () => {
+
+  if(!confirm('Are you sure you want to sign out?')) return;
+
+  const {error} = await supabase.auth.signOut();
+
+  if(error) {
+    alert('Sign out failed: ' + error.message);
+    return;
+  }
+
+  window.location.replace('school-website-manager.html');
+
+});
+
+// ======================================================
+// SESSION RESTORATION
+// ======================================================
+
+async function checkExistingSession() {
+
+  const {data,error} = await supabase.auth.getSession();
+
+  if(error) {
+    message('loginMessage',error.message);
+    return;
+  }
+
+  if(data.session) {
+
+    currentUser = data.session.user;
+
+    try {
+      await initialiseWorkspace();
+    } catch(error) {
+      message('loginMessage',error.message);
+    }
+
+  }
+
+}
+
+// ======================================================
+// AUTHENTICATION STATE
+// ======================================================
+
+supabase.auth.onAuthStateChange((event,session) => {
+
+  if(event === 'SIGNED_OUT') {
+    window.location.replace('school-website-manager.html');
+  }
+
+});
+
+// ======================================================
+// START APPLICATION
+// ======================================================
+
+checkExistingSession().catch(error => {
+
+  console.error('Manager initialization error:',error);
+
+  message('loginMessage',error.message);
+
+});
+
+</script>
+
+</body>
+</html>

@@ -1,0 +1,298 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex,nofollow">
+<title>CRIPRI | School Registration</title>
+<link rel="stylesheet" href="style.css">
+
+<style>
+body {
+  background: #f3f6f9;
+}
+.reg-wrap {
+  width: min(900px, calc(100% - 32px));
+  margin: 40px auto;
+}
+.reg-card {
+  padding: 35px;
+  background: white;
+  border-radius: 16px;
+  box-shadow: 0 10px 35px rgba(0,0,0,.07);
+}
+h1 {
+  color: #10233f;
+}
+.intro {
+  color: #657583;
+  line-height: 1.7;
+}
+.form-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 18px;
+}
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+}
+.field.full {
+  grid-column: 1 / -1;
+}
+label {
+  font-weight: 700;
+  color: #263746;
+}
+input, select, textarea {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 12px;
+  border: 1px solid #cfd9e1;
+  border-radius: 8px;
+  font: inherit;
+}
+textarea {
+  min-height: 90px;
+}
+.actions {
+  margin-top: 25px;
+}
+button {
+  padding: 13px 22px;
+  background: #123b5d;
+  color: white;
+  border: 0;
+  border-radius: 8px;
+  font-weight: bold;
+  cursor: pointer;
+}
+button:disabled {
+  opacity: .6;
+}
+#formMessage {
+  margin-top: 18px;
+  padding: 12px;
+  border-radius: 8px;
+}
+.success {
+  background: #eaf7f1;
+  color: #145c43;
+}
+.error {
+  background: #fff0f0;
+  color: #8d2525;
+}
+@media(max-width:650px) {
+  .form-grid {
+    grid-template-columns: 1fr;
+  }
+  .field.full {
+    grid-column: auto;
+  }
+  .reg-card {
+    padding: 22px;
+  }
+}
+</style>
+</head>
+
+<body>
+<main class="reg-wrap">
+
+<a href="index.html">← Back to CRIPRI website</a>
+
+<section class="reg-card">
+
+<p><strong>CRIPRI TECHNOLOGIES</strong></p>
+
+<h1>Register Your Institution</h1>
+
+<p class="intro">
+Submit your school's details to begin the CRIPRI school
+website and workspace onboarding process.
+Applications are reviewed by an authorised administrator.
+</p>
+
+<form id="schoolRegistrationForm">
+
+<div class="form-grid">
+
+<div class="field">
+<label for="school_name">Official Institution Name *</label>
+<input id="school_name" name="school_name"
+required minlength="2" maxlength="180">
+</div>
+
+<div class="field">
+<label for="institution_type">Institution Type *</label>
+<select id="institution_type" name="institution_type" required>
+<option value="">Select institution type</option>
+<option value="school">School</option><option value="college">College</option>
+<option value="university">University</option><option value="tvet">TVET institution</option>
+<option value="training_centre">Training centre</option><option value="church">Church</option>
+<option value="mosque">Mosque</option><option value="union">Union</option>
+<option value="association">Association</option><option value="ngo">NGO</option>
+<option value="cooperative">Cooperative</option><option value="company">Company</option>
+<option value="government">Government institution</option><option value="other">Other</option>
+</select>
+</div>
+<div class="field">
+<label for="school_category">School Category (schools only)</label>
+<select id="school_category" name="school_category">
+<option value="">Not applicable</option><option>Primary</option><option>Secondary</option><option>Primary and secondary</option>
+</select>
+</div>
+
+<div class="field">
+<label for="country">Country *</label>
+<input id="country" name="country" value="Kenya" required>
+</div>
+
+<div class="field">
+<label for="region">County / Region *</label>
+<input id="region" name="region" required>
+</div>
+
+<div class="field">
+<label for="contact_email">Official School Email *</label>
+<input id="contact_email" name="contact_email"
+type="email" required>
+</div>
+
+<div class="field">
+<label for="contact_phone">Telephone</label>
+<input id="contact_phone" name="contact_phone" type="tel">
+</div>
+
+<div class="field full">
+<label for="physical_address">Physical Address</label>
+<textarea id="physical_address"
+name="physical_address"></textarea>
+</div>
+
+<div class="field">
+<label for="contact_person">Authorised Contact Person *</label>
+<input id="contact_person" name="contact_person" required>
+</div>
+
+<div class="field">
+<label for="contact_role">Contact Person's Role *</label>
+<select id="contact_role" name="contact_role" required>
+<option value="">Select role</option>
+<option>Headteacher / Principal</option>
+<option>Director / Proprietor</option>
+<option>School administrator</option>
+<option>Other authorised representative</option>
+</select>
+</div>
+
+<div class="field full">
+<label for="message">Additional Information</label>
+<textarea id="message" name="message"></textarea>
+</div>
+
+</div>
+
+<div class="actions">
+<button type="submit" id="submitRegistration">
+Submit School Application
+</button>
+</div>
+
+<div id="formMessage" role="status" aria-live="polite"></div>
+
+</form>
+</section>
+</main>
+  
+<script type="module">
+import { createClient } from
+'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.57.4/+esm';
+
+const SUPABASE_URL = 'https://dudrolmymjwphwivrlko.supabase.co';
+
+const SUPABASE_KEY = 'sb_publishable_PLYgkSvgd79KTEHKh21o-g_CKgUTRTY';
+
+const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
+
+const form = document.getElementById('schoolRegistrationForm');
+const message = document.getElementById('formMessage');
+const submitButton = document.getElementById('submitRegistration');
+
+function createSchoolSlug(name) {
+  return name
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .toLowerCase()
+    .trim()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '');
+}
+
+form.addEventListener('submit', async function(event) {
+  event.preventDefault();
+
+  message.textContent = '';
+  message.className = '';
+
+  const schoolName = document.getElementById('school_name').value.trim();
+
+  const application = {
+    school_name: schoolName,
+    institution_type: document.getElementById('institution_type').value,
+    school_category: document.getElementById('school_category').value || null,
+    country: document.getElementById('country').value.trim(),
+    region: document.getElementById('region').value.trim(),
+    contact_email: document.getElementById('contact_email').value.trim(),
+    contact_phone: document.getElementById('contact_phone').value.trim() || null,
+    physical_address: document.getElementById('physical_address').value.trim() || null,
+    contact_person: document.getElementById('contact_person').value.trim(),
+    contact_role: document.getElementById('contact_role').value,
+    message: document.getElementById('message').value.trim() || null,
+    requested_slug: createSchoolSlug(schoolName)
+  };
+
+  if (!application.requested_slug) {
+    message.textContent = 'Please enter a valid school name.';
+    message.className = 'error';
+    return;
+  }
+
+  submitButton.disabled = true;
+  submitButton.textContent = 'Submitting...';
+
+  try {
+    const { error } = await supabase
+      .from('school_applications')
+      .insert([application]);
+
+    if (error) throw error;
+
+    message.textContent =
+      'Your school application has been submitted successfully. It is now awaiting administrator review.';
+
+    message.className = 'success';
+    form.reset();
+    document.getElementById('country').value = 'Kenya';
+
+  } catch (error) {
+    console.error('School application error:', error);
+
+    message.textContent =
+      'Submission failed. Please check your connection and try again. If the problem continues, contact CRIPRI support.';
+
+    message.className = 'error';
+
+  } finally {
+    submitButton.disabled = false;
+    submitButton.textContent = 'Submit School Application';
+  }
+});
+</script>
+</body>
+</html>
+
+

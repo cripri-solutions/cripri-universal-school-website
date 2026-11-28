@@ -5,11 +5,11 @@
  *   *.criprisolutions.co.ke/*
  *
  * Root requests serve the dynamic school page. Static files (images, CSS,
- * JavaScript and other assets) are forwarded to their matching GitHub Pages
+ * JavaScript and other assets) are forwarded to their matching Cloudflare Pages
  * paths instead of incorrectly receiving school.html.
  */
-const PAGES_ORIGIN = "https://cripri-solutions.github.io";
-const PAGES_BASE = "/cripri-universal-school-website/";
+const PAGES_ORIGIN = "https://dd0b34d1.cripri-universal-school-website.pages.dev";
+const PAGES_BASE = "/";
 
 function getSchoolSlug(hostname) {
   const suffix = ".criprisolutions.co.ke";
@@ -41,7 +41,7 @@ export default {
     }
 
     // Serve the school engine at the subdomain root. For every other path,
-    // proxy the corresponding static asset from the GitHub Pages project.
+    // proxy the corresponding static asset from the Cloudflare Pages project.
     const requestedPath = incoming.pathname.replace(/^\/+/, "");
     const assetPath = requestedPath || "school.html";
 

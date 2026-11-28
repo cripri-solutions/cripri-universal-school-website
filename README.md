@@ -1,57 +1,45 @@
 # CRIPRI Universal School Website
 
-The public landing page for the CRIPRI Universal School Website platform, maintained by CRIPRI Technologies.
+Production platform source for CRIPRI Technologies.
 
-## Live preview
+## Canonical public origin
+- Canonical domain: https://criprisolutions.co.ke
+- GitHub repository: https://github.com/cripri-solutions/cripri-universal-school-website
+- Supabase backend: CRIPRI Platform
 
-https://cripri-solutions.github.io/cripri-universal-school-website/
+Cloudflare Pages/Worker production deployment is part of the release process. Confirm the actual Pages deployment hostname in Cloudflare before changing the Worker upstream. Do not guess a `.pages.dev` hostname.
 
-## What this repository currently contains
+## Core routes
+- `/` — current public platform homepage.
+- `/school-registration.html` — live universal institution application form.
+- `/school-website-manager.html` — institution administrator sign-in and content manager.
+- `/super-admin-login.html` — CRIPRI platform administrator sign-in.
+- `/super-admin-dashboard.html` — authenticated platform administration.
+- `/super-admin-domain-onboarding.html` — authenticated domain onboarding workspace.
+- School subdomains — dynamic public school pages served by `school.html`.
 
-- `index.html` — CRIPRI platform landing page explaining the service and school onboarding approach.
-- `style.css` — responsive visual design shared by the public pages.
-- `school-registration-preview.html` — demonstration of the proposed school application form; it is disabled and does not submit or store data.
-- `portal-preview.html` — sample school administrator workspace; it has no login or database.
-- `registration-review-preview.html` — fictional sample of CRIPRI's manual application review process; it is not a live staff console.
-- `script.js` — reusable settings-driven school homepage script retained as a starter for future individual school sites.
-- `firestore.rules` and `firebase.json` — an initial security-rules draft and Firebase configuration; not deployed.
-- `docs/backend-security-plan.md` — proposed backend structure and security boundaries.
+## Legacy route policy
+Old preview/demo filenames are redirect-only compatibility routes. They must not render obsolete preview interfaces. New internal links use canonical production routes. The old GitHub Pages hostname is not a canonical destination.
 
-## Current hosting
+## Backend
+- Supabase project: CRIPRI Platform.
+- Tables include school applications, schools, memberships, subscriptions, payments, content, content audits, domain onboarding and notifications.
+- Edge Functions include super-admin-administrators, school-admin-management and send-school-notification.
+- Browser code may contain a Supabase publishable key; never commit service-role keys, Resend secrets or other server secrets.
 
-The public static pages are hosted on GitHub Pages. Firebase is not currently connected. No existing CRIPRI Firebase project is used or modified.
+## Institution registration
+The registration form submits the required `institution_type` using database-supported values:
+`school`, `college`, `university`, `tvet`, `training_centre`, `church`, `mosque`, `union`, `association`, `ngo`, `cooperative`, `company`, `government`, `other`.
+Applications remain pending until an authorised CRIPRI reviewer approves them. Submission must never auto-activate an institution.
 
-## Important functionality boundary
+## Release checklist
+1. Deploy the branch after review and merge to the production branch.
+2. Verify Cloudflare Pages serves the new homepage and route files.
+3. Verify the Cloudflare Worker uses the confirmed Pages upstream and wildcard school-subdomain route.
+4. Update Supabase Auth allowed redirect URLs to include `https://criprisolutions.co.ke/school-website-manager.html`.
+5. Update Edge Function CORS and invitation redirect origins to the canonical domain.
+6. Test registration, approval, invitation, sign-in, content CRUD, publishing, withdrawal, recovery, subscription gating and active school subdomains.
+7. Run Supabase security/performance advisors and address the high-risk findings.
 
-This is currently a public website and set of interface previews. It does **not** yet:
-- collect or transmit school applications;
-- create school accounts or administrator logins;
-- approve or reject applications;
-- generate school IDs;
-- save or publish school content from a dashboard;
-- provide a private database.
-
-Do not enter real school details, passwords, student information or confidential information into preview pages. The registration form is disabled and the review/dashboard pages use illustrative content only.
-
-## Planned school onboarding
-
-1. A school submits an application through a future secure form.
-2. The application is stored as `PENDING_REVIEW`.
-3. CRIPRI verifies the school and its authorised representative.
-4. An authorised CRIPRI reviewer records approval or rejection.
-5. Only after approval does a trusted process create the school identity and provision administrator access.
-
-No school should be automatically activated simply because it submits an application.
-
-## Hosting and cost approach
-
-- Keep public static website hosting on GitHub Pages.
-- Evaluate a separate Firebase project for the platform backend, starting with the no-cost Spark plan where supported.
-- Do not enable billing, upgrade to Blaze, enable Cloud Build or deploy paid services without explicit approval.
-- Secure role assignment and school activation must not be implemented in untrusted browser code. Any backend design must be tested before real applications are accepted.
-
-## Individual school websites
-
-The `script.js` and existing school-page styling provide a starting point for future individual school websites. Each school site should use its own approved public content and approved photographs. Do not publish identifiable learner photographs without the school's appropriate permissions and consent.
-
-Built by CRIPRI Technologies.
+## Migration integrity
+The live Supabase project has migrations beyond the SQL migration files currently tracked here. Reconstruct and commit missing migration SQL before treating this repository as a fully reproducible deployment source. Do not fabricate migration history from names alone.
